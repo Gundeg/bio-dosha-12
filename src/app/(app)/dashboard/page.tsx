@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import DoshaRadar from "@/components/DoshaRadar";
 import DoshaCard from "@/components/DoshaCard";
 import { ButtonLink } from "@/components/ui/button-link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DoshaKey } from "@/lib/ktMapping";
 
 interface Profile {
@@ -134,105 +134,90 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Dosha Radar */}
-            <Card className="lg:col-span-1 border-slate-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-                  Доша Радар
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                {latest && selected?.doshaType ? (
-                  <>
+          {/* Hero Radar Section */}
+          <Card className="border-slate-200 overflow-hidden">
+            <CardContent className="p-6 sm:p-8">
+              {latest && selected?.doshaType ? (
+                <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-10">
+                  {/* Radar — hero size */}
+                  <div className="flex-shrink-0">
                     <DoshaRadar
                       doshaKey={selected.doshaType as DoshaKey}
                       deviation={latest.deviation}
-                      size={220}
+                      size={360}
                     />
-                    <div className="mt-4 grid grid-cols-2 gap-3 w-full">
-                      <div className="bg-slate-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-muted-foreground mb-1">BEDI индекс</p>
-                        <p className="text-xl font-bold text-slate-800">{latest.bedi.toFixed(2)}</p>
+                  </div>
+                  {/* Side stats */}
+                  <div className="flex flex-col gap-4 w-full lg:w-auto lg:min-w-[220px]">
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">BEDI индекс</p>
+                      <p className="text-4xl font-bold text-slate-800">{latest.bedi.toFixed(2)}</p>
+                    </div>
+                    <div className="h-px bg-slate-100" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Улирал</p>
+                        <p className="text-lg font-semibold text-slate-700">{SEASON_LABELS[latest.season]}</p>
                       </div>
-                      <div className="bg-slate-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-muted-foreground mb-1">Улирал</p>
-                        <p className="text-xl font-bold text-slate-800">{SEASON_LABELS[latest.season]}</p>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Жин</p>
+                        <p className="text-lg font-semibold text-slate-700">
+                          {latest?.weightKg ? `${latest.weightKg} кг` : "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Нийт тооцоолол</p>
+                        <p className="text-lg font-semibold text-slate-700">{selected?.bediRecords?.length ?? 0}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-0.5">Гэр бүл</p>
+                        <p className="text-lg font-semibold text-slate-700">
+                          {profiles.filter((p) => p.relationship !== "self").length}
+                        </p>
                       </div>
                     </div>
-                  </>
-                ) : latest ? (
-                  <div className="py-6 text-center space-y-2">
-                    <p className="text-sm text-muted-foreground">Үнэлгээ хийгдээгүй</p>
-                    <ButtonLink size="sm" href="/assessment">Үнэлгээ өгөх</ButtonLink>
+                    <div className="h-px bg-slate-100" />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <ButtonLink href="/calculator" size="sm" className="flex-1">
+                        Шинэ тооцоолол
+                      </ButtonLink>
+                      <ButtonLink href="/recommendations" variant="outline" size="sm" className="flex-1">
+                        Ерөндөг харах
+                      </ButtonLink>
+                    </div>
                   </div>
-                ) : (
-                  <div className="py-8 text-center space-y-3">
-                    <p className="text-3xl">📊</p>
-                    <p className="text-sm text-muted-foreground">Тооцоолол хийгдэж байна...</p>
-                    <ButtonLink size="sm" href="/calculator">Тооцоолол хийх</ButtonLink>
-                  </div>
-                )}
+                </div>
+              ) : latest ? (
+                <div className="py-8 text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">Үнэлгээ хийгдээгүй</p>
+                  <ButtonLink size="sm" href="/assessment">Үнэлгээ өгөх</ButtonLink>
+                </div>
+              ) : (
+                <div className="py-10 text-center space-y-3">
+                  <p className="text-3xl">📊</p>
+                  <p className="text-sm text-muted-foreground">Тооцоолол хийгдэж байна...</p>
+                  <ButtonLink size="sm" href="/calculator">Тооцоолол хийх</ButtonLink>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Dosha Card */}
+          {selected?.doshaType ? (
+            <DoshaCard
+              doshaKey={selected.doshaType as DoshaKey}
+              kt={selected.ktScore ?? 1.0}
+            />
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="py-10 text-center space-y-3">
+                <p className="text-3xl">🌀</p>
+                <p className="text-slate-500 font-medium">Махбодийн үнэлгээ хийгдээгүй байна</p>
+                <p className="text-sm text-muted-foreground">12 асуулт хариулж таны Kt коэффициентийг тодорхойлно</p>
+                <ButtonLink href="/assessment">12 асуултын үнэлгээ өгөх</ButtonLink>
               </CardContent>
             </Card>
-
-            {/* Right column */}
-            <div className="lg:col-span-2 space-y-4">
-              {selected?.doshaType ? (
-                <DoshaCard
-                  doshaKey={selected.doshaType as DoshaKey}
-                  kt={selected.ktScore ?? 1.0}
-                />
-              ) : (
-                <Card className="border-dashed">
-                  <CardContent className="py-10 text-center space-y-3">
-                    <p className="text-3xl">🌀</p>
-                    <p className="text-slate-500 font-medium">Махбодийн үнэлгээ хийгдээгүй байна</p>
-                    <p className="text-sm text-muted-foreground">12 асуулт хариулж таны Kt коэффициентийг тодорхойлно</p>
-                    <ButtonLink href="/assessment">12 асуултын үнэлгээ өгөх</ButtonLink>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Quick stats */}
-              <div className="grid grid-cols-3 gap-3">
-                <Card className="border-slate-200">
-                  <CardContent className="py-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Нийт тооцоолол</p>
-                    <p className="text-2xl font-bold text-slate-800">
-                      {selected?.bediRecords?.length ?? 0}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="border-slate-200">
-                  <CardContent className="py-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Гэр бүл</p>
-                    <p className="text-2xl font-bold text-slate-800">
-                      {profiles.filter((p) => p.relationship !== "self").length}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="border-slate-200">
-                  <CardContent className="py-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Жин</p>
-                    <p className="text-2xl font-bold text-slate-800">
-                      {latest?.weightKg ? `${latest.weightKg}кг` : "—"}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick actions */}
-              <div className="grid grid-cols-2 gap-3">
-                <ButtonLink href="/calculator" variant="outline" className="h-12 text-sm font-medium">
-                  ⚖ Шинэ тооцоолол
-                </ButtonLink>
-                <ButtonLink href="/recommendations" variant="outline" className="h-12 text-sm font-medium">
-                  ✦ Ерөндөг харах
-                </ButtonLink>
-              </div>
-            </div>
-          </div>
+          )}
         </>
       )}
     </div>

@@ -33,7 +33,13 @@ export default function RegisterPage() {
       setLoading(false);
       return;
     }
-    await signIn("credentials", { email: form.email, password: form.password, redirect: false });
+    const result = await signIn("credentials", { email: form.email, password: form.password, redirect: false });
+    if (result?.error) {
+      toast.error("Бүртгэл амжилттай боловч нэвтрэхэд алдаа гарлаа. Нэвтрэх хуудас руу орно уу.");
+      setLoading(false);
+      router.push("/login");
+      return;
+    }
     router.push("/dashboard");
   }
 

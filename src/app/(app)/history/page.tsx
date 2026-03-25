@@ -43,9 +43,11 @@ export default function HistoryPage() {
     fetch("/api/profiles")
       .then((r) => r.json())
       .then((data: Profile[]) => {
+        if (!Array.isArray(data)) return;
         setProfiles(data);
         if (data.length > 0) setSelectedId(data[0].id);
-      });
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -53,7 +55,9 @@ export default function HistoryPage() {
     setLoading(true);
     fetch(`/api/bedi?profileId=${selectedId}`)
       .then((r) => r.json())
-      .then((data) => { setRecords(data); setLoading(false); });
+      .then((data) => { if (Array.isArray(data)) setRecords(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [selectedId]);
 
   const chartData = [...records]

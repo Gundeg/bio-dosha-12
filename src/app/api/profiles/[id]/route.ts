@@ -46,6 +46,12 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  await prisma.profile.deleteMany({ where: { id, userId: session.user.id } });
+  const profile = await prisma.profile.findFirst({ where: { id, userId: session.user.id } });
+  if (!profile) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (profile.relationship === "patient") {
+    return NextResponse.json({ error: "Use the patients API to remove patients" }, { status: 403 });
+  }
+
+  await prisma.profile.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }

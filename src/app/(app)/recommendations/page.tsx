@@ -37,11 +37,13 @@ export default function RecommendationsPage() {
     fetch("/api/profiles")
       .then((r) => r.json())
       .then((data) => {
+        if (!Array.isArray(data)) return;
         setProfiles(data);
         const self = data.find((p: Profile) => p.relationship === "self") ?? data[0];
         if (self) setSelectedId(self.id);
-        setLoading(false);
-      });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const profile = profiles.find((p) => p.id === selectedId);
@@ -64,6 +66,7 @@ export default function RecommendationsPage() {
         <div className="flex gap-2 flex-wrap">
           {profiles.map((p) => (
             <button
+              type="button"
               key={p.id}
               onClick={() => setSelectedId(p.id)}
               className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${

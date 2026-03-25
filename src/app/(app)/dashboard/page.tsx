@@ -45,11 +45,13 @@ export default function DashboardPage() {
     fetch("/api/profiles")
       .then((r) => r.json())
       .then((data: Profile[]) => {
+        if (!Array.isArray(data)) return;
         setProfiles(data);
         const self = data.find((p) => p.relationship === "self") ?? data[0];
         setSelected(self ?? null);
-        setLoading(false);
-      });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const latest    = selected?.bediRecords?.[0];

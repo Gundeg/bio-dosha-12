@@ -48,10 +48,16 @@ export default function FamilyPage() {
   const [submitting, setSubmitting] = useState(false);
 
   async function loadProfiles() {
-    const res = await fetch("/api/profiles");
-    const data = await res.json();
-    setProfiles(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/profiles");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) setProfiles(data);
+    } catch {
+      // network error — leave current state
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { loadProfiles(); }, []);

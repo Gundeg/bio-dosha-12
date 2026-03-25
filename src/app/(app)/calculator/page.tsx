@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ const SEASONS: { key: SeasonKey; icon: string }[] = [
 ];
 
 export default function CalculatorPage() {
+  const searchParams = useSearchParams();
   const [profiles, setProfiles]             = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState("");
   const [weightKg, setWeightKg]             = useState("");
@@ -45,11 +47,15 @@ export default function CalculatorPage() {
     fetch("/api/profiles")
       .then((r) => r.json())
       .then((data: Profile[]) => {
+        if (!Array.isArray(data)) return;
         const withKt = data.filter((p) => p.ktScore);
         setProfiles(withKt);
-        if (withKt.length > 0) setSelectedProfileId(withKt[0].id);
-      });
-  }, []);
+        const deepLink = searchParams.get("profile");
+        const initial = (deepLink && withKt.find((p) => p.id === deepLink)) ?? withKt[0];
+        if (initial) setSelectedProfileId(initial.id);
+      })
+      .catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
 

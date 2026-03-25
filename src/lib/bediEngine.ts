@@ -40,10 +40,11 @@ export function calculateBEDI(input: BEDIInput): BEDIResult {
   const heightM = heightCm / 100;
   const genderCoeff = sex === "MALE" ? 1.1 : 1.0;
   const seasonCoeff = SEASON_COEFFICIENTS[season];
+  const safeAge = Math.max(age, 1);
 
   const bedi =
     (weightKg * genderCoeff * seasonCoeff * culturalFactor) /
-    (heightM * age * kt);
+    (heightM * safeAge * kt);
 
   const deviation = bedi / 1.0 - 1;
 

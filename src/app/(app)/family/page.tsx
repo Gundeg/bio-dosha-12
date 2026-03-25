@@ -241,6 +241,7 @@ export default function FamilyPage() {
             <div className="space-y-1">
               <Label>Хамаарал</Label>
               <select
+                aria-label="Хамаарал сонгох"
                 className="w-full border rounded-md px-3 py-2 text-sm"
                 value={form.relationship}
                 onChange={(e) => setForm({ ...form, relationship: e.target.value })}

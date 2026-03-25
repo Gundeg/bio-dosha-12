@@ -140,6 +140,7 @@ export default function AssessmentPage() {
             <div className="space-y-1">
               <Label>Хамаарал</Label>
               <select
+                aria-label="Хамаарал сонгох"
                 className="w-full border rounded-md px-3 py-2 text-sm"
                 value={profile.relationship}
                 onChange={(e) => setProfile({ ...profile, relationship: e.target.value })}

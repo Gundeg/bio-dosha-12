@@ -22,6 +22,7 @@ export default function LoginPage() {
     if (res?.error) {
       toast.error("Имэйл эсвэл нууц үг буруу байна.");
     } else {
+      router.refresh();
       router.push("/dashboard");
     }
   }

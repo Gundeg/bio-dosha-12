@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import BEDIGauge from "@/components/BEDIGauge";
+import DoshaRadar from "@/components/DoshaRadar";
 import RemedyPanel from "@/components/RemedyPanel";
 import { calculateBEDI, calcAge, BEDIResult } from "@/lib/bediEngine";
 import { getRemedies, RemedyResult } from "@/lib/remedyEngine";
 import { getCurrentSeason, SEASON_LABELS, SeasonKey } from "@/lib/seasonFactors";
+import { DoshaKey } from "@/lib/ktMapping";
 import { toast } from "sonner";
 
 interface Profile {
@@ -18,21 +19,27 @@ interface Profile {
   sex: "MALE" | "FEMALE";
   heightCm: number;
   ktScore: number | null;
+  doshaType: string | null;
   birthDate: string;
   relationship: string;
 }
 
-const SEASONS: SeasonKey[] = ["WINTER", "SPRING", "SUMMER", "AUTUMN"];
+const SEASONS: { key: SeasonKey; icon: string }[] = [
+  { key: "WINTER", icon: "❄" },
+  { key: "SPRING", icon: "🌸" },
+  { key: "SUMMER", icon: "☀" },
+  { key: "AUTUMN", icon: "🍂" },
+];
 
 export default function CalculatorPage() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles]             = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState("");
-  const [weightKg, setWeightKg] = useState("");
-  const [season, setSeason] = useState<SeasonKey>(getCurrentSeason());
-  const [notes, setNotes] = useState("");
-  const [result, setResult] = useState<BEDIResult | null>(null);
-  const [remedyResult, setRemedyResult] = useState<RemedyResult | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [weightKg, setWeightKg]             = useState("");
+  const [season, setSeason]                 = useState<SeasonKey>(getCurrentSeason());
+  const [notes, setNotes]                   = useState("");
+  const [result, setResult]                 = useState<BEDIResult | null>(null);
+  const [remedyResult, setRemedyResult]     = useState<RemedyResult | null>(null);
+  const [saving, setSaving]                 = useState(false);
 
   useEffect(() => {
     fetch("/api/profiles")
@@ -57,9 +64,8 @@ export default function CalculatorPage() {
       season,
       kt: selectedProfile.ktScore,
     });
-    const remedies = getRemedies(res.status, age);
     setResult(res);
-    setRemedyResult(remedies);
+    setRemedyResult(getRemedies(res.status, age));
   }
 
   async function handleSave() {
@@ -89,24 +95,32 @@ export default function CalculatorPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">BEDI Тооцоолол</h1>
-        <p className="text-muted-foreground text-sm">Bio-Dosha-12 индекс тооцоолох</p>
+        <h1 className="text-2xl font-bold text-slate-800">BEDI Тооцоолол</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">Bio-Dosha-12 индекс тооцоолох</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader><CardTitle>Өгөгдөл оруулах</CardTitle></CardHeader>
+        {/* Input card */}
+        <Card className="border-slate-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Өгөгдөл оруулах</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             {profiles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Эхлээд үнэлгээ хийж профайл үүсгэнэ үү.
-              </p>
+              <div className="py-6 text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Эхлээд үнэлгээ хийж профайл үүсгэнэ үү.
+                </p>
+              </div>
             ) : (
               <>
-                <div className="space-y-1">
-                  <Label>Профайл</Label>
+                {/* Profile selector */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Профайл</Label>
                   <select
-                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    id="profile-select"
+                    aria-label="Профайл сонгох"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={selectedProfileId}
                     onChange={(e) => {
                       setSelectedProfileId(e.target.value);
@@ -120,29 +134,28 @@ export default function CalculatorPage() {
                   </select>
                 </div>
 
+                {/* Profile summary */}
                 {selectedProfile && (
-                  <div className="bg-slate-50 rounded-lg p-3 text-sm space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Өндөр</span>
-                      <span>{selectedProfile.heightCm} см</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Хүйс</span>
-                      <span>{selectedProfile.sex === "MALE" ? "Эрэгтэй" : "Эмэгтэй"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Нас</span>
-                      <span>{calcAge(selectedProfile.birthDate)} нас</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Kt</span>
-                      <span className="font-semibold">{selectedProfile.ktScore}</span>
-                    </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 grid grid-cols-2 gap-y-1.5 text-sm">
+                    {[
+                      ["Өндөр", `${selectedProfile.heightCm} см`],
+                      ["Хүйс", selectedProfile.sex === "MALE" ? "Эрэгтэй" : "Эмэгтэй"],
+                      ["Нас", `${calcAge(selectedProfile.birthDate)} нас`],
+                      ["Kt", selectedProfile.ktScore?.toFixed(2) ?? "—"],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex justify-between col-span-1">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className="font-semibold text-slate-700">{value}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                <div className="space-y-1">
-                  <Label>Одоогийн жин (кг)</Label>
+                {/* Weight input */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Одоогийн жин (кг)
+                  </Label>
                   <Input
                     type="number"
                     value={weightKg}
@@ -150,40 +163,47 @@ export default function CalculatorPage() {
                     placeholder="70"
                     min="20"
                     max="300"
+                    className="border-slate-200 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Улирал</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {SEASONS.map((s) => (
+                {/* Season picker */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Улирал</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {SEASONS.map(({ key, icon }) => (
                       <button
-                        key={s}
+                        key={key}
                         type="button"
-                        onClick={() => setSeason(s)}
-                        className={`border rounded-lg p-2 text-sm transition-colors ${
-                          season === s
-                            ? "border-primary bg-primary/5 font-semibold"
-                            : "border-gray-200 hover:border-gray-300"
+                        onClick={() => setSeason(key)}
+                        className={`flex flex-col items-center gap-1 border rounded-xl p-2.5 text-xs font-semibold transition-all ${
+                          season === key
+                            ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm"
+                            : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
                         }`}
                       >
-                        {SEASON_LABELS[s].mn}
+                        <span className="text-lg leading-none">{icon}</span>
+                        <span>{SEASON_LABELS[key].mn}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Тэмдэглэл (заавал биш)</Label>
+                {/* Notes */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Тэмдэглэл <span className="text-slate-300 font-normal">(заавал биш)</span>
+                  </Label>
                   <Input
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Нэмэлт тэмдэглэл..."
+                    className="border-slate-200"
                   />
                 </div>
 
                 <Button
-                  className="w-full"
+                  className="w-full h-11 font-semibold"
                   disabled={!weightKg || !selectedProfile?.ktScore}
                   onClick={handleCalculate}
                 >
@@ -194,31 +214,38 @@ export default function CalculatorPage() {
           </CardContent>
         </Card>
 
+        {/* Result column */}
         <div className="space-y-4">
-          {result ? (
+          {result && selectedProfile?.doshaType ? (
             <>
-              <Card>
-                <CardHeader><CardTitle>Үр дүн</CardTitle></CardHeader>
-                <CardContent className="flex flex-col items-center">
-                  <BEDIGauge deviation={result.deviation} size={200} />
-                  <div className="grid grid-cols-2 gap-4 mt-4 w-full text-center">
-                    <div className="bg-slate-50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground">BEDI индекс</p>
-                      <p className="text-2xl font-bold">{result.bedi}</p>
+              <Card className="border-slate-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Үр дүн</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-4">
+                  <DoshaRadar
+                    doshaKey={selectedProfile.doshaType as DoshaKey}
+                    deviation={result.deviation}
+                    size={220}
+                  />
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <div className="bg-slate-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">BEDI индекс</p>
+                      <p className="text-2xl font-bold text-slate-800">{result.bedi}</p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-3">
-                      <p className="text-xs text-muted-foreground">Хазайлт (Δ)</p>
+                    <div className="bg-slate-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-muted-foreground mb-1">Хазайлт (Δ)</p>
                       <p className={`text-2xl font-bold ${
                         result.deviation < -0.3 ? "text-blue-500"
                         : result.deviation > 0.3 ? "text-red-500"
-                        : "text-green-500"
+                        : "text-emerald-500"
                       }`}>
                         {result.deviation >= 0 ? "+" : ""}{result.deviation}
                       </p>
                     </div>
                   </div>
                   <Button
-                    className="w-full mt-4"
+                    className="w-full"
                     variant="outline"
                     onClick={handleSave}
                     disabled={saving}
@@ -227,15 +254,25 @@ export default function CalculatorPage() {
                   </Button>
                 </CardContent>
               </Card>
+
               {remedyResult && (
                 <RemedyPanel status={result.status} remedyResult={remedyResult} />
               )}
             </>
+          ) : result ? (
+            <Card className="border-slate-200">
+              <CardContent className="py-8 text-center space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Үнэлгээ хийгдэж Kt тодорхойлогдоогүй байна.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            <Card className="h-64 flex items-center justify-center">
-              <CardContent className="text-center text-muted-foreground">
-                <p>Тооцоолол хийхийн тулд өгөгдлөө оруулаад</p>
-                <p className="font-medium">"Тооцоолох" дарна уу.</p>
+            <Card className="h-64 flex items-center justify-center border-dashed border-slate-200">
+              <CardContent className="text-center text-muted-foreground space-y-2">
+                <p className="text-3xl">🎯</p>
+                <p className="text-sm">Өгөгдлөө оруулаад</p>
+                <p className="font-semibold text-slate-600">"Тооцоолох" дарна уу</p>
               </CardContent>
             </Card>
           )}

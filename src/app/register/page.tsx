@@ -27,14 +27,18 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { error?: string } = {};
+      try { data = JSON.parse(text); } catch { /* non-JSON response */ }
       if (!res.ok) {
-        toast.error(data.error ?? "Бүртгэл амжилтгүй боллоо.");
+        console.error("[register] status:", res.status, "body:", text);
+        toast.error(data.error ?? `Алдаа гарлаа (${res.status}). Дахин оролдоно уу.`);
         return;
       }
       toast.success("Бүртгэл амжилттай! Нэвтэрнэ үү.");
       router.push("/login");
-    } catch {
+    } catch (err) {
+      console.error("[register] fetch error:", err);
       toast.error("Сүлжээний алдаа гарлаа. Дахин оролдоно уу.");
     } finally {
       setLoading(false);

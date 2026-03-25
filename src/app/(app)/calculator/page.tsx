@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +32,7 @@ const SEASONS: { key: SeasonKey; icon: string }[] = [
   { key: "AUTUMN", icon: "🍂" },
 ];
 
-export default function CalculatorPage() {
+function CalculatorInner() {
   const searchParams = useSearchParams();
   const [profiles, setProfiles]             = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState("");
@@ -285,5 +285,13 @@ export default function CalculatorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CalculatorPage() {
+  return (
+    <Suspense>
+      <CalculatorInner />
+    </Suspense>
   );
 }

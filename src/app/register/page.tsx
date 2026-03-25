@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,26 +21,24 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      toast.error(data.error ?? "Бүртгэл амжилтгүй боллоо.");
-      setLoading(false);
-      return;
-    }
-    const result = await signIn("credentials", { email: form.email, password: form.password, redirect: false });
-    if (result?.error) {
-      toast.error("Бүртгэл амжилттай боловч нэвтрэхэд алдаа гарлаа. Нэвтрэх хуудас руу орно уу.");
-      setLoading(false);
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Бүртгэл амжилтгүй боллоо.");
+        return;
+      }
+      toast.success("Бүртгэл амжилттай! Нэвтэрнэ үү.");
       router.push("/login");
-      return;
+    } catch {
+      toast.error("Сүлжээний алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setLoading(false);
     }
-    router.refresh();
-    router.push("/dashboard");
   }
 
   return (

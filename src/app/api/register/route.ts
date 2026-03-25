@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ id: user.id, email: user.email, role: user.role });
-  } catch {
+  } catch (err) {
+    console.error("[/api/register]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

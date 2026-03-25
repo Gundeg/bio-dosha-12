@@ -43,12 +43,12 @@ function applyDeviation(
 }
 
 // Fixed viewBox coords — SVG scales via width prop
-const VW = 280;
-const VH = 256;
-const CX = 140;
-const CY = 132;
-const R  = 88;
-const LR = R + 30; // label radius
+const VW = 360;
+const VH = 340;
+const CX = 180;
+const CY = 172;
+const R  = 120;
+const LR = R + 36; // label radius
 
 // Equilateral triangle: Хий=top, Шар=bottom-right, Бадган=bottom-left
 const ANGLES = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6] as const;
@@ -73,7 +73,7 @@ interface DoshaRadarProps {
   size?: number;
 }
 
-export default function DoshaRadar({ doshaKey, deviation, size = 260 }: DoshaRadarProps) {
+export default function DoshaRadar({ doshaKey, deviation, size = 340 }: DoshaRadarProps) {
   const base    = BASE_SCORES[doshaKey] ?? BASE_SCORES.Tentsveertei;
   const current = applyDeviation(base, deviation);
 
@@ -144,7 +144,7 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260 }: DoshaRad
           return (
             <circle
               key={i}
-              cx={x} cy={y} r={5}
+              cx={x} cy={y} r={6}
               fill={AXIS_COLORS[i]}
               stroke="white"
               strokeWidth="2"

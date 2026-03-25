@@ -136,15 +136,15 @@ export default function CalculatorPage() {
 
                 {/* Profile summary */}
                 {selectedProfile && (
-                  <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 grid grid-cols-2 gap-y-1.5 text-sm">
+                  <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 grid grid-cols-2 gap-3 text-sm">
                     {[
                       ["Өндөр", `${selectedProfile.heightCm} см`],
                       ["Хүйс", selectedProfile.sex === "MALE" ? "Эрэгтэй" : "Эмэгтэй"],
                       ["Нас", `${calcAge(selectedProfile.birthDate)} нас`],
                       ["Kt", selectedProfile.ktScore?.toFixed(2) ?? "—"],
                     ].map(([label, value]) => (
-                      <div key={label} className="flex justify-between col-span-1">
-                        <span className="text-muted-foreground">{label}</span>
+                      <div key={label} className="flex flex-col gap-0.5">
+                        <span className="text-xs text-muted-foreground">{label}</span>
                         <span className="font-semibold text-slate-700">{value}</span>
                       </div>
                     ))}
@@ -226,7 +226,7 @@ export default function CalculatorPage() {
                   <DoshaRadar
                     doshaKey={selectedProfile.doshaType as DoshaKey}
                     deviation={result.deviation}
-                    size={220}
+                    size={300}
                   />
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <div className="bg-slate-50 rounded-lg p-3 text-center">

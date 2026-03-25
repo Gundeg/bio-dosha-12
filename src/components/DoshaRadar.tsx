@@ -71,9 +71,11 @@ interface DoshaRadarProps {
   doshaKey: DoshaKey;
   deviation: number;
   size?: number;
+  /** Hide the status badge, legend, and axis score summary below the SVG */
+  compact?: boolean;
 }
 
-export default function DoshaRadar({ doshaKey, deviation, size = 260 }: DoshaRadarProps) {
+export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = false }: DoshaRadarProps) {
   const base    = BASE_SCORES[doshaKey] ?? BASE_SCORES.Tentsveertei;
   const current = applyDeviation(base, deviation);
 
@@ -81,6 +83,8 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260 }: DoshaRad
     deviation < -0.3 ? "#3b82f6" : deviation > 0.3 ? "#f87171" : "#10b981";
   const statusLabel =
     deviation < -0.3 ? "Хий арвидсан" : deviation > 0.3 ? "Шар/Бадган арвидсан" : "Тэнцвэртэй";
+  const statusBadgeClass =
+    deviation < -0.3 ? "bg-blue-500" : deviation > 0.3 ? "bg-red-400" : "bg-emerald-500";
 
   const svgH = Math.round(size * (VH / VW));
 
@@ -196,48 +200,49 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260 }: DoshaRad
         })}
       </svg>
 
-      {/* Status badge */}
-      <span
-        className="text-sm font-bold px-4 py-1 rounded-full text-white"
-        style={{ backgroundColor: statusColor }}
-      >
-        {statusLabel}
-      </span>
+      {!compact && (
+        <>
+          {/* Status badge */}
+          <span className={`text-sm font-bold px-4 py-1 rounded-full text-white ${statusBadgeClass}`}>
+            {statusLabel}
+          </span>
 
-      {/* Deviation value */}
-      <span className="text-sm text-muted-foreground font-mono">
-        Δ = {deviation >= 0 ? "+" : ""}{deviation.toFixed(2)}
-      </span>
+          {/* Deviation value */}
+          <span className="text-sm text-muted-foreground font-mono">
+            Δ = {deviation >= 0 ? "+" : ""}{deviation.toFixed(2)}
+          </span>
 
-      {/* Legend */}
-      <div className="flex items-center gap-5 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <svg width="20" height="6" aria-hidden="true">
-            <line x1="0" y1="3" x2="20" y2="3" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="5 3" />
-          </svg>
-          Үндсэн
-        </span>
-        <span className="flex items-center gap-1.5">
-          <svg width="20" height="6" aria-hidden="true">
-            <line x1="0" y1="3" x2="20" y2="3" stroke={statusColor} strokeWidth="2.5" />
-          </svg>
-          Одоогийн
-        </span>
-      </div>
-
-      {/* Axis score summary */}
-      <div className="flex gap-4 mt-1">
-        {AXIS_LABELS.map((label, i) => (
-          <div key={label} className="flex flex-col items-center">
-            <span className="text-xs font-semibold" style={{ color: AXIS_COLORS[i] }}>
-              {label}
+          {/* Legend */}
+          <div className="flex items-center gap-5 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <svg width="20" height="6" aria-hidden="true">
+                <line x1="0" y1="3" x2="20" y2="3" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="5 3" />
+              </svg>
+              Үндсэн
             </span>
-            <span className="text-base font-bold text-slate-700">
-              {Math.round(current[i])}
+            <span className="flex items-center gap-1.5">
+              <svg width="20" height="6" aria-hidden="true">
+                <line x1="0" y1="3" x2="20" y2="3" stroke={statusColor} strokeWidth="2.5" />
+              </svg>
+              Одоогийн
             </span>
           </div>
-        ))}
-      </div>
+        </>
+      )}
+
+      {!compact && (
+        <div className="flex gap-4 mt-1">
+          {AXIS_LABELS.map((label, i) => {
+            const textClass = i === 0 ? "text-blue-500" : i === 1 ? "text-amber-500" : "text-violet-500";
+            return (
+              <div key={label} className="flex flex-col items-center">
+                <span className={`text-xs font-semibold ${textClass}`}>{label}</span>
+                <span className="text-base font-bold text-slate-700">{Math.round(current[i])}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

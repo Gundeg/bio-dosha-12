@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import DoshaRadar from "@/components/DoshaRadar";
 import DoshaCard from "@/components/DoshaCard";
 import { ButtonLink } from "@/components/ui/button-link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DoshaKey } from "@/lib/ktMapping";
 
 interface Profile {
@@ -30,16 +30,16 @@ const SEASON_LABELS: Record<string, string> = {
 };
 
 const STATUS_CONFIG = {
-  khii_excess:       { label: "Хий арвидсан",      bg: "bg-blue-500",    light: "bg-blue-50 border-blue-200",   text: "text-blue-700"   },
-  balanced:          { label: "Тэнцвэртэй",         bg: "bg-emerald-500", light: "bg-emerald-50 border-emerald-200", text: "text-emerald-700" },
-  shar_badgan_excess:{ label: "Шар/Бадган арвидсан",bg: "bg-red-500",     light: "bg-red-50 border-red-200",     text: "text-red-700"    },
+  khii_excess:        { label: "Хий арвидсан",       bg: "bg-blue-500",    light: "bg-blue-50 border-blue-200",        text: "text-blue-700"    },
+  balanced:           { label: "Тэнцвэртэй",          bg: "bg-emerald-500", light: "bg-emerald-50 border-emerald-200",  text: "text-emerald-700" },
+  shar_badgan_excess: { label: "Шар/Бадган арвидсан", bg: "bg-red-500",     light: "bg-red-50 border-red-200",          text: "text-red-700"     },
 };
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [profiles, setProfiles]   = useState<Profile[]>([]);
-  const [selected, setSelected]   = useState<Profile | null>(null);
-  const [loading, setLoading]     = useState(true);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [selected, setSelected] = useState<Profile | null>(null);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
     fetch("/api/profiles")
@@ -52,7 +52,7 @@ export default function DashboardPage() {
       });
   }, []);
 
-  const latest = selected?.bediRecords?.[0];
+  const latest    = selected?.bediRecords?.[0];
   const statusCfg = latest ? STATUS_CONFIG[latest.status as keyof typeof STATUS_CONFIG] : null;
 
   if (loading) {
@@ -67,7 +67,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
@@ -75,10 +75,10 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-slate-800">
             Сайн байна уу, {session?.user?.name}!
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Bio-Dosha-12 хяналтын самбар</p>
+          <p className="text-slate-400 text-sm mt-0.5">Bio-Dosha-12 хяналтын самбар</p>
         </div>
         <div className="flex gap-2 shrink-0">
-          <ButtonLink href="/calculator" size="sm">Тооцоолол</ButtonLink>
+          <ButtonLink href="/calculator" size="sm">+ Тооцоолол</ButtonLink>
           {!selected?.doshaType && (
             <ButtonLink variant="outline" href="/assessment" size="sm">Үнэлгээ</ButtonLink>
           )}
@@ -86,9 +86,9 @@ export default function DashboardPage() {
       </div>
 
       {profiles.length === 0 ? (
-        <Card className="text-center py-16 border-dashed">
+        <Card className="text-center py-20 border-dashed">
           <CardContent className="space-y-4">
-            <div className="text-4xl">🌿</div>
+            <p className="text-5xl">🌿</p>
             <p className="text-lg font-medium text-slate-600">Профайл үүсгэгдээгүй байна</p>
             <p className="text-sm text-muted-foreground">12 асуултын үнэлгээ хийж эхэл</p>
             <ButtonLink href="/assessment">Үнэлгээ эхлүүлэх</ButtonLink>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
                   key={p.id}
                   type="button"
                   onClick={() => setSelected(p)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
                     selected?.id === p.id
                       ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                       : "border-slate-200 text-slate-600 hover:border-slate-300 bg-white"
@@ -118,116 +118,116 @@ export default function DashboardPage() {
 
           {/* Status banner */}
           {latest && statusCfg && (
-            <div className={`flex items-center justify-between px-4 py-3 rounded-xl border ${statusCfg.light}`}>
-              <div className="flex items-center gap-2.5">
-                <div className={`w-2.5 h-2.5 rounded-full ${statusCfg.bg}`} />
-                <span className={`text-sm font-semibold ${statusCfg.text}`}>
-                  {statusCfg.label}
-                </span>
-                <span className="text-sm text-slate-500">
-                  — Δ {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
+            <div className={`flex items-center justify-between px-5 py-3.5 rounded-2xl border-2 ${statusCfg.light}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${statusCfg.bg} ring-4 ring-current ring-opacity-20`} />
+                <span className={`font-bold ${statusCfg.text}`}>{statusCfg.label}</span>
+                <span className="text-slate-400 text-sm">
+                  Δ {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
                 </span>
               </div>
-              <span className="text-xs text-slate-400">
-                {new Date(latest.date).toLocaleDateString("mn-MN")}
-              </span>
+              <div className="flex items-center gap-4 text-sm text-slate-400">
+                <span>{SEASON_LABELS[latest.season]}</span>
+                <span>{new Date(latest.date).toLocaleDateString("mn-MN")}</span>
+              </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Dosha Radar */}
-            <Card className="lg:col-span-1 border-slate-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-                  Доша Радар
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
+          {/* Main grid — radar wider on left, info on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+            {/* ── Radar card (2/5 width) ── */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-full">
                 {latest && selected?.doshaType ? (
                   <>
-                    <DoshaRadar
-                      doshaKey={selected.doshaType as DoshaKey}
-                      deviation={latest.deviation}
-                      size={220}
-                    />
-                    <div className="mt-4 grid grid-cols-2 gap-3 w-full">
-                      <div className="bg-slate-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-muted-foreground mb-1">BEDI индекс</p>
-                        <p className="text-xl font-bold text-slate-800">{latest.bedi.toFixed(2)}</p>
+                    {/* Radar fills the card */}
+                    <div className="flex justify-center pt-6 pb-2 px-4">
+                      <DoshaRadar
+                        doshaKey={selected.doshaType as DoshaKey}
+                        deviation={latest.deviation}
+                        size={340}
+                        compact
+                      />
+                    </div>
+
+                    {/* Stats strip at bottom of radar card */}
+                    <div className="grid grid-cols-3 divide-x divide-slate-100 border-t border-slate-100">
+                      <div className="py-3 text-center">
+                        <p className="text-[11px] text-slate-400 uppercase tracking-wide">BEDI</p>
+                        <p className="text-lg font-bold text-slate-800">{latest.bedi.toFixed(2)}</p>
                       </div>
-                      <div className="bg-slate-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-muted-foreground mb-1">Улирал</p>
-                        <p className="text-xl font-bold text-slate-800">{SEASON_LABELS[latest.season]}</p>
+                      <div className="py-3 text-center">
+                        <p className="text-[11px] text-slate-400 uppercase tracking-wide">Жин</p>
+                        <p className="text-lg font-bold text-slate-800">{latest.weightKg} кг</p>
+                      </div>
+                      <div className="py-3 text-center">
+                        <p className="text-[11px] text-slate-400 uppercase tracking-wide">Улирал</p>
+                        <p className="text-lg font-bold text-slate-800">{SEASON_LABELS[latest.season]}</p>
                       </div>
                     </div>
                   </>
                 ) : latest ? (
-                  <div className="py-6 text-center space-y-2">
-                    <p className="text-sm text-muted-foreground">Үнэлгээ хийгдээгүй</p>
+                  <div className="flex flex-col items-center justify-center h-full py-16 gap-3 text-center px-6">
+                    <p className="text-slate-400 text-sm">Үнэлгээ хийгдэж Kt тодорхойлогдоогүй байна</p>
                     <ButtonLink size="sm" href="/assessment">Үнэлгээ өгөх</ButtonLink>
                   </div>
                 ) : (
-                  <div className="py-8 text-center space-y-3">
-                    <p className="text-3xl">📊</p>
-                    <p className="text-sm text-muted-foreground">Тооцоолол хийгдэж байна...</p>
+                  <div className="flex flex-col items-center justify-center h-full py-16 gap-3 text-center px-6">
+                    <p className="text-4xl">📊</p>
+                    <p className="text-slate-500 font-medium">Тооцоолол хийгдэж байна...</p>
                     <ButtonLink size="sm" href="/calculator">Тооцоолол хийх</ButtonLink>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Right column */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* ── Right column (3/5 width) ── */}
+            <div className="lg:col-span-3 flex flex-col gap-4">
+
+              {/* Dosha card */}
               {selected?.doshaType ? (
                 <DoshaCard
                   doshaKey={selected.doshaType as DoshaKey}
                   kt={selected.ktScore ?? 1.0}
                 />
               ) : (
-                <Card className="border-dashed">
-                  <CardContent className="py-10 text-center space-y-3">
-                    <p className="text-3xl">🌀</p>
-                    <p className="text-slate-500 font-medium">Махбодийн үнэлгээ хийгдээгүй байна</p>
-                    <p className="text-sm text-muted-foreground">12 асуулт хариулж таны Kt коэффициентийг тодорхойлно</p>
-                    <ButtonLink href="/assessment">12 асуултын үнэлгээ өгөх</ButtonLink>
-                  </CardContent>
-                </Card>
+                <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center py-12 text-center gap-3 px-6">
+                  <p className="text-4xl">🌀</p>
+                  <p className="font-semibold text-slate-600">Махбодийн үнэлгээ хийгдээгүй</p>
+                  <p className="text-sm text-slate-400">12 асуулт хариулж Kt коэффициентийг тодорхойлно</p>
+                  <ButtonLink href="/assessment">Үнэлгээ эхлүүлэх</ButtonLink>
+                </div>
               )}
 
-              {/* Quick stats */}
+              {/* Stats row */}
               <div className="grid grid-cols-3 gap-3">
-                <Card className="border-slate-200">
-                  <CardContent className="py-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Нийт тооцоолол</p>
-                    <p className="text-2xl font-bold text-slate-800">
-                      {selected?.bediRecords?.length ?? 0}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="border-slate-200">
-                  <CardContent className="py-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Гэр бүл</p>
-                    <p className="text-2xl font-bold text-slate-800">
-                      {profiles.filter((p) => p.relationship !== "self").length}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="border-slate-200">
-                  <CardContent className="py-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Жин</p>
-                    <p className="text-2xl font-bold text-slate-800">
-                      {latest?.weightKg ? `${latest.weightKg}кг` : "—"}
-                    </p>
-                  </CardContent>
-                </Card>
+                {[
+                  { label: "Нийт тооцоолол", value: String(selected?.bediRecords?.length ?? 0) },
+                  { label: "Гэр бүлийн гишүүд", value: String(profiles.filter((p) => p.relationship !== "self").length) },
+                  { label: "Сүүлийн жин", value: latest?.weightKg ? `${latest.weightKg} кг` : "—" },
+                ].map(({ label, value }) => (
+                  <div key={label} className="bg-white rounded-xl border border-slate-200 py-4 text-center shadow-sm">
+                    <p className="text-[11px] text-slate-400 uppercase tracking-wide mb-1">{label}</p>
+                    <p className="text-2xl font-bold text-slate-800">{value}</p>
+                  </div>
+                ))}
               </div>
 
-              {/* Quick actions */}
+              {/* Action buttons */}
               <div className="grid grid-cols-2 gap-3">
-                <ButtonLink href="/calculator" variant="outline" className="h-12 text-sm font-medium">
+                <ButtonLink
+                  href="/calculator"
+                  variant="outline"
+                  className="h-12 text-sm font-semibold rounded-xl border-slate-200 hover:border-slate-300"
+                >
                   ⚖ Шинэ тооцоолол
                 </ButtonLink>
-                <ButtonLink href="/recommendations" variant="outline" className="h-12 text-sm font-medium">
+                <ButtonLink
+                  href="/recommendations"
+                  variant="outline"
+                  className="h-12 text-sm font-semibold rounded-xl border-slate-200 hover:border-slate-300"
+                >
                   ✦ Ерөндөг харах
                 </ButtonLink>
               </div>

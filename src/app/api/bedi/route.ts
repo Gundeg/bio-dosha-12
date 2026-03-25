@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateBEDI, calcAge } from "@/lib/bediEngine";
+
+export const runtime = "nodejs";
 import { getRemedies } from "@/lib/remedyEngine";
 
 export async function POST(req: NextRequest) {

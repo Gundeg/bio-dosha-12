@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+export const runtime = "nodejs";
+
 const profileSchema = z.object({
   name: z.string().min(1),
   birthDate: z.string().refine((d) => {

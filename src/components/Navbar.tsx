@@ -8,7 +8,6 @@ import { usePathname } from "next/navigation";
 const NAV_LINKS = [
   { href: "/dashboard",       label: "Самбар" },
   { href: "/calculator",      label: "Тооцоолол" },
-  { href: "/assessment",      label: "Үнэлгээ" },
   { href: "/history",         label: "Түүх" },
   { href: "/family",          label: "Гэр бүл" },
   { href: "/recommendations", label: "Ерөндөг" },

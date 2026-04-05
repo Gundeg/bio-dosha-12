@@ -1,10 +1,14 @@
 import { BEDIStatus } from "./bediEngine";
+import { getTherapy, validateRemedy, RemedyValidation } from "./potencyEngine";
+import { DoshaKey } from "./ktMapping";
 
 export interface RemedyResult {
   remedies: string[];
   avoidFoods: string[];
   riskFactors: string[];
   ageNote: string;
+  lifestyle: string[];
+  validation: RemedyValidation | null;
 }
 
 interface AgeGroup {
@@ -105,16 +109,28 @@ const AGE_REMEDIES: Record<string, { extra: string[]; avoidExtra: string[]; note
   },
 };
 
-export function getRemedies(status: BEDIStatus, age: number): RemedyResult {
+export function getRemedies(status: BEDIStatus, age: number, doshaKey?: DoshaKey, deviation?: number): RemedyResult {
   const ageGroup = getAgeGroup(age);
   const base = BASE_REMEDIES[status];
   const ageData = AGE_REMEDIES[ageGroup];
   const risks = RISK_FACTORS[status];
 
-  // For children with shar_badgan_excess, honey is strictly forbidden
-  let remedies = [...base.remedies, ...ageData.extra];
+  // potencyEngine-с доша-д тохирсон идээ болон амьдралын хэв маягийн зөвлөмж авах
+  const therapy = doshaKey ? getTherapy(doshaKey) : null;
+
+  // potencyEngine-ийн идээг нэгтгэх (давхардлаас зайлсхийх)
+  const therapyFoods = therapy ? therapy.foods : [];
+  let remedies = [...base.remedies, ...therapyFoods, ...ageData.extra];
+
+  // Children: зөгийн бал огт хориглоно
   if (ageGroup === "child") {
     remedies = remedies.filter((r) => !r.includes("Зөгийн бал"));
+  }
+
+  // Logic Gate — validateRemedy (баримт бичгийн Patent Claim 3)
+  let validation: RemedyValidation | null = null;
+  if (doshaKey && deviation !== undefined && status === "shar_badgan_excess") {
+    validation = validateRemedy(deviation, "WARM", doshaKey);
   }
 
   return {
@@ -122,5 +138,7 @@ export function getRemedies(status: BEDIStatus, age: number): RemedyResult {
     avoidFoods: [...base.avoidFoods, ...ageData.avoidExtra],
     riskFactors: risks,
     ageNote: ageData.note,
+    lifestyle: therapy ? therapy.lifestyle : [],
+    validation,
   };
 }

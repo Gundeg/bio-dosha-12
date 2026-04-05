@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateBEDI, calcAge } from "@/lib/bediEngine";
+import { DoshaKey } from "@/lib/ktMapping";
 
 export const runtime = "nodejs";
 import { getRemedies } from "@/lib/remedyEngine";
@@ -29,7 +30,12 @@ export async function POST(req: NextRequest) {
     kt: profile.ktScore,
   });
 
-  const remedies = getRemedies(result.status, age);
+  const remedies = getRemedies(
+    result.status,
+    age,
+    (profile.doshaType as DoshaKey | null) ?? undefined,
+    result.deviation
+  );
 
   const record = await prisma.bEDIRecord.create({
     data: {
@@ -45,6 +51,10 @@ export async function POST(req: NextRequest) {
           remedies: remedies.remedies,
           avoidFoods: remedies.avoidFoods,
           riskFactors: remedies.riskFactors,
+          ageNote: remedies.ageNote,
+          lifestyle: remedies.lifestyle,
+          validationStatus: remedies.validation?.status ?? null,
+          validationAction: remedies.validation?.action ?? null,
         },
       },
     },

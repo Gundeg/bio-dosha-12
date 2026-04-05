@@ -5,9 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import RemedyPanel from "@/components/RemedyPanel";
 import DoshaCard from "@/components/DoshaCard";
-import { getRemedies, RemedyResult } from "@/lib/remedyEngine";
 import { calcAge, BEDIStatus } from "@/lib/bediEngine";
 import { DoshaKey } from "@/lib/ktMapping";
+import { RemedyResult } from "@/lib/remedyEngine";
+
+interface StoredRecommendation {
+  remedies: string[];
+  avoidFoods: string[];
+  riskFactors: string[];
+  ageNote: string | null;
+  lifestyle: string[];
+  validationStatus: string | null;
+  validationAction: string | null;
+}
 
 interface Profile {
   id: string;
@@ -20,11 +30,7 @@ interface Profile {
     deviation: number;
     status: string;
     date: string;
-    recommendation: {
-      remedies: string[];
-      avoidFoods: string[];
-      riskFactors: string[];
-    } | null;
+    recommendation: StoredRecommendation | null;
   }>;
 }
 
@@ -49,8 +55,24 @@ export default function RecommendationsPage() {
   const profile = profiles.find((p) => p.id === selectedId);
   const latest = profile?.bediRecords?.[0];
   const age = profile ? calcAge(profile.birthDate) : 0;
-  const remedyResult: RemedyResult | null = latest
-    ? getRemedies(latest.status as BEDIStatus, age)
+
+  // DB-с хадгалагдсан recommendation ашиглах
+  const rec = latest?.recommendation ?? null;
+  const remedyResult: RemedyResult | null = rec
+    ? {
+        remedies: rec.remedies,
+        avoidFoods: rec.avoidFoods,
+        riskFactors: rec.riskFactors,
+        ageNote: rec.ageNote ?? "",
+        lifestyle: rec.lifestyle ?? [],
+        validation: rec.validationStatus
+          ? {
+              status: rec.validationStatus as "OK" | "WARNING" | "CONTRAINDICATED",
+              action: rec.validationAction ?? "",
+              adjustedDosePercent: rec.validationStatus === "WARNING" ? 70 : rec.validationStatus === "CONTRAINDICATED" ? 0 : 100,
+            }
+          : null,
+      }
     : null;
 
   if (loading) return <div className="text-center py-12 text-muted-foreground">Ачааллаж байна...</div>;

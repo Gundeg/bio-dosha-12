@@ -68,12 +68,16 @@ model BEDIRecord {
 }
 
 model Recommendation {
-  id           String     @id @default(cuid())
-  bediRecordId String     @unique
-  bediRecord   BEDIRecord @relation(fields: [bediRecordId], references: [id], onDelete: Cascade)
-  remedies     String[]
-  avoidFoods   String[]
-  riskFactors  String[]
+  id                String     @id @default(cuid())
+  bediRecordId      String     @unique
+  bediRecord        BEDIRecord @relation(fields: [bediRecordId], references: [id], onDelete: Cascade)
+  remedies          String[]
+  avoidFoods        String[]
+  riskFactors       String[]
+  ageNote           String?
+  lifestyle         String[]
+  validationStatus  String?
+  validationAction  String?
 }
 
 model Patient {

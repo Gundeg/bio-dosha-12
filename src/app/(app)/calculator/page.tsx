@@ -3,10 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import DoshaRadar from "@/components/DoshaRadar";
 import DoshaCard from "@/components/DoshaCard";
@@ -58,48 +56,87 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
 };
 
 const DOSHA_COLOR: Record<DominantType, string> = {
-  H: "text-blue-500",
-  S: "text-amber-500",
-  B: "text-purple-500",
+  H: "text-primary",
+  S: "text-secondary",
+  B: "text-tertiary",
 };
 
 const DOSHA_BG: Record<DominantType, string> = {
-  H: "bg-blue-50 border-blue-200",
-  S: "bg-amber-50 border-amber-200",
-  B: "bg-purple-50 border-purple-200",
+  H: "bg-primary/5",
+  S: "bg-secondary/5",
+  B: "bg-tertiary/5",
 };
 
-// ─── Categories for grouping questions ───────────────────────────────────────
 const CATEGORIES = [...new Set(QUESTIONNAIRE.map((q) => q.category))];
+
+// ─── Wizard step definitions ──────────────────────────────────────────────────
+
+const WIZARD_STEPS = [
+  { label: "Доша Үнэлгээ",  desc: "Kt коэффициент" },
+  { label: "Хэмжилт",       desc: "Биометр + улирал" },
+  { label: "Үр дүн",        desc: "BEDI индекс" },
+];
+
+const CONSTITUTION_CARDS = [
+  {
+    title: "Хөнгөн биетэй",
+    desc: "Туранхай, нарийн ястай. Хурдан бодисын солилцоо. Жин нэмэхэд хэцүү.",
+    bg: "bg-primary/8",
+    text: "text-primary",
+    dot: "bg-primary",
+  },
+  {
+    title: "Дунд биетэй",
+    desc: "Спортлог, бат бөх биетэй. Булчин тодорхой. Жин хялбар зохицдог.",
+    bg: "bg-secondary/8",
+    text: "text-secondary",
+    dot: "bg-secondary",
+  },
+  {
+    title: "Хүнд биетэй",
+    desc: "Бат бөх, хүнд биетэй. Удаан бодисын солилцоо. Жин хуримтлагдах хандлагатай.",
+    bg: "bg-tertiary/8",
+    text: "text-tertiary",
+    dot: "bg-tertiary",
+  },
+];
 
 // ─── Inner component ─────────────────────────────────────────────────────────
 
 function CalculatorInner() {
   const searchParams = useSearchParams();
+  const requestedTab  = searchParams.get("tab");
+  const requestedProfile = searchParams.get("profile");
+  const newParam      = searchParams.get("new");
+
+  // Хэрэв тодорхой ?tab=calc эсвэл ?profile=X эсвэл ?new=1 байхгүй бол
+  // үргэлж 1-р алхам (Доша Үнэлгээ) -аас эхлүүлнэ
+  const goDirectlyToCalc = requestedTab === "calc" || !!requestedProfile || newParam === "1";
+  const initialTab: Tab = goDirectlyToCalc ? "calc" : "assessment";
 
   // ── Shared state ──
-  const [profiles, setProfiles]           = useState<Profile[]>([]);
+  const [profiles, setProfiles]               = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
-  const [activeTab, setActiveTab]         = useState<Tab>("calc");
+  const [activeTab, setActiveTab]             = useState<Tab>(initialTab);
 
   // ── Calculator state ──
   const [selectedProfileId, setSelectedProfileId] = useState("");
-  const [weightKg, setWeightKg]           = useState("");
-  const [season, setSeason]               = useState<SeasonKey>(getCurrentSeason());
-  const [notes, setNotes]                 = useState("");
-  const [calcResult, setCalcResult]       = useState<BEDIResult | null>(null);
-  const [remedyResult, setRemedyResult]   = useState<RemedyResult | null>(null);
-  const [saving, setSaving]               = useState(false);
+  const [weightKg, setWeightKg]   = useState("");
+  const [season, setSeason]       = useState<SeasonKey>(getCurrentSeason());
+  const [notes, setNotes]         = useState("");
+  const [calcResult, setCalcResult]     = useState<BEDIResult | null>(null);
+  const [remedyResult, setRemedyResult] = useState<RemedyResult | null>(null);
+  const [saving, setSaving]       = useState(false);
 
   // ── Assessment state ──
-  const [assessStep, setAssessStep]       = useState<AssessmentStep>("profile-select");
+  const [assessStep, setAssessStep]         = useState<AssessmentStep>("profile-select");
   const [assessProfileId, setAssessProfileId] = useState("__new__");
-  const [profileForm, setProfileForm]     = useState<ProfileForm>({
+  const [profileForm, setProfileForm]       = useState<ProfileForm>({
     name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "self",
   });
-  const [currentQ, setCurrentQ]           = useState(0);
-  const [answers, setAnswers]             = useState<Record<number, DominantType>>({});
-  const [ktResult, setKtResult]           = useState<ReturnType<typeof scoreQuestionnaire> | null>(null);
+  const [currentQ, setCurrentQ]   = useState(0);
+  const [answers, setAnswers]     = useState<Record<number, DominantType>>({});
+  const [ktResult, setKtResult]   = useState<ReturnType<typeof scoreQuestionnaire> | null>(null);
   const [savingAssessment, setSavingAssessment] = useState(false);
 
   // ── Load profiles ──
@@ -111,13 +148,23 @@ function CalculatorInner() {
         const withKt = data.filter((p) => p.ktScore);
         setProfiles(withKt);
         if (withKt.length === 0) {
-          // No profiles: go straight to assessment
+          // Профайл байхгүй → шинэ профайл үүсгэх хэлбэр рүү
           setActiveTab("assessment");
           setAssessStep("info");
         } else {
-          const deepLink = searchParams.get("profile");
+          // Профайл байна — selectedProfileId тохируулна
+          const deepLink = requestedProfile;
           const initial = (deepLink && withKt.find((p) => p.id === deepLink)) ?? withKt[0];
           if (initial) setSelectedProfileId(initial.id);
+
+          // ?new=1 эсвэл ?tab=calc эсвэл ?profile=X → шууд 2-р алхам (Хэмжилт) руу
+          if (goDirectlyToCalc) {
+            setActiveTab("calc");
+          } else {
+            // Ердийн навигаци → 1-р алхам (профайл сонгох) -оос эхлэ
+            setActiveTab("assessment");
+            setAssessStep("profile-select");
+          }
         }
       })
       .catch(() => {})
@@ -180,7 +227,7 @@ function CalculatorInner() {
     }
   }
 
-  // ── Assessment: save (create new or update existing) ──
+  // ── Assessment: save ──
   async function handleSaveAssessment() {
     if (!ktResult) return;
     setSavingAssessment(true);
@@ -188,7 +235,6 @@ function CalculatorInner() {
       let savedProfile: Profile;
 
       if (assessProfileId === "__new__") {
-        // Create new profile
         const res = await fetch("/api/profiles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -207,14 +253,12 @@ function CalculatorInner() {
         setProfiles((prev) => [...prev, savedProfile]);
         toast.success(`${savedProfile.name}-ийн профайл үүслээ!`);
       } else {
-        // Update existing profile's Kt
         const res = await fetch(`/api/profiles/${assessProfileId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ doshaType: ktResult.doshaKey, ktScore: ktResult.kt }),
         });
         if (!res.ok) throw new Error();
-        // Refresh profiles
         const refreshed = await fetch("/api/profiles").then((r) => r.json());
         const withKt = Array.isArray(refreshed) ? refreshed.filter((p: Profile) => p.ktScore) : [];
         setProfiles(withKt);
@@ -222,14 +266,11 @@ function CalculatorInner() {
         toast.success("Үнэлгээ шинэчлэгдлээ!");
       }
 
-      // Switch to calculator with the saved profile
       setSelectedProfileId(savedProfile.id);
       setCalcResult(null);
       setRemedyResult(null);
       setWeightKg("");
       setActiveTab("calc");
-
-      // Reset assessment state
       setAssessStep("profile-select");
       setCurrentQ(0);
       setAnswers({});
@@ -248,11 +289,7 @@ function CalculatorInner() {
     setCurrentQ(0);
     setAnswers({});
     setKtResult(null);
-    if (profileId === "__new__") {
-      setAssessStep("info");
-    } else {
-      setAssessStep("questions");
-    }
+    setAssessStep(profileId === "__new__" ? "info" : "questions");
   }
 
   function resetAssessment() {
@@ -263,358 +300,241 @@ function CalculatorInner() {
   }
 
   if (loadingProfiles) {
-    return <div className="text-center py-20 text-muted-foreground">Ачааллаж байна...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm text-on-surface-variant">Ачааллаж байна...</p>
+        </div>
+      </div>
+    );
   }
 
+  // ── Derived values ──
   const q = QUESTIONNAIRE[currentQ];
   const progress = assessStep === "questions"
     ? Math.round(((currentQ + 1) / QUESTIONNAIRE.length) * 100)
     : assessStep === "result" ? 100 : 0;
 
+  // Шидтэн алхамын индекс: 0=үнэлгээ, 1=хэмжилт оруулах, 2=үр дүн
+  const activeWizardStep = activeTab === "assessment" ? 0 : calcResult ? 2 : 1;
+
+  // Хуудасны гарчиг
+  const stepMeta = (() => {
+    if (activeTab === "calc" && calcResult) {
+      return { title: "BEDI Индексийн Тооцоолол", subtitle: "Таны шинжилгээ гүйцэтгэгдлээ. Үр дүнг шалгаад хадгалаарай." };
+    }
+    if (activeTab === "calc") {
+      return { title: "Хэмжилт Оруулах", subtitle: "Биометрийн мэдээлэл болон одоогийн улирлын нөхцөлийг оруулна уу." };
+    }
+    if (assessStep === "questions") {
+      return { title: "Доша Асуулт", subtitle: "Өнөөгийн биш — байгалийн мөн чанартаа тулгуурлан хариулаарай." };
+    }
+    if (assessStep === "result") {
+      return { title: "Үнэлгээний Үр Дүн", subtitle: "Таны Kt коэффициент тодорхойлогдлоо. Хадгалаад BEDI тооцоолол руу орно уу." };
+    }
+    return { title: "Доша Профайл", subtitle: "Доша асуулгыг бөглөж Kt коэффициентийг тодорхойлно уу." };
+  })();
+
   // ══════════════════════════════════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="flex gap-6">
 
-      {/* ── Page header + Tab switcher ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Bio-Dosha-12</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">Махбодийн үнэлгээ ба BEDI тооцоолол</p>
-      </div>
+      {/* ── MAIN: Content area ────────────────────────────────────────── */}
+      <main className="flex-1 min-w-0">
 
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-        {([
-          { id: "calc",       label: "Тооцоолол",  icon: "🎯" },
-          { id: "assessment", label: "Үнэлгээ",    icon: "📋" },
-        ] as { id: Tab; label: string; icon: string }[]).map(({ id, label, icon }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => {
-              setActiveTab(id);
-              if (id === "assessment" && assessStep === "profile-select" && profiles.length === 0) {
-                setAssessStep("info");
-              }
-            }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === id
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <span>{icon}</span>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          ТООЦООЛОЛ TAB
-      ══════════════════════════════════════════════════════════════════ */}
-      {activeTab === "calc" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Input card */}
-          <Card className="border-slate-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Өгөгдөл оруулах</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {profiles.length === 0 ? (
-                <div className="py-8 text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Эхлэхийн тулд үнэлгээ хийх шаардлагатай.
-                  </p>
-                  <Button onClick={() => { setActiveTab("assessment"); setAssessStep("info"); }}>
-                    Үнэлгээ хийх →
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {/* Profile selector */}
-                  {profiles.length > 1 && (
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Профайл</Label>
-                      <select
-                        aria-label="Профайл сонгох"
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={selectedProfileId}
-                        onChange={(e) => {
-                          setSelectedProfileId(e.target.value);
-                          setCalcResult(null);
-                          setRemedyResult(null);
-                        }}
-                      >
-                        {profiles.map((p) => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Profile summary */}
-                  {selectedProfile && (
-                    <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-slate-800">{selectedProfile.name}</p>
-                          <p className="text-xs text-slate-500">
-                            {RELATIONSHIP_LABELS[selectedProfile.relationship] ?? selectedProfile.relationship}
-                          </p>
-                        </div>
-                        {selectedProfile.doshaType && (
-                          <Badge variant="secondary" className="text-xs">
-                            {selectedProfile.doshaType.replace(/_/g, "-")}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 text-sm">
-                        {[
-                          ["Нас", `${calcAge(selectedProfile.birthDate)} нас`],
-                          ["Өндөр", `${selectedProfile.heightCm} см`],
-                          ["Kt", selectedProfile.ktScore?.toFixed(2) ?? "—"],
-                        ].map(([label, value]) => (
-                          <div key={label} className="bg-white rounded-lg p-2 text-center border border-slate-100">
-                            <p className="text-[10px] text-muted-foreground">{label}</p>
-                            <p className="font-semibold text-slate-700 text-sm">{value}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveTab("assessment");
-                          startAssessment(selectedProfile.id);
-                        }}
-                        className="text-xs text-blue-500 hover:text-blue-700 hover:underline underline-offset-2"
-                      >
-                        Үнэлгээ дахин хийх
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Weight */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      Одоогийн жин (кг)
-                    </Label>
-                    <Input
-                      type="number"
-                      value={weightKg}
-                      onChange={(e) => setWeightKg(e.target.value)}
-                      placeholder="70"
-                      min="20"
-                      max="300"
-                      className="border-slate-200 focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  {/* Season */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Улирал</Label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {SEASONS.map(({ key, icon }) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => setSeason(key)}
-                          className={`flex flex-col items-center gap-1 border rounded-xl p-2.5 text-xs font-semibold transition-all ${
-                            season === key
-                              ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm"
-                              : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
-                          }`}
-                        >
-                          <span className="text-lg leading-none">{icon}</span>
-                          <span>{SEASON_LABELS[key].mn}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      Тэмдэглэл <span className="text-slate-300 font-normal">(заавал биш)</span>
-                    </Label>
-                    <Input
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Нэмэлт тэмдэглэл..."
-                      className="border-slate-200"
-                    />
-                  </div>
-
-                  <Button
-                    className="w-full h-11 font-semibold"
-                    disabled={!weightKg || !selectedProfile?.ktScore}
-                    onClick={handleCalculate}
-                  >
-                    Тооцоолох
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Result column */}
-          <div className="space-y-4">
-            {calcResult && selectedProfile?.doshaType ? (
-              <>
-                <Card className="border-slate-200">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Үр дүн</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center gap-4">
-                    <DoshaRadar
-                      doshaKey={selectedProfile.doshaType as DoshaKey}
-                      deviation={calcResult.deviation}
-                      size={300}
-                    />
-                    <div className="grid grid-cols-2 gap-3 w-full">
-                      <div className="bg-slate-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-muted-foreground mb-1">BEDI индекс</p>
-                        <p className="text-2xl font-bold text-slate-800">{calcResult.bedi}</p>
-                      </div>
-                      <div className="bg-slate-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-muted-foreground mb-1">Хазайлт (Δ)</p>
-                        <p className={`text-2xl font-bold ${
-                          calcResult.deviation < -0.3 ? "text-blue-500"
-                          : calcResult.deviation > 0.3 ? "text-red-500"
-                          : "text-emerald-500"
-                        }`}>
-                          {calcResult.deviation >= 0 ? "+" : ""}{calcResult.deviation}
-                        </p>
-                      </div>
-                    </div>
-                    <Button className="w-full" variant="outline" onClick={handleSaveBEDI} disabled={saving}>
-                      {saving ? "Хадгалж байна..." : "Үр дүн хадгалах"}
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {remedyResult && (
-                  <RemedyPanel status={calcResult.status} remedyResult={remedyResult} />
-                )}
-              </>
-            ) : (
-              <Card className="h-64 flex items-center justify-center border-dashed border-slate-200">
-                <CardContent className="text-center text-muted-foreground space-y-2">
-                  <p className="text-3xl">🎯</p>
-                  <p className="text-sm">Жингээ оруулаад</p>
-                  <p className="font-semibold text-slate-600">"Тооцоолох" дарна уу</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════════
-          ҮНЭЛГЭЭ TAB
-      ══════════════════════════════════════════════════════════════════ */}
-      {activeTab === "assessment" && (
-        <div className="max-w-2xl space-y-5">
-
-          {/* ── Step: profile-select ── */}
-          {assessStep === "profile-select" && (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground font-medium">Хэний үнэлгээ хийх вэ?</p>
-
-              <div className="grid gap-3">
-                {profiles.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => startAssessment(p.id)}
-                    className="flex items-center justify-between border border-slate-200 rounded-xl p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
-                  >
-                    <div>
-                      <p className="font-semibold text-slate-800">{p.name}</p>
-                      <p className="text-xs text-slate-500">
-                        {RELATIONSHIP_LABELS[p.relationship] ?? p.relationship}
-                        {p.doshaType && ` · ${p.doshaType.replace(/_/g, "-")} · Kt ${p.ktScore?.toFixed(2)}`}
-                      </p>
-                    </div>
-                    <span className="text-blue-500 text-sm font-medium">Дахин хийх →</span>
-                  </button>
-                ))}
-
+        {/* ── Горизонтал шидтэн алхамууд ── */}
+        <div className="flex items-center gap-1 mb-5 overflow-x-auto pb-0.5">
+          {WIZARD_STEPS.map((step, i) => {
+            const isActive = activeWizardStep === i;
+            const isDone = activeWizardStep > i;
+            const isClickable = i === 0 || (i === 1 && profiles.length > 0);
+            return (
+              <div key={i} className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => startAssessment("__new__")}
-                  className="flex items-center gap-3 border-2 border-dashed border-slate-300 rounded-xl p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                  disabled={!isClickable}
+                  onClick={() => {
+                    if (i === 0) {
+                      setCalcResult(null); setRemedyResult(null);
+                      setActiveTab("assessment");
+                      setAssessStep(profiles.length > 0 ? "profile-select" : "info");
+                    } else if (i === 1 && profiles.length > 0) {
+                      setActiveTab("calc"); setCalcResult(null); setRemedyResult(null);
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                    isActive
+                      ? "bg-primary text-on-primary shadow-sm"
+                      : isDone
+                      ? "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+                      : isClickable
+                      ? "bg-surface-container text-on-surface-variant/60 hover:bg-surface-container-high"
+                      : "bg-surface-container text-on-surface-variant/25 cursor-default"
+                  }`}
                 >
-                  <span className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg font-bold">+</span>
-                  <div>
-                    <p className="font-semibold text-slate-700">Шинэ профайл</p>
-                    <p className="text-xs text-slate-400">Шинэ хүний мэдээлэл + үнэлгээ</p>
-                  </div>
+                  <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${
+                    isActive ? "bg-on-primary/20 text-on-primary"
+                    : isDone ? "bg-primary/15 text-primary"
+                    : "border border-current/30"
+                  }`}>
+                    {isDone ? "✓" : i + 1}
+                  </span>
+                  <span className="hidden sm:inline">{step.label}</span>
                 </button>
+                {i < WIZARD_STEPS.length - 1 && (
+                  <div className={`h-px w-5 shrink-0 ${isDone ? "bg-primary/30" : "bg-outline-variant/20"}`} />
+                )}
               </div>
-            </div>
-          )}
+            );
+          })}
+        </div>
 
-          {/* ── Step: info (new profile only) ── */}
-          {assessStep === "info" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Хувийн мэдээлэл</CardTitle>
-                <CardDescription>Нэг л удаа оруулна — дараа нь автоматаар ашиглагдана</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Нэр</Label>
-                  <Input
-                    value={profileForm.name}
-                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                    placeholder="Таны нэр"
+        {/* Page header */}
+        <div className="mb-6">
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full uppercase tracking-wider mb-3">
+            <span>⚕</span>
+            <span>BEDI Protocol v2.4</span>
+          </div>
+          <h1 className="font-headline text-3xl font-black text-on-surface tracking-tight">
+            {stepMeta.title}
+          </h1>
+          <p className="text-on-surface-variant text-sm mt-2 max-w-lg leading-relaxed">
+            {stepMeta.subtitle}
+          </p>
+
+          {activeTab === "assessment" && assessStep === "questions" && (
+            <>
+              <div className="flex items-center justify-between mt-4 mb-2">
+                <span className="text-xs font-semibold text-on-surface-variant">
+                  {currentQ + 1} / {QUESTIONNAIRE.length} асуулт
+                </span>
+                <span className="text-xs font-semibold text-primary">{progress}%</span>
+              </div>
+              <div className="flex gap-1">
+                {Array.from({ length: 10 }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`flex-1 h-1.5 rounded-full transition-colors duration-300 ${
+                      i < Math.round(progress / 10)
+                        ? "bg-primary"
+                        : "bg-surface-container-high"
+                    }`}
                   />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════
+            ASSESSMENT CONTENT
+        ══════════════════════════════════════════════════════════════ */}
+        {activeTab === "assessment" && (
+          <div className="max-w-xl space-y-5">
+
+            {/* Profile select */}
+            {assessStep === "profile-select" && (
+              <div className="space-y-3">
+                <p className="text-sm text-on-surface-variant font-medium">Хэний үнэлгээ хийх вэ?</p>
+                <div className="grid gap-3">
+                  {profiles.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => startAssessment(p.id)}
+                      className="flex items-center justify-between bg-surface-container-low rounded-2xl p-4 hover:bg-surface-container transition-colors text-left"
+                    >
+                      <div>
+                        <p className="font-semibold text-on-surface">{p.name}</p>
+                        <p className="text-xs text-on-surface-variant">
+                          {RELATIONSHIP_LABELS[p.relationship] ?? p.relationship}
+                          {p.doshaType && ` · ${p.doshaType.replace(/_/g, "-")} · Kt ${p.ktScore?.toFixed(2)}`}
+                        </p>
+                      </div>
+                      <span className="text-primary text-sm font-medium">Дахин хийх →</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => startAssessment("__new__")}
+                    className="flex items-center gap-3 bg-surface-container-low rounded-2xl p-4 hover:bg-surface-container transition-colors border-2 border-dashed border-outline-variant"
+                  >
+                    <span className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-bold">+</span>
+                    <div>
+                      <p className="font-semibold text-on-surface">Шинэ профайл</p>
+                      <p className="text-xs text-on-surface-variant">Шинэ хүний мэдээлэл + үнэлгээ</p>
+                    </div>
+                  </button>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Төрсөн огноо</Label>
-                  <Input
-                    type="date"
-                    value={profileForm.birthDate}
-                    onChange={(e) => setProfileForm({ ...profileForm, birthDate: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Хүйс</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[{ value: "MALE", label: "Эрэгтэй" }, { value: "FEMALE", label: "Эмэгтэй" }].map(
-                      ({ value, label }) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setProfileForm({ ...profileForm, sex: value as "MALE" | "FEMALE" })}
-                          className={`border rounded-lg p-3 text-sm transition-colors ${
-                            profileForm.sex === value
-                              ? "border-blue-500 bg-blue-50 font-semibold text-blue-700"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      )
-                    )}
+              </div>
+            )}
+
+            {/* Profile info form */}
+            {assessStep === "info" && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Нэр</Label>
+                    <Input
+                      value={profileForm.name}
+                      onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                      placeholder="Таны нэр"
+                      className="bg-surface-container-low border-none h-12 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Төрсөн огноо</Label>
+                    <Input
+                      type="date"
+                      value={profileForm.birthDate}
+                      onChange={(e) => setProfileForm({ ...profileForm, birthDate: e.target.value })}
+                      className="bg-surface-container-low border-none h-12 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Өндөр (см)</Label>
+                    <Input
+                      type="number"
+                      value={profileForm.heightCm}
+                      onChange={(e) => setProfileForm({ ...profileForm, heightCm: e.target.value })}
+                      placeholder="170"
+                      min="100" max="250"
+                      className="bg-surface-container-low border-none h-12 rounded-xl"
+                    />
                   </div>
                 </div>
+
                 <div className="space-y-1.5">
-                  <Label>Өндөр (см)</Label>
-                  <Input
-                    type="number"
-                    value={profileForm.heightCm}
-                    onChange={(e) => setProfileForm({ ...profileForm, heightCm: e.target.value })}
-                    placeholder="170"
-                    min="100"
-                    max="250"
-                  />
+                  <Label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Хүйс</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: "MALE", label: "Эрэгтэй", icon: "♂" },
+                      { value: "FEMALE", label: "Эмэгтэй", icon: "♀" },
+                    ].map(({ value, label, icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setProfileForm({ ...profileForm, sex: value as "MALE" | "FEMALE" })}
+                        className={`rounded-full py-3 text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                          profileForm.sex === value
+                            ? "bg-primary text-on-primary shadow-lg shadow-primary/20"
+                            : "bg-surface-container-high text-on-surface"
+                        }`}
+                      >
+                        <span>{icon}</span>{label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
                 <div className="space-y-1.5">
-                  <Label>Хамаарал</Label>
+                  <Label className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Хамаарал</Label>
                   <select
                     aria-label="Хамаарал сонгох"
-                    className="w-full border rounded-md px-3 py-2 text-sm bg-white"
+                    className="w-full bg-surface-container-low border-none h-12 rounded-xl px-4 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
                     value={profileForm.relationship}
                     onChange={(e) => setProfileForm({ ...profileForm, relationship: e.target.value })}
                   >
@@ -623,177 +543,665 @@ function CalculatorInner() {
                     ))}
                   </select>
                 </div>
-                <div className="flex gap-3">
+
+                <div className="flex gap-3 pt-1">
                   {profiles.length > 0 && (
-                    <Button variant="outline" onClick={resetAssessment} className="flex-1">
-                      ← Буцах
-                    </Button>
+                    <Button variant="outline" onClick={resetAssessment} className="flex-1 h-12">← Буцах</Button>
                   )}
                   <Button
-                    className="flex-1 h-11 font-semibold"
+                    className="flex-1 h-12 font-bold"
                     disabled={!profileForm.name || !profileForm.birthDate || !profileForm.heightCm}
                     onClick={() => setAssessStep("questions")}
                   >
-                    Асуултуудыг эхлүүлэх →
+                    Асуулт эхлүүлэх →
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* ── Step: questions ── */}
-          {assessStep === "questions" && (
-            <div className="space-y-4">
-              {/* Progress bar */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-700">
-                    {currentQ + 1} / {QUESTIONNAIRE.length} — {q.category}
-                  </span>
-                  <span className="text-slate-400">{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
               </div>
+            )}
 
-              <Card>
-                <CardHeader>
-                  <CardDescription className="text-xs font-semibold text-blue-500 uppercase tracking-wider">
-                    {q.category}
-                  </CardDescription>
-                  <CardTitle className="text-lg leading-snug mt-1">{q.question}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {q.options.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => handleAnswer(opt.value)}
-                      className={`w-full text-left border-2 rounded-xl p-4 transition-all hover:shadow-sm group ${DOSHA_BG[opt.value]} border-transparent hover:border-current`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className={`mt-0.5 shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-black ${
-                          opt.value === "H" ? "border-blue-400 text-blue-600 bg-blue-100"
-                          : opt.value === "S" ? "border-amber-400 text-amber-600 bg-amber-100"
-                          : "border-purple-400 text-purple-600 bg-purple-100"
-                        }`}>
-                          {opt.value === "H" ? "Х" : opt.value === "S" ? "Ш" : "Б"}
+            {/* Questions */}
+            {assessStep === "questions" && (
+              <div className="space-y-4">
+                <div className="bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
+                  <div className="bg-surface-container-low px-6 py-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                          {q.category}
                         </span>
-                        <div>
-                          <p className={`font-semibold text-sm ${DOSHA_COLOR[opt.value]}`}>{opt.label}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{opt.hint}</p>
-                        </div>
+                        <h2 className="font-headline text-xl font-bold text-on-surface leading-snug mt-3">
+                          {q.question}
+                        </h2>
                       </div>
-                    </button>
-                  ))}
-
-                  {currentQ > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentQ(currentQ - 1)}
-                      className="mt-1"
-                    >
-                      ← Өмнөх асуулт
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Category mini-map */}
-              <div className="flex gap-1 flex-wrap">
-                {CATEGORIES.map((cat, i) => {
-                  const catQuestions = QUESTIONNAIRE.filter((q) => q.category === cat);
-                  const firstIdx = QUESTIONNAIRE.findIndex((q) => q.category === cat);
-                  const done = catQuestions.every((q) => answers[q.id]);
-                  const active = cat === q.category;
-                  return (
-                    <span
-                      key={i}
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                        done ? "bg-emerald-100 text-emerald-700"
-                        : active ? "bg-blue-100 text-blue-700"
-                        : "bg-slate-100 text-slate-400"
-                      }`}
-                    >
-                      {cat}
-                    </span>
-                  );
-                  void firstIdx;
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── Step: result ── */}
-          {assessStep === "result" && ktResult && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Үнэлгээний үр дүн</CardTitle>
-                  <CardDescription>
-                    {assessProfileId === "__new__"
-                      ? "Профайл хадгалаад тооцоолол руу шилжинэ"
-                      : "Профайлын Kt шинэчлэгдэнэ"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Score bars */}
-                  <div className="space-y-3">
-                    {[
-                      { key: "H" as DominantType, label: "Хий (Салхи)", color: "bg-blue-400" },
-                      { key: "S" as DominantType, label: "Шар (Гал)", color: "bg-amber-400" },
-                      { key: "B" as DominantType, label: "Бадган (Газар)", color: "bg-purple-400" },
-                    ].map(({ key, label, color }) => {
-                      const score = ktResult.scores[key];
-                      const pct = Math.round((score / QUESTIONNAIRE.length) * 100);
-                      return (
-                        <div key={key} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span className={`font-semibold ${DOSHA_COLOR[key]}`}>{label}</span>
-                            <span className="font-bold">{score} оноо</span>
+                      {currentQ > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setCurrentQ(currentQ - 1)}
+                          className="shrink-0 text-xs font-medium text-on-surface-variant hover:text-primary transition-colors"
+                        >
+                          ← Буцах
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="px-6 py-5 space-y-3">
+                    {q.options.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => handleAnswer(opt.value)}
+                        className={`w-full text-left rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-ambient group ${DOSHA_BG[opt.value]}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-black text-sm bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}>
+                            {opt.value === "H" ? "Х" : opt.value === "S" ? "Ш" : "Б"}
                           </div>
-                          <Progress value={pct} className={`h-3 [&>div]:${color}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-bold text-sm ${DOSHA_COLOR[opt.value]}`}>{opt.label}</p>
+                            <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">{opt.hint}</p>
+                          </div>
+                          <span className={`shrink-0 text-base opacity-0 group-hover:opacity-100 transition-opacity ${DOSHA_COLOR[opt.value]}`}>→</span>
                         </div>
-                      );
-                    })}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Category mini-map */}
+                <div className="flex gap-1.5 flex-wrap">
+                  {CATEGORIES.map((cat, i) => {
+                    const catQuestions = QUESTIONNAIRE.filter((cq) => cq.category === cat);
+                    const done = catQuestions.every((cq) => answers[cq.id]);
+                    const active = cat === q.category;
+                    return (
+                      <span
+                        key={i}
+                        className={`flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-full font-medium ${
+                          done ? "bg-primary/10 text-primary"
+                          : active ? "bg-surface-container-high text-on-surface font-bold"
+                          : "bg-surface-container text-on-surface-variant"
+                        }`}
+                      >
+                        {done && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                        {active && !done && <span className="w-1.5 h-1.5 rounded-full bg-on-surface-variant" />}
+                        {cat}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Assessment result */}
+            {assessStep === "result" && ktResult && (
+              <div className="space-y-4">
+                <div className="bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
+                  <div className="bg-surface-container-low px-6 py-5">
+                    <h2 className="font-headline font-bold text-on-surface">Үнэлгээний үр дүн</h2>
+                    <p className="text-on-surface-variant text-sm mt-0.5">
+                      {assessProfileId === "__new__"
+                        ? "Профайл хадгалаад тооцоолол руу шилжинэ"
+                        : "Профайлын Kt шинэчлэгдэнэ"}
+                    </p>
+                  </div>
+                  <div className="px-6 py-5 space-y-4">
+                    <div className="space-y-3">
+                      {[
+                        { key: "H" as DominantType, label: "Хий (Салхи)", color: "bg-primary" },
+                        { key: "S" as DominantType, label: "Шар (Гал)", color: "bg-secondary-container" },
+                        { key: "B" as DominantType, label: "Бадган (Газар)", color: "bg-tertiary-container" },
+                      ].map(({ key, label, color }) => {
+                        const score = ktResult.scores[key];
+                        const pct = Math.round((score / QUESTIONNAIRE.length) * 100);
+                        return (
+                          <div key={key} className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span className={`font-semibold ${DOSHA_COLOR[key]}`}>{label}</span>
+                              <span className="font-bold text-on-surface">{score} оноо</span>
+                            </div>
+                            <Progress value={pct} className={`h-3 [&>div]:${color}`} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="bg-surface-container-low rounded-2xl p-4 text-center">
+                      <p className="text-xs text-on-surface-variant mb-1">Тогтоогдсон Kt коэффициент</p>
+                      <p className="font-headline text-4xl font-black text-on-surface">{ktResult.kt}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <DoshaCard doshaKey={ktResult.doshaKey} kt={ktResult.kt} />
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setCurrentQ(0); setAnswers({}); setAssessStep("questions"); }}
+                    className="flex-1"
+                  >
+                    Дахин хийх
+                  </Button>
+                  <Button
+                    onClick={handleSaveAssessment}
+                    disabled={savingAssessment}
+                    className="flex-1 h-11 font-semibold"
+                  >
+                    {savingAssessment ? "Хадгалж байна..." : "Хадгалаад тооцоолол хийх →"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════
+            PHYSICAL METRICS INPUT
+        ══════════════════════════════════════════════════════════════ */}
+        {activeTab === "calc" && !calcResult && (
+          <div className="max-w-xl space-y-6">
+
+            {profiles.length === 0 ? (
+              <div className="bg-surface-container-lowest rounded-3xl p-10 text-center shadow-ambient">
+                <p className="text-4xl mb-4">🌀</p>
+                <p className="text-on-surface-variant mb-5 text-sm">Эхлэхийн тулд доша үнэлгээ хийх шаардлагатай.</p>
+                <Button onClick={() => { setActiveTab("assessment"); setAssessStep("info"); }}>
+                  Үнэлгээ хийх →
+                </Button>
+              </div>
+            ) : (
+              <>
+                {/* Profile selector pills */}
+                {profiles.length > 1 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {profiles.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => { setSelectedProfileId(p.id); setCalcResult(null); setRemedyResult(null); }}
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                          selectedProfileId === p.id
+                            ? "bg-primary text-on-primary"
+                            : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+                        }`}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* 3-column metrics row */}
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Өндөр — профайлаас */}
+                  <div>
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">
+                      Өндөр (СМ)
+                    </p>
+                    <div className="h-14 bg-surface-container rounded-xl flex items-center justify-center font-headline text-xl font-bold text-on-surface-variant/70">
+                      {selectedProfile?.heightCm ?? "—"}
+                    </div>
                   </div>
 
-                  <div className="bg-slate-50 rounded-xl p-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Тогтоогдсон Kt коэффициент</p>
-                    <p className="text-4xl font-black text-slate-800">{ktResult.kt}</p>
+                  {/* Жин — оруулах */}
+                  <div>
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">
+                      Жин (КГ)
+                    </p>
+                    <Input
+                      type="number"
+                      value={weightKg}
+                      onChange={(e) => setWeightKg(e.target.value)}
+                      placeholder="70"
+                      min="20"
+                      max="300"
+                      className="h-14 rounded-xl text-center font-headline text-xl font-bold bg-surface-container-low border-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    />
                   </div>
-                </CardContent>
-              </Card>
 
-              <DoshaCard doshaKey={ktResult.doshaKey} kt={ktResult.kt} />
+                  {/* Нас — профайлаас */}
+                  <div>
+                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">
+                      Нас
+                    </p>
+                    <div className="h-14 bg-surface-container rounded-xl flex items-center justify-center font-headline text-xl font-bold text-on-surface-variant/70">
+                      {selectedProfile ? calcAge(selectedProfile.birthDate) : "—"}
+                    </div>
+                  </div>
+                </div>
 
+                {/* Хүйс */}
+                <div>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">
+                    Хүйс
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: "MALE",   label: "Эрэгтэй", icon: "♂" },
+                      { value: "FEMALE", label: "Эмэгтэй", icon: "♀" },
+                    ].map(({ value, label, icon }) => (
+                      <div
+                        key={value}
+                        className={`flex items-center justify-center gap-2 h-12 rounded-full font-semibold text-sm transition-all ${
+                          selectedProfile?.sex === value
+                            ? "bg-primary text-on-primary shadow-lg shadow-primary/20"
+                            : "bg-surface-container-low text-on-surface-variant"
+                        }`}
+                      >
+                        <span className="text-base">{icon}</span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Улирал */}
+                <div>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">
+                    Одоогийн Улирал
+                  </p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {SEASONS.map(({ key, icon }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSeason(key)}
+                        className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all group ${
+                          season === key
+                            ? "bg-surface-container-lowest ring-2 ring-primary shadow-ambient text-primary"
+                            : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-primary"
+                        }`}
+                      >
+                        <span className={`text-2xl leading-none transition-transform duration-200 ${season !== key ? "group-hover:scale-110" : ""}`}>
+                          {icon}
+                        </span>
+                        <span className="text-xs font-bold">{SEASON_LABELS[key].mn}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Тэмдэглэл */}
+                <div>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                    Тэмдэглэл <span className="normal-case font-normal text-on-surface-variant/50">(заавал биш)</span>
+                  </Label>
+                  <Input
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Нэмэлт тэмдэглэл..."
+                    className="mt-2 bg-surface-container-low border-none h-11 rounded-xl"
+                  />
+                </div>
+
+                {/* Calculate button */}
+                <Button
+                  className="w-full h-14 font-extrabold text-base shadow-2xl shadow-primary/30 hover:scale-[1.01] active:scale-95 transition-all gap-2"
+                  disabled={!weightKg || !selectedProfile?.ktScore}
+                  onClick={handleCalculate}
+                >
+                  <span className="material-symbols-outlined text-[20px] icon-filled">analytics</span>
+                  BEDI Тооцоолох
+                </Button>
+
+                {/* Assessment re-do link */}
+                {selectedProfile && (
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTab("assessment"); startAssessment(selectedProfile.id); }}
+                    className="w-full text-xs text-primary hover:underline underline-offset-2 text-center"
+                  >
+                    Үнэлгээ дахин хийх
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════
+            ҮР ДҮН
+        ══════════════════════════════════════════════════════════════ */}
+        {activeTab === "calc" && calcResult && selectedProfile && (() => {
+          const isExcess = calcResult.status === "shar_badgan_excess";
+          const isBalanced = calcResult.status === "balanced";
+          const statusLabel = isBalanced ? "Тэнцвэртэй"
+            : calcResult.status === "khii_excess" ? "Хий арвидсан"
+            : "Шар/Бадган арвидсан";
+          const statusColor = isExcess ? "text-secondary" : "text-primary";
+          const statusBg    = isExcess ? "bg-secondary/6 border-secondary/20" : "bg-primary/6 border-primary/20";
+          const statusBadge = isExcess ? "bg-secondary/15 text-secondary" : "bg-primary/15 text-primary";
+          const statusDot   = isExcess ? "bg-secondary" : "bg-primary";
+          const deviationExplanation = isBalanced
+            ? "Таны гурван доша тэнцвэртэй байна. Одоогийн амьдралын хэв маягаа хадгалаарай."
+            : calcResult.status === "khii_excess"
+            ? "Хий (Вата) доша арвидсан байна. Дулаан хоол, амрах горим болон дулааны дасгалуудыг нэмнэ үү."
+            : "Шар (Питта) эсвэл Бадган (Капха) давамгайлж байна. Хөнгөн хоол, хүйтэн биш дасгал хэрэгтэй.";
+
+          return (
+            <div className="max-w-xl space-y-4">
+
+              {/* ── Хиро статус карт ── */}
+              <div className={`relative overflow-hidden rounded-3xl px-7 py-6 border ${statusBg}`}>
+                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-[0.04] bg-current pointer-events-none" />
+
+                {/* Статус ба BEDI индекс */}
+                <div className="flex items-start justify-between gap-5 flex-wrap mb-5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60 mb-2">
+                      BEDI тооцооллын үр дүн
+                    </p>
+                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold mb-4 ${statusBadge}`}>
+                      <span className={`w-2 h-2 rounded-full animate-pulse ${statusDot}`} />
+                      {statusLabel}
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className={`font-headline text-5xl font-black ${statusColor}`}>{calcResult.bedi}</span>
+                      <span className="text-sm text-on-surface-variant font-medium">BEDI индекс</span>
+                    </div>
+                  </div>
+
+                  {/* Доша зөрүү */}
+                  <div className="bg-surface-container-lowest/80 rounded-2xl px-5 py-4 text-center shrink-0">
+                    <p className="text-[10px] text-on-surface-variant uppercase tracking-wide font-semibold mb-1">
+                      Доша зөрүү
+                    </p>
+                    <p className={`font-headline text-3xl font-black ${
+                      calcResult.deviation > 0.3 ? "text-secondary"
+                      : calcResult.deviation < -0.3 ? "text-primary"
+                      : "text-on-surface"
+                    }`}>
+                      {calcResult.deviation >= 0 ? "+" : ""}{calcResult.deviation}
+                    </p>
+                    <p className="text-[10px] text-on-surface-variant mt-1">
+                      {calcResult.deviation < -0.3 ? "Хий давамгай"
+                       : calcResult.deviation > 0.3 ? "Шар/Бадган давамгай"
+                       : "Тэнцвэртэй"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Тайлбар */}
+                <div className="pt-4 border-t border-current/10">
+                  <p className="text-sm text-on-surface leading-relaxed">{deviationExplanation}</p>
+                </div>
+              </div>
+
+              {/* ── Радар график ── */}
+              {selectedProfile.doshaType && (
+                <div className="bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
+                  <div className="bg-surface-container-low px-6 py-4 border-b border-surface-container-high flex items-center justify-between">
+                    <div>
+                      <h2 className="font-headline font-bold text-on-surface text-sm">Доша Харьцааны График</h2>
+                      <p className="text-[11px] text-on-surface-variant mt-0.5">
+                        Цагаан — үндсэн доша &nbsp;·&nbsp; Улаан — өнөөгийн байдал
+                      </p>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold ${statusBadge}`}>
+                      {selectedProfile.doshaType.replace(/_/g, " · ")}
+                    </div>
+                  </div>
+                  <div className="px-6 py-5 flex justify-center">
+                    <DoshaRadar
+                      doshaKey={selectedProfile.doshaType as DoshaKey}
+                      deviation={calcResult.deviation}
+                      size={280}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ── Хэмжилтийн дэлгэрэнгүй ── */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Нас", value: `${calcAge(selectedProfile.birthDate)}`, sub: "жил" },
+                  { label: "Жин", value: weightKg, sub: "кг" },
+                  { label: "Өндөр", value: `${selectedProfile.heightCm}`, sub: "см" },
+                ].map(({ label, value, sub }) => (
+                  <div key={label} className="bg-surface-container-lowest rounded-2xl shadow-ambient p-3 text-center">
+                    <p className="text-[10px] text-on-surface-variant uppercase tracking-wide font-semibold mb-1">{label}</p>
+                    <p className="font-headline text-xl font-bold text-on-surface">{value}</p>
+                    <p className="text-[10px] text-on-surface-variant">{sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Товчнууд ── */}
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => { setCurrentQ(0); setAnswers({}); setAssessStep("questions"); }}
                   className="flex-1"
+                  onClick={() => { setCalcResult(null); setRemedyResult(null); }}
                 >
-                  Дахин хийх
+                  <span className="material-symbols-outlined text-[16px] mr-1.5">arrow_back</span>
+                  Дахин тооцоолох
                 </Button>
-                <Button
-                  onClick={handleSaveAssessment}
-                  disabled={savingAssessment}
-                  className="flex-1 h-11 font-semibold"
-                >
-                  {savingAssessment ? "Хадгалж байна..." : "Хадгалаад тооцоолол хийх →"}
+                <Button className="flex-1" onClick={handleSaveBEDI} disabled={saving}>
+                  <span className="material-symbols-outlined text-[16px] mr-1.5">save</span>
+                  {saving ? "Хадгалж байна..." : "Хадгалах"}
                 </Button>
               </div>
+
+              {remedyResult && (
+                <RemedyPanel status={calcResult.status} remedyResult={remedyResult} />
+              )}
             </div>
-          )}
+          );
+        })()}
+      </main>
+
+      {/* ── RIGHT: Dynamic helper panel ─────────────────────────────── */}
+      <aside className="hidden xl:block w-64 shrink-0">
+        <div className="sticky top-28">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-ambient overflow-hidden">
+
+            {/* Constitution helper — calc input */}
+            {activeTab === "calc" && !calcResult && (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-primary">psychology</span>
+                  </div>
+                  <h3 className="font-headline font-bold text-on-surface text-sm">Биеийн Бүтцийн Лавлах</h3>
+                </div>
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                  Үндсэн биеийн бүтцийг тодорхойлоход туслах лавлагаа.
+                </p>
+                <div className="space-y-2.5">
+                  {CONSTITUTION_CARDS.map(({ title, desc, bg, text, dot }) => (
+                    <div key={title} className={`rounded-xl p-3 ${bg}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${dot}`} />
+                        <p className={`font-bold text-xs ${text}`}>{title}</p>
+                      </div>
+                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* BEDI result guide */}
+            {activeTab === "calc" && calcResult && (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-primary">monitoring</span>
+                  </div>
+                  <h3 className="font-headline font-bold text-on-surface text-sm">BEDI Утгыг Ойлгох</h3>
+                </div>
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                  Доша зөрүү нь таны тэнцвэрийн өнөөгийн байдлыг харуулна.
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    { dot: "bg-primary", label: "Хий арвидсан", body: "Хий (Вата) давамгайлж байна. Дулаан хоол, амрах горим шаардлагатай.", active: calcResult.deviation < -0.3 },
+                    { dot: "bg-surface-container-high", label: "Тэнцвэртэй", body: "Гурван доша тэнцвэртэй. Одоогийн хэв маягаа хадгалаарай.", active: calcResult.deviation >= -0.3 && calcResult.deviation <= 0.3 },
+                    { dot: "bg-secondary-container", label: "Шар/Бадган арвидсан", body: "Шар/Бадган давамгайлж байна. Хөнгөн хоол, хөргөх дасгал.", active: calcResult.deviation > 0.3 },
+                  ].map(({ dot, label, body, active }) => (
+                    <div key={label} className={`rounded-xl p-3 transition-all ${active ? "bg-primary/8 ring-1 ring-primary/20" : "bg-surface-container-low"}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${dot}`} />
+                        <p className={`font-bold text-xs ${active ? "text-primary" : "text-on-surface"}`}>{label}</p>
+                        {active && <span className="ml-auto text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">Одоо</span>}
+                      </div>
+                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Assessment: dosha intro */}
+            {activeTab === "assessment" && assessStep === "profile-select" && (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-tertiary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-tertiary">auto_awesome</span>
+                  </div>
+                  <h3 className="font-headline font-bold text-on-surface text-sm">Гурван Доша</h3>
+                </div>
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                  Таны бие гурван доша-ийн хослолоос бүрдэнэ. Үнэлгээ тус тусын харьцааг тогтооно.
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    { dot: "bg-primary", text: "text-primary", label: "Хий (Vata)", body: "Салхи + эфир. Уян хатан, хурдан, бодол сэтгэлгээт." },
+                    { dot: "bg-secondary-container", text: "text-secondary", label: "Шар (Pitta)", body: "Гал + ус. Хурц оюун, лидер, шийдэмгий." },
+                    { dot: "bg-tertiary-container", text: "text-tertiary", label: "Бадган (Kapha)", body: "Газар + ус. Тэвчээртэй, бат бөх, хайрлах зан." },
+                  ].map(({ dot, text, label, body }) => (
+                    <div key={label} className="rounded-xl p-3 bg-surface-container-low">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${dot}`} />
+                        <p className={`font-bold text-xs ${text}`}>{label}</p>
+                      </div>
+                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Assessment: info form guide */}
+            {activeTab === "assessment" && assessStep === "info" && (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-secondary">info</span>
+                  </div>
+                  <h3 className="font-headline font-bold text-on-surface text-sm">Яагаад Шаардлагатай?</h3>
+                </div>
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                  Эдгээр мэдээлэл BEDI индексийг нарийвчлан тооцоолоход ашиглагдана.
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    { dot: "bg-primary", text: "text-primary", label: "Өндөр & жин", body: "BMI-тэй холбоотой BEDI хувиргалтыг тохируулна." },
+                    { dot: "bg-secondary-container", text: "text-secondary", label: "Нас", body: "Насны коэффициент биологийн базелайнд нөлөөлнө." },
+                    { dot: "bg-tertiary-container", text: "text-tertiary", label: "Хүйс", body: "Биологийн хүйс физиологийн суурь утгыг тодорхойлно." },
+                  ].map(({ dot, text, label, body }) => (
+                    <div key={label} className="rounded-xl p-3 bg-surface-container-low">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${dot}`} />
+                        <p className={`font-bold text-xs ${text}`}>{label}</p>
+                      </div>
+                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Assessment: questions guide */}
+            {activeTab === "assessment" && assessStep === "questions" && q && (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-primary">help</span>
+                  </div>
+                  <h3 className="font-headline font-bold text-on-surface text-sm">{q.category}</h3>
+                </div>
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                  Байгалийн мөн чанартаа тулгуурлан хариулаарай — өнөөгийн биш, угийн байдлаараа.
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    { dot: "bg-primary", text: "text-primary", label: "Хий (H) хариулт", body: "Хөнгөн, уян, хувьсамтгай шинжийг илэрхийлнэ." },
+                    { dot: "bg-secondary-container", text: "text-secondary", label: "Шар (S) хариулт", body: "Хурц, дулаан, шийдэмгий шинжийг илэрхийлнэ." },
+                    { dot: "bg-tertiary-container", text: "text-tertiary", label: "Бадган (B) хариулт", body: "Тогтвортой, хүнд, тайван шинжийг илэрхийлнэ." },
+                  ].map(({ dot, text, label, body }) => (
+                    <div key={label} className="rounded-xl p-3 bg-surface-container-low">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${dot}`} />
+                        <p className={`font-bold text-xs ${text}`}>{label}</p>
+                      </div>
+                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-outline-variant/15">
+                  <p className="text-[10px] text-on-surface-variant/60">
+                    Асуулт {currentQ + 1} / {QUESTIONNAIRE.length}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Assessment: result / Kt guide */}
+            {activeTab === "assessment" && assessStep === "result" && (
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-lg bg-tertiary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-tertiary">biotech</span>
+                  </div>
+                  <h3 className="font-headline font-bold text-on-surface text-sm">Kt Коэффициент</h3>
+                </div>
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                  Kt нь таны доша тэнцвэрийн суурь утга бөгөөд BEDI тооцоолоход хэрэглэгдэнэ.
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    { dot: "bg-primary", text: "text-primary", label: "Kt < 1.0 · Хий давамгай", body: "Вата доша илүү. Хөнгөн, уян биетэй хүмүүс." },
+                    { dot: "bg-surface-container-high", text: "text-on-surface", label: "Kt ≈ 1.0 · Тэнцвэртэй", body: "Гурван доша тэнцвэртэй. Хавар, намрын улиралтай ойр." },
+                    { dot: "bg-secondary-container", text: "text-secondary", label: "Kt > 1.0 · Шар/Бадган", body: "Питта/Капха доша илүү. Хүнд, тогтвортой биетэй." },
+                  ].map(({ dot, text, label, body }) => (
+                    <div key={label} className="rounded-xl p-3 bg-surface-container-low">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${dot}`} />
+                        <p className={`font-bold text-xs ${text}`}>{label}</p>
+                      </div>
+                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Decorative footer — always visible */}
+            <div className="h-20 bg-linear-to-br from-primary/15 via-tertiary/10 to-secondary/10 flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 flex items-end justify-center pb-2">
+                <span className="text-5xl opacity-50">🌿</span>
+              </div>
+              <p className="relative text-[10px] font-bold text-primary/70 uppercase tracking-widest">
+                Bio-Dosha-12
+              </p>
+            </div>
+          </div>
         </div>
-      )}
+      </aside>
+
     </div>
   );
 }
 
+// ─── Page export ──────────────────────────────────────────────────────────────
+
 export default function CalculatorPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    }>
       <CalculatorInner />
     </Suspense>
   );

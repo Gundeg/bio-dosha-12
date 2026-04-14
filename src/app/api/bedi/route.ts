@@ -3,16 +3,21 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateBEDI, calcAge } from "@/lib/bediEngine";
 import { DoshaKey } from "@/lib/ktMapping";
+import { bediCreateSchema, bediQuerySchema } from "@/lib/apiSchemas";
+import { getRemedies } from "@/lib/remedyEngine";
 
 export const runtime = "nodejs";
-import { getRemedies } from "@/lib/remedyEngine";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
-  const { profileId, weightKg, season, notes } = body;
+  const body = await req.json().catch(() => null);
+  const parsed = bediCreateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+  }
+  const { profileId, weightKg, season, notes } = parsed.data;
 
   const profile = await prisma.profile.findFirst({
     where: { id: profileId, userId: session.user.id },
@@ -68,9 +73,13 @@ export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { searchParams } = new URL(req.url);
-  const profileId = searchParams.get("profileId");
-  if (!profileId) return NextResponse.json({ error: "profileId required" }, { status: 400 });
+  const parsed = bediQuerySchema.safeParse({
+    profileId: new URL(req.url).searchParams.get("profileId"),
+  });
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+  }
+  const { profileId } = parsed.data;
 
   const profile = await prisma.profile.findFirst({
     where: { id: profileId, userId: session.user.id },

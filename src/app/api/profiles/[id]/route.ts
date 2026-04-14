@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { profileUpdateSchema } from "@/lib/apiSchemas";
 
 export const runtime = "nodejs";
 
@@ -28,16 +29,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  const parsed = profileUpdateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+  }
 
-  const profile = await prisma.profile.updateMany({
+  const existing = await prisma.profile.findFirst({
     where: { id, userId: session.user.id },
-    data: {
-      ...(body.name && { name: body.name }),
-      ...(body.heightCm && { heightCm: body.heightCm }),
-      ...(body.doshaType !== undefined && { doshaType: body.doshaType }),
-      ...(body.ktScore !== undefined && { ktScore: body.ktScore }),
-    },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const profile = await prisma.profile.update({
+    where: { id },
+    data: parsed.data,
   });
 
   return NextResponse.json(profile);

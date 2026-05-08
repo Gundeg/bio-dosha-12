@@ -150,8 +150,8 @@ export default function PatientsPage() {
                 )}
 
                 <div className="flex gap-2">
+                  <ButtonLink size="sm" className="flex-1" href={`/patients/${p.id}`}>Үзлэгийн карт</ButtonLink>
                   <ButtonLink size="sm" variant="outline" className="flex-1" href={`/calculator?profile=${p.profile.id}`}>Тооцоолох</ButtonLink>
-                  <ButtonLink size="sm" variant="outline" className="flex-1" href={`/reports?patient=${p.profile.id}`}>Тайлан</ButtonLink>
                 </div>
               </CardContent>
             </Card>

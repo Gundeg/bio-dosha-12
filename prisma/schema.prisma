@@ -25,32 +25,39 @@ enum Season {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
+  id        String           @id @default(cuid())
+  email     String           @unique
   password  String
-  role      Role      @default(INDIVIDUAL)
+  role      Role             @default(INDIVIDUAL)
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
   profiles  Profile[]
-  patients  Patient[] @relation("PractitionerPatients")
+  patients  Patient[]        @relation("PractitionerPatients")
+  intakes   ClinicalIntake[] @relation("PractitionerIntakes")
 }
 
 model Profile {
-  id           String       @id @default(cuid())
-  userId       String
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name         String
-  birthDate    DateTime
-  sex          Sex
-  heightCm     Float
-  doshaType    String?
-  ktScore      Float?
-  relationship String       @default("self")
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  bediRecords  BEDIRecord[]
-  asPatient    Patient[]    @relation("PatientProfile")
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  lastName       String?
+  birthDate      DateTime
+  sex            Sex
+  heightCm       Float
+  doshaType      String?
+  ktScore        Float?
+  relationship   String           @default("self")
+  registerNumber String?
+  phone          String?
+  address        String?
+  occupation     String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  bediRecords    BEDIRecord[]
+  asPatient      Patient[]        @relation("PatientProfile")
+  intakes        ClinicalIntake[]
 }
 
 model BEDIRecord {
@@ -89,4 +96,85 @@ model Patient {
   clinicalNotes  String?
   addedAt        DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model ClinicalIntake {
+  id             String        @id @default(cuid())
+  profileId      String
+  profile        Profile       @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  practitionerId String
+  practitioner   User          @relation("PractitionerIntakes", fields: [practitionerId], references: [id], onDelete: Restrict)
+
+  admissionDate  DateTime
+  dischargeDate  DateTime?
+
+  season         Season
+  weightKg       Float
+  heightCm       Float
+  tongue         String?
+  pulseSummary   String?
+  pulseTable     Json?
+
+  complaintAtArrival   String?
+  condition            String?
+  mentalState          String?
+  position             String?
+  zurkhai              String?
+  diagnosis            String?
+  treatmentPlan        String?
+
+  covidHistory     String?
+  surgeryHistory   String?
+  chronicDisease   String?
+  traumaHistory    String?
+  bloodPressure    String?
+  heartRate        String?
+
+  complaintAtDischarge String?
+  recommendations      String?
+
+  treatmentLog   TreatmentLog?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([profileId, admissionDate])
+  @@index([practitionerId])
+}
+
+model TreatmentLog {
+  id       String         @id @default(cuid())
+  intakeId String         @unique
+  intake   ClinicalIntake @relation(fields: [intakeId], references: [id], onDelete: Cascade)
+
+  tractionNeck        Int @default(0)
+  tractionBack        Int @default(0)
+
+  barriaaHead         Int @default(0)
+  barriaaNeckShoulder Int @default(0)
+  barriaaBack         Int @default(0)
+  barriaaLegs         Int @default(0)
+
+  acupuncture     Int @default(0)
+  cupping         Int @default(0)
+  heatTreatment   Int @default(0)
+
+  oilZad5         Int @default(0)
+  oilBoigor10     Int @default(0)
+  oilSenden4      Int @default(0)
+  oilSesame       Int @default(0)
+  oilGinger       Int @default(0)
+  oilMilk         Int @default(0)
+  oilZad5Tail     Int @default(0)
+  oilGarlic       Int @default(0)
+
+  hotStone        Int @default(0)
+  electrophoresis Int @default(0)
+  detox           Int @default(0)
+  footReflex      Int @default(0)
+  bloodletting    Int @default(0)
+  moxibustion     Int @default(0)
+  exerciseTherapy Int @default(0)
+
+  updatedAt DateTime @updatedAt
 }

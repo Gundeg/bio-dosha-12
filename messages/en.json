@@ -1,0 +1,78 @@
+{
+  "common": {
+    "appName": "Bio-Dosha-12",
+    "brandTagline": "Tb Otoch Ayurveda",
+    "loading": "Loading...",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorNetwork": "Network error. Please check your connection."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "calculator": "Calculator",
+    "history": "History",
+    "family": "Family",
+    "recommendations": "Remedies",
+    "patients": "Patients",
+    "reports": "Reports",
+    "admin": "Access requests",
+    "adminPanel": "Admin panel",
+    "help": "Help",
+    "logout": "Sign out",
+    "profile": "Profile",
+    "profileMenu": "Profile menu",
+    "newCalculation": "New calculation",
+    "retakeAssessment": "Retake assessment",
+    "mainMenu": "Main menu",
+    "specialistSection": "Specialist",
+    "adminSection": "Admin",
+    "roleUser": "User",
+    "roleSpecialist": "✦ Specialist",
+    "roleAdmin": "★ Admin"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Sign in to Bio-Dosha-12",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "invalidCredentials": "Incorrect email or password.",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Create a new Bio-Dosha-12 account",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "password": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "personaTitle": "Account type",
+      "individualLabel": "Personal",
+      "individualDesc": "Track your own and your family's balance",
+      "practitionerLabel": "Practitioner",
+      "practitionerDesc": "Doctor access opens after admin approval",
+      "practitionerNote": "Practitioner access is granted by an admin. While your request is pending you can use every personal feature.",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "welcome": "Welcome!",
+      "welcomePractitioner": "Welcome! Your practitioner request was sent to the admin.",
+      "successManualLogin": "Account created! Please sign in.",
+      "errorWithStatus": "Something went wrong ({status}). Please try again.",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
+  },
+  "locale": {
+    "label": "Language",
+    "mn": "Монгол",
+    "en": "English"
+  }
+}

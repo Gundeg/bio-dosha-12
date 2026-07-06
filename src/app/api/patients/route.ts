@@ -1,22 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+import { patientCreateSchema } from "@/lib/apiSchemas";
 
 export const runtime = "nodejs";
-
-const patientSchema = z.object({
-  name: z.string().min(1),
-  birthDate: z.string().refine((d) => {
-    const date = new Date(d);
-    return !isNaN(date.getTime()) && date < new Date();
-  }, { message: "birthDate must be a valid past date" }),
-  sex: z.enum(["MALE", "FEMALE"]),
-  heightCm: z.number().positive().max(300),
-  doshaType: z.string().optional().nullable(),
-  ktScore: z.number().optional().nullable(),
-  relationship: z.string().optional(),
-});
 
 export async function GET() {
   const session = await auth();
@@ -46,22 +33,39 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const parsed = patientSchema.safeParse(body);
+  const parsed = patientCreateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
-  const { name, birthDate, sex, heightCm, doshaType, ktScore, relationship } = parsed.data;
+  const {
+    name,
+    lastName,
+    birthDate,
+    sex,
+    heightCm,
+    doshaType,
+    ktScore,
+    registerNumber,
+    phone,
+    address,
+    occupation,
+  } = parsed.data;
 
   const profile = await prisma.profile.create({
     data: {
       userId: session.user.id,
       name,
+      lastName,
       birthDate: new Date(birthDate),
       sex,
       heightCm,
       doshaType,
       ktScore,
-      relationship: relationship ?? "patient",
+      relationship: "patient",
+      registerNumber,
+      phone,
+      address,
+      occupation,
     },
   });
 

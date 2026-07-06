@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import RemedyPanel from "@/components/RemedyPanel";
 import DoshaCard from "@/components/DoshaCard";
 import { calcAge, BEDIStatus } from "@/lib/bediEngine";
 import { DoshaKey } from "@/lib/ktMapping";
 import { RemedyResult } from "@/lib/remedyEngine";
 import { ButtonLink } from "@/components/ui/button-link";
+import { apiFetch, ApiError } from "@/lib/api";
+import { ErrorState } from "@/components/states";
 
 interface StoredRecommendation {
   remedies: string[];
@@ -67,19 +69,30 @@ export default function RecommendationsPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoadError(null);
+    setLoading(true);
+    try {
+      const data = await apiFetch<Profile[]>("/api/profiles");
+      setProfiles(data);
+      const self = data.find((p) => p.relationship === "self") ?? data[0];
+      if (self) setSelectedId(self.id);
+    } catch (err) {
+      setLoadError(
+        err instanceof ApiError
+          ? err.message
+          : "Мэдээлэл ачаалахад алдаа гарлаа."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch("/api/profiles")
-      .then((r) => r.json())
-      .then((data) => {
-        if (!Array.isArray(data)) return;
-        setProfiles(data);
-        const self = data.find((p: Profile) => p.relationship === "self") ?? data[0];
-        if (self) setSelectedId(self.id);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    load();
+  }, [load]);
 
   const profile = profiles.find((p) => p.id === selectedId);
   const latest = profile?.bediRecords?.[0];
@@ -158,7 +171,10 @@ export default function RecommendationsPage() {
         )}
       </div>
 
-      {!latest ? (
+      {loadError ? (
+        /* ── Error state ── */
+        <ErrorState message={loadError} onRetry={load} />
+      ) : !latest ? (
         /* ── Empty state ── */
         <div className="bg-surface-container-lowest rounded-3xl shadow-ambient text-center py-20 px-8">
           <p className="text-5xl mb-4">🌿</p>

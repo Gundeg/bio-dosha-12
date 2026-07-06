@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
+import { PendingPractitionerBanner } from "@/components/PendingPractitionerBanner";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main content — offset by sidebar on desktop */}
       <main className="md:ml-64 pt-24 pb-28 md:pb-10 px-6 md:px-10">
         <div className="max-w-6xl mx-auto">
+          <PendingPractitionerBanner />
           {children}
         </div>
       </main>

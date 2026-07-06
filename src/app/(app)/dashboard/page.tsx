@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { apiFetch, ApiError } from "@/lib/api";
+import { ErrorState } from "@/components/states";
 import DoshaRadar from "@/components/DoshaRadar";
 import DoshaCard from "@/components/DoshaCard";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -64,19 +66,34 @@ export default function DashboardPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selected, setSelected] = useState<Profile | null>(null);
   const [loading, setLoading]   = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/profiles")
-      .then((r) => r.json())
-      .then((data: Profile[]) => {
+  const load = useCallback(() => {
+    apiFetch<Profile[]>("/api/profiles")
+      .then((data) => {
         if (!Array.isArray(data)) return;
+        setLoadError(null);
         setProfiles(data);
         const self = data.find((p) => p.relationship === "self") ?? data[0];
         setSelected(self ?? null);
       })
-      .catch(() => {})
+      .catch((err) => {
+        setLoadError(
+          err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
+        );
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  const retry = useCallback(() => {
+    setLoadError(null);
+    setLoading(true);
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const latest    = selected?.bediRecords?.[0];
   const statusCfg = latest ? STATUS_CONFIG[latest.status as keyof typeof STATUS_CONFIG] : null;
@@ -144,7 +161,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {profiles.length === 0 ? (
+      {loadError ? (
+        <ErrorState message={loadError} onRetry={retry} />
+      ) : profiles.length === 0 ? (
         <div className="bg-surface-container-lowest rounded-3xl shadow-ambient text-center py-20 px-8">
           <p className="text-5xl mb-4">🌿</p>
           <p className="text-lg font-semibold text-on-surface">Профайл үүсгэгдээгүй байна</p>

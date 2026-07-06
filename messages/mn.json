@@ -1,0 +1,78 @@
+{
+  "common": {
+    "appName": "Bio-Dosha-12",
+    "brandTagline": "Тб оточ Ayurveda",
+    "loading": "Ачааллаж байна...",
+    "retry": "Дахин оролдох",
+    "cancel": "Болих",
+    "save": "Хадгалах",
+    "delete": "Устгах",
+    "close": "Хаах",
+    "errorGeneric": "Алдаа гарлаа. Дахин оролдоно уу.",
+    "errorNetwork": "Сүлжээний алдаа гарлаа. Холболтоо шалгана уу."
+  },
+  "nav": {
+    "dashboard": "Самбар",
+    "calculator": "Тооцоолол",
+    "history": "Түүх",
+    "family": "Гэр бүл",
+    "recommendations": "Ерөндөг",
+    "patients": "Өвчтөнүүд",
+    "reports": "Тайлан",
+    "admin": "Эрхийн хүсэлтүүд",
+    "adminPanel": "Админ самбар",
+    "help": "Тусламж",
+    "logout": "Гарах",
+    "profile": "Профайл",
+    "profileMenu": "Профайл цэс",
+    "newCalculation": "Шинэ тооцоолол",
+    "retakeAssessment": "Үнэлгээ дахин хийх",
+    "mainMenu": "Үндсэн цэс",
+    "specialistSection": "Мэргэжилтэн",
+    "adminSection": "Админ",
+    "roleUser": "Хэрэглэгч",
+    "roleSpecialist": "✦ Мэргэжилтэн",
+    "roleAdmin": "★ Админ"
+  },
+  "auth": {
+    "login": {
+      "title": "Нэвтрэх",
+      "subtitle": "Bio-Dosha-12 системд нэвтрэх",
+      "email": "Имэйл",
+      "password": "Нууц үг",
+      "submit": "Нэвтрэх",
+      "submitting": "Нэвтэрч байна...",
+      "invalidCredentials": "Имэйл эсвэл нууц үг буруу байна.",
+      "noAccount": "Бүртгэл байхгүй юу?",
+      "registerLink": "Бүртгүүлэх"
+    },
+    "register": {
+      "title": "Бүртгүүлэх",
+      "subtitle": "Bio-Dosha-12 системд шинэ бүртгэл үүсгэх",
+      "name": "Нэр",
+      "namePlaceholder": "Таны нэр",
+      "email": "Имэйл",
+      "password": "Нууц үг",
+      "passwordPlaceholder": "Хамгийн багадаа 6 тэмдэгт",
+      "personaTitle": "Хэрэглэгчийн төрөл",
+      "individualLabel": "Хувь хүн",
+      "individualDesc": "Өөрийн болон гэр бүлийн тэнцвэрийг хянана",
+      "practitionerLabel": "Тб оточ",
+      "practitionerDesc": "Админ баталгаажуулсны дараа эмчийн эрх нээгдэнэ",
+      "practitionerNote": "Эмчийн эрхийг админ баталгаажуулна. Хүлээгдэж байх хугацаанд та энгийн хэрэглэгчийн бүх боломжийг ашиглах боломжтой.",
+      "submit": "Бүртгүүлэх",
+      "submitting": "Бүртгэж байна...",
+      "welcome": "Тавтай морил!",
+      "welcomePractitioner": "Тавтай морил! Эмчийн эрхийн хүсэлт админд илгээгдлээ.",
+      "successManualLogin": "Бүртгэл амжилттай! Нэвтэрнэ үү.",
+      "errorWithStatus": "Алдаа гарлаа ({status}). Дахин оролдоно уу.",
+      "hasAccount": "Бүртгэлтэй юу?",
+      "loginLink": "Нэвтрэх"
+    }
+  },
+  "locale": {
+    "label": "Хэл",
+    "mn": "Монгол",
+    "en": "English"
+  }
+}

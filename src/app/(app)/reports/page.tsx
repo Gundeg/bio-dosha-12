@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { apiFetch, ApiError } from "@/lib/api";
+import { ErrorState } from "@/components/states";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge, BEDIStatus } from "@/lib/bediEngine";
 import { getRemedies } from "@/lib/remedyEngine";
@@ -46,16 +48,28 @@ function ReportContent() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedId, setSelectedId] = useState(patientProfileId ?? "");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const data = await apiFetch<Patient[]>("/api/patients");
+      const list = Array.isArray(data) ? data : [];
+      setPatients(list);
+      if (!patientProfileId && list.length > 0) setSelectedId(list[0].profile.id);
+    } catch (err) {
+      setLoadError(
+        err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [patientProfileId]);
 
   useEffect(() => {
-    fetch("/api/patients")
-      .then((r) => r.json())
-      .then((data) => {
-        setPatients(Array.isArray(data) ? data : []);
-        if (!patientProfileId && data.length > 0) setSelectedId(data[0].profile.id);
-        setLoading(false);
-      });
-  }, [patientProfileId]);
+    load();
+  }, [load]);
 
   const patient = patients.find((p) => p.profile.id === selectedId);
   const profile = patient?.profile;
@@ -81,6 +95,10 @@ function ReportContent() {
         <Button onClick={handlePrint} disabled={!profile}>Хэвлэх / PDF</Button>
       </div>
 
+      {loadError ? (
+        <ErrorState message={loadError} onRetry={load} />
+      ) : (
+        <>
       {patients.length > 0 && (
         <div className="flex gap-2 flex-wrap print:hidden">
           {patients.map((p) => (
@@ -263,6 +281,8 @@ function ReportContent() {
             </p>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -10,7 +10,7 @@
 
 import { DoshaKey } from "./ktMapping";
 
-export type PotencyType = "WARM" | "COOL" | "HEAVY" | "LIGHT" | "OILY" | "ROUGH" | "SHARP" | "SOFT" | "CLEAR" | "COLD";
+export type PotencyType = "WARM" | "COOL" | "HEAVY" | "LIGHT" | "OILY" | "ROUGH" | "SHARP" | "SOFT" | "CLEAR" | "COLD" | "DULL";
 
 export interface TherapyEntry {
   foods: string[];
@@ -21,7 +21,7 @@ export interface TherapyEntry {
 /** Доша тус бүрийн эсрэг чадал (Antidote potencies) */
 export const ANTIDOTE_POTENCIES: Record<"Khii" | "Shar" | "Badgan", PotencyType[]> = {
   Khii:   ["SOFT", "HEAVY", "WARM", "OILY"],   // Зөөлөн, Хүнд, Дулаан, Тослог
-  Shar:   ["COOL", "SOFT", "CLEAR", "SOFT"],    // Сэрүүн, Мохоо, Тунгалаг, Зөөлөн
+  Shar:   ["COOL", "DULL", "CLEAR", "SOFT"],    // Сэрүүн, Мохоо, Тунгалаг, Зөөлөн
   Badgan: ["ROUGH", "LIGHT", "COLD", "SHARP"],  // Ширүүн, Хөнгөн, Хүйтэн, Хурц
 };
 
@@ -50,7 +50,7 @@ export const THERAPY_MAP: Record<"Khii" | "Shar" | "Badgan", TherapyEntry> = {
     ],
   },
   Shar: {
-    potencies: ["COOL", "SOFT", "CLEAR", "SOFT"],
+    potencies: ["COOL", "DULL", "CLEAR", "SOFT"],
     foods: [
       "Үхрийн мах",
       "Арвайн гурил",

@@ -1,7 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { apiFetch, ApiError } from "@/lib/api";
+import { ErrorState } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,6 +119,7 @@ function CalculatorInner() {
   // ── Shared state ──
   const [profiles, setProfiles]               = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [loadError, setLoadError]             = useState<string | null>(null);
   const [activeTab, setActiveTab]             = useState<Tab>(initialTab);
 
   // ── Calculator state ──
@@ -140,10 +143,11 @@ function CalculatorInner() {
   const [savingAssessment, setSavingAssessment] = useState(false);
 
   // ── Load profiles ──
-  useEffect(() => {
-    fetch("/api/profiles")
-      .then((r) => r.json())
-      .then((data: Profile[]) => {
+  const load = useCallback(() => {
+    setLoadError(null);
+    setLoadingProfiles(true);
+    apiFetch<Profile[]>("/api/profiles")
+      .then((data) => {
         if (!Array.isArray(data)) return;
         const withKt = data.filter((p) => p.ktScore);
         setProfiles(withKt);
@@ -167,9 +171,15 @@ function CalculatorInner() {
           }
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        setLoadError(err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа.");
+      })
       .finally(() => setLoadingProfiles(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
 
@@ -195,9 +205,8 @@ function CalculatorInner() {
     if (!calcResult || !selectedProfile) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/bedi", {
+      await apiFetch("/api/bedi", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           profileId: selectedProfile.id,
           weightKg: parseFloat(weightKg),
@@ -205,11 +214,10 @@ function CalculatorInner() {
           notes,
         }),
       });
-      if (!res.ok) throw new Error();
       toast.success("Тооцоолол амжилттай хадгалагдлаа!");
       setNotes("");
-    } catch {
-      toast.error("Хадгалах явцад алдаа гарлаа.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Хадгалах явцад алдаа гарлаа.");
     } finally {
       setSaving(false);
     }
@@ -235,9 +243,8 @@ function CalculatorInner() {
       let savedProfile: Profile;
 
       if (assessProfileId === "__new__") {
-        const res = await fetch("/api/profiles", {
+        savedProfile = await apiFetch<Profile>("/api/profiles", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: profileForm.name,
             birthDate: profileForm.birthDate,
@@ -248,18 +255,14 @@ function CalculatorInner() {
             relationship: profileForm.relationship,
           }),
         });
-        if (!res.ok) throw new Error();
-        savedProfile = await res.json();
         setProfiles((prev) => [...prev, savedProfile]);
         toast.success(`${savedProfile.name}-ийн профайл үүслээ!`);
       } else {
-        const res = await fetch(`/api/profiles/${assessProfileId}`, {
+        await apiFetch(`/api/profiles/${assessProfileId}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ doshaType: ktResult.doshaKey, ktScore: ktResult.kt }),
         });
-        if (!res.ok) throw new Error();
-        const refreshed = await fetch("/api/profiles").then((r) => r.json());
+        const refreshed = await apiFetch<Profile[]>("/api/profiles");
         const withKt = Array.isArray(refreshed) ? refreshed.filter((p: Profile) => p.ktScore) : [];
         setProfiles(withKt);
         savedProfile = withKt.find((p: Profile) => p.id === assessProfileId) ?? withKt[0];
@@ -277,8 +280,8 @@ function CalculatorInner() {
       setKtResult(null);
       setProfileForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "self" });
       setAssessProfileId("__new__");
-    } catch {
-      toast.error("Хадгалах явцад алдаа гарлаа.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Хадгалах явцад алдаа гарлаа.");
     } finally {
       setSavingAssessment(false);
     }
@@ -394,10 +397,6 @@ function CalculatorInner() {
 
         {/* Page header */}
         <div className="mb-6">
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full uppercase tracking-wider mb-3">
-            <span>⚕</span>
-            <span>BEDI Protocol v2.4</span>
-          </div>
           <h1 className="font-headline text-3xl font-black text-on-surface tracking-tight">
             {stepMeta.title}
           </h1>
@@ -430,9 +429,18 @@ function CalculatorInner() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════
+            LOAD ERROR — алдаа хэзээ ч "хоосон" мэт харагдах ёсгүй
+        ══════════════════════════════════════════════════════════════ */}
+        {loadError && (
+          <div className="max-w-xl">
+            <ErrorState message={loadError} onRetry={load} />
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════
             ASSESSMENT CONTENT
         ══════════════════════════════════════════════════════════════ */}
-        {activeTab === "assessment" && (
+        {!loadError && activeTab === "assessment" && (
           <div className="max-w-xl space-y-5">
 
             {/* Profile select */}
@@ -697,7 +705,7 @@ function CalculatorInner() {
         {/* ══════════════════════════════════════════════════════════════
             PHYSICAL METRICS INPUT
         ══════════════════════════════════════════════════════════════ */}
-        {activeTab === "calc" && !calcResult && (
+        {!loadError && activeTab === "calc" && !calcResult && (
           <div className="max-w-xl space-y-6">
 
             {profiles.length === 0 ? (
@@ -861,7 +869,7 @@ function CalculatorInner() {
         {/* ══════════════════════════════════════════════════════════════
             ҮР ДҮН
         ══════════════════════════════════════════════════════════════ */}
-        {activeTab === "calc" && calcResult && selectedProfile && (() => {
+        {!loadError && activeTab === "calc" && calcResult && selectedProfile && (() => {
           const isExcess = calcResult.status === "shar_badgan_excess";
           const isBalanced = calcResult.status === "balanced";
           const statusLabel = isBalanced ? "Тэнцвэртэй"

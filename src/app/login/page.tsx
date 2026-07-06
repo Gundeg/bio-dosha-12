@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const t = useTranslations("auth.login");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
     const res = await signIn("credentials", { ...form, redirect: false });
     setLoading(false);
     if (res?.error) {
-      toast.error("Имэйл эсвэл нууц үг буруу байна.");
+      toast.error(t("invalidCredentials"));
     } else {
       window.location.href = "/dashboard";
     }
@@ -35,8 +35,8 @@ export default function LoginPage() {
           <div className="inline-flex w-12 h-12 rounded-2xl bg-linear-to-br from-blue-500 to-violet-600 items-center justify-center mb-4">
             <span className="text-white text-lg font-black">BD</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Нэвтрэх</h1>
-          <p className="text-sm text-slate-500 mt-1">Bio-Dosha-12 системд нэвтрэх</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("title")}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t("subtitle")}</p>
         </div>
 
         {/* Card */}
@@ -44,7 +44,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                Имэйл
+                {t("email")}
               </Label>
               <Input
                 id="email"
@@ -59,7 +59,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                Нууц үг
+                {t("password")}
               </Label>
               <Input
                 id="password"
@@ -76,17 +76,17 @@ export default function LoginPage() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Нэвтэрч байна...
+                  {t("submitting")}
                 </span>
-              ) : "Нэвтрэх"}
+              ) : t("submit")}
             </Button>
           </form>
         </div>
 
         <p className="text-center text-sm text-slate-500 mt-5">
-          Бүртгэл байхгүй юу?{" "}
+          {t("noAccount")}{" "}
           <Link href="/register" className="text-blue-600 font-semibold hover:underline">
-            Бүртгүүлэх
+            {t("registerLink")}
           </Link>
         </p>
       </div>

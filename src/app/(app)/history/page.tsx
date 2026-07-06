@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer, Area, AreaChart,
 } from "recharts";
+import { apiFetch, ApiError } from "@/lib/api";
+import { ErrorState } from "@/components/states";
 import { Button } from "@/components/ui/button";
 
 interface Profile {
@@ -57,26 +59,52 @@ export default function HistoryPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [records, setRecords] = useState<BEDIRecord[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/profiles")
-      .then((r) => r.json())
-      .then((data: Profile[]) => {
+  const loadProfiles = useCallback(() => {
+    apiFetch<Profile[]>("/api/profiles")
+      .then((data) => {
         if (!Array.isArray(data)) return;
+        setLoadError(null);
         setProfiles(data);
         if (data.length > 0) setSelectedId(data[0].id);
         else setRecords([]);
       })
-      .catch(() => setRecords([]));
+      .catch((err) => {
+        setLoadError(
+          err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
+        );
+      });
   }, []);
 
   useEffect(() => {
+    loadProfiles();
+  }, [loadProfiles]);
+
+  const loadRecords = useCallback(() => {
     if (!selectedId) return;
-    fetch(`/api/bedi?profileId=${selectedId}`)
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setRecords(data); })
-      .catch(() => setRecords([]));
+    apiFetch<BEDIRecord[]>(`/api/bedi?profileId=${selectedId}`)
+      .then((data) => {
+        if (!Array.isArray(data)) return;
+        setLoadError(null);
+        setRecords(data);
+      })
+      .catch((err) => {
+        setLoadError(
+          err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
+        );
+      });
   }, [selectedId]);
+
+  useEffect(() => {
+    loadRecords();
+  }, [loadRecords]);
+
+  const retry = useCallback(() => {
+    setLoadError(null);
+    if (profiles.length === 0) loadProfiles();
+    else loadRecords();
+  }, [profiles.length, loadProfiles, loadRecords]);
 
   const chartData = [...(records ?? [])]
     .reverse()
@@ -146,7 +174,9 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {records === null ? (
+      {loadError ? (
+        <ErrorState message={loadError} onRetry={retry} />
+      ) : records === null ? (
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />

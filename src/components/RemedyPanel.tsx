@@ -53,7 +53,7 @@ export default function RemedyPanel({ status, remedyResult }: RemedyPanelProps) 
             {VALIDATION_STYLE[validation.status].icon}
           </span>
           <span className={VALIDATION_STYLE[validation.status].text}>
-            <span className="font-semibold">Logic Gate: </span>
+            <span className="font-semibold">Аюулгүйн шалгалт: </span>
             {validation.action}
           </span>
         </div>

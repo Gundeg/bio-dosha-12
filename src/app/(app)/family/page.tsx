@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { apiFetch, ApiError } from "@/lib/api";
+import { ErrorState, PageLoading } from "@/components/states";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge } from "@/lib/bediEngine";
 import { toast } from "sonner";
@@ -61,34 +63,37 @@ const STATUS_DISPLAY: Record<string, { label: string; bg: string; text: string }
 export default function FamilyPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({
     name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "spouse",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  async function loadProfiles() {
+  const loadProfiles = useCallback(async () => {
+    setLoadError(null);
     try {
-      const res = await fetch("/api/profiles");
-      if (!res.ok) return;
-      const data = await res.json();
-      if (Array.isArray(data)) setProfiles(data);
-    } catch {
-      // network error — leave current state
+      const data = await apiFetch<Profile[]>("/api/profiles");
+      setProfiles(data);
+    } catch (err) {
+      setLoadError(
+        err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
+      );
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  useEffect(() => { loadProfiles(); }, []);
+  useEffect(() => { loadProfiles(); }, [loadProfiles]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/profiles", {
+      await apiFetch("/api/profiles", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           birthDate: form.birthDate,
@@ -97,34 +102,34 @@ export default function FamilyPage() {
           relationship: form.relationship,
         }),
       });
-      if (!res.ok) throw new Error();
       toast.success("Гэр бүлийн гишүүн нэмэгдлээ!");
       setShowAdd(false);
       setForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "spouse" });
       await loadProfiles();
-    } catch {
-      toast.error("Нэмэх явцад алдаа гарлаа.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Нэмэх явцад алдаа гарлаа.");
     } finally {
       setSubmitting(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Устгах уу?")) return;
-    await fetch(`/api/profiles/${id}`, { method: "DELETE" });
-    await loadProfiles();
-    toast.success("Устгагдлаа.");
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await apiFetch(`/api/profiles/${deleteTarget.id}`, { method: "DELETE" });
+      toast.success("Устгагдлаа.");
+      setDeleteTarget(null);
+      await loadProfiles();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Устгах явцад алдаа гарлаа.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-on-surface-variant">Ачааллаж байна...</p>
-        </div>
-      </div>
-    );
+    return <PageLoading />;
   }
 
   return (
@@ -150,6 +155,9 @@ export default function FamilyPage() {
       </div>
 
       {/* ── Profile grid ── */}
+      {loadError ? (
+        <ErrorState message={loadError} onRetry={loadProfiles} />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {profiles.map((p) => {
           const latest = p.bediRecords?.[0];
@@ -242,7 +250,7 @@ export default function FamilyPage() {
                       size="sm"
                       variant="ghost"
                       className="text-error hover:text-error hover:bg-error/5"
-                      onClick={() => handleDelete(p.id)}
+                      onClick={() => setDeleteTarget(p)}
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
                     </Button>
@@ -263,6 +271,7 @@ export default function FamilyPage() {
           <p className="text-sm font-semibold">Гишүүн нэмэх</p>
         </button>
       </div>
+      )}
 
       {/* ── Add member dialog ── */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
@@ -341,6 +350,27 @@ export default function FamilyPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Delete confirm dialog ── */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-headline">Гишүүн устгах</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-on-surface-variant pt-2">
+            <span className="font-semibold text-on-surface">{deleteTarget?.name}</span>
+            {" "}гишүүнийг устгах уу? Гишүүний бүх хэмжилтийн түүх хамт устана.
+          </p>
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)}>
+              Болих
+            </Button>
+            <Button type="button" variant="destructive" className="flex-1" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Устгаж байна..." : "Устгах"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

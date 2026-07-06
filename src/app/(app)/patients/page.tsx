@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { ErrorState } from "@/components/states";
+import { apiFetch, ApiError } from "@/lib/api";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge } from "@/lib/bediEngine";
 import { toast } from "sonner";
@@ -38,28 +40,35 @@ export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({
     name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "patient",
   });
   const [submitting, setSubmitting] = useState(false);
 
-  async function loadPatients() {
-    const res = await fetch("/api/patients");
-    const data = await res.json();
-    setPatients(Array.isArray(data) ? data : []);
-    setLoading(false);
-  }
+  const loadPatients = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const data = await apiFetch<Patient[]>("/api/patients");
+      setPatients(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setLoadError(
+        err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  useEffect(() => { loadPatients(); }, []);
+  useEffect(() => { loadPatients(); }, [loadPatients]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/patients", {
+      await apiFetch("/api/patients", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           birthDate: form.birthDate,
@@ -68,13 +77,12 @@ export default function PatientsPage() {
           relationship: form.relationship,
         }),
       });
-      if (!res.ok) throw new Error();
       toast.success("Өвчтөн нэмэгдлээ!");
       setShowAdd(false);
       setForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "patient" });
       await loadPatients();
-    } catch {
-      toast.error("Нэмэх явцад алдаа гарлаа.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Нэмэх явцад алдаа гарлаа.");
     } finally {
       setSubmitting(false);
     }
@@ -103,6 +111,9 @@ export default function PatientsPage() {
         className="max-w-sm"
       />
 
+      {loadError ? (
+        <ErrorState message={loadError} onRetry={loadPatients} />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((p) => {
           const latest = p.profile.bediRecords?.[0];
@@ -164,6 +175,7 @@ export default function PatientsPage() {
           </div>
         )}
       </div>
+      )}
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>

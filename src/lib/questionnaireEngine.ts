@@ -145,6 +145,12 @@ export interface QuestionnaireResult {
   kt: number;
 }
 
+const PURE_KEY: Record<DominantType, DoshaKey> = {
+  H: "Khii",
+  S: "Shar",
+  B: "Badgan",
+};
+
 function mapToDoshaKey(scores: { H: number; S: number; B: number }): DoshaKey {
   const sorted = (["H", "S", "B"] as DominantType[]).sort(
     (a, b) => scores[b] - scores[a]
@@ -155,16 +161,20 @@ function mapToDoshaKey(scores: { H: number; S: number; B: number }): DoshaKey {
     return "Tentsveertei";
   }
 
+  // Дан махбод: хоёрдогч махбодын оноо тэргүүлэгчийн талаас БАГА үед
+  // (жишээ нь 12/0/0, 9/3/0 → дан; 8/4/0 → хавсарсан). Өмнө нь энэ салбар
+  // хэзээ ч ажилладаггүй байсан тул дан Хий/Шар/Бадган (Kt 0.70/1.00/1.50)
+  // гарах боломжгүй байв. Босгыг эзэмшигч баталгаажуулна.
+  if (scores[second] * 2 < scores[first]) {
+    return PURE_KEY[first];
+  }
+
   if (first === "H" && second === "S") return "Khii_Shar";
   if (first === "H" && second === "B") return "Khii_Badgan";
   if (first === "S" && second === "H") return "Shar_Khii";
   if (first === "S" && second === "B") return "Shar_Badgan";
   if (first === "B" && second === "H") return "Badgan_Khii";
-  if (first === "B" && second === "S") return "Badgan_Shar";
-
-  if (first === "H") return "Khii";
-  if (first === "S") return "Shar";
-  return "Badgan";
+  return "Badgan_Shar";
 }
 
 const KT_BY_KEY: Record<DoshaKey, number> = {

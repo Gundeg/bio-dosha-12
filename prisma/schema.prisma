@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   INDIVIDUAL
   PRACTITIONER
+  ADMIN
 }
 
 enum Sex {
@@ -25,16 +26,18 @@ enum Season {
 }
 
 model User {
-  id        String           @id @default(cuid())
-  email     String           @unique
-  password  String
-  role      Role             @default(INDIVIDUAL)
-  name      String
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  profiles  Profile[]
-  patients  Patient[]        @relation("PractitionerPatients")
-  intakes   ClinicalIntake[] @relation("PractitionerIntakes")
+  id                      String           @id @default(cuid())
+  email                   String           @unique
+  password                String
+  role                    Role             @default(INDIVIDUAL)
+  name                    String
+  practitionerRequestedAt DateTime?
+  practitionerApprovedAt  DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  profiles                Profile[]
+  patients                Patient[]        @relation("PractitionerPatients")
+  intakes                 ClinicalIntake[] @relation("PractitionerIntakes")
 }
 
 model Profile {

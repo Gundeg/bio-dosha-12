@@ -151,8 +151,8 @@ export default function PatientsPage() {
                   <div className="text-sm flex justify-between">
                     <span className="text-muted-foreground">Сүүлийн Δ:</span>
                     <span className={`font-semibold ${
-                      latest.deviation < -0.3 ? "text-blue-500"
-                      : latest.deviation > 0.3 ? "text-red-500"
+                      latest.status === "khii_excess" ? "text-blue-500"
+                      : latest.status === "shar_badgan_excess" ? "text-red-500"
                       : "text-green-500"
                     }`}>
                       {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}

@@ -204,7 +204,7 @@ export default function HistoryPage() {
                 label: "Сүүлийн хазайлт",
                 value: `${records[0].deviation >= 0 ? "+" : ""}${records[0].deviation.toFixed(2)}`,
                 sub: "Δ",
-                color: records[0].deviation > 0.3 ? "text-secondary" : "text-primary",
+                color: records[0].status === "shar_badgan_excess" ? "text-secondary" : "text-primary",
               },
               {
                 label: "Сүүлийн BEDI",
@@ -315,8 +315,8 @@ export default function HistoryPage() {
                       <div className="text-right">
                         <p className="text-[10px] text-on-surface-variant uppercase tracking-wide font-semibold">Δ</p>
                         <p className={`font-headline text-base font-bold ${
-                          r.deviation < -0.3 ? "text-primary"
-                          : r.deviation > 0.3 ? "text-secondary"
+                          r.status === "khii_excess" ? "text-primary"
+                          : r.status === "shar_badgan_excess" ? "text-secondary"
                           : "text-on-surface"
                         }`}>
                           {r.deviation >= 0 ? "+" : ""}{r.deviation.toFixed(2)}

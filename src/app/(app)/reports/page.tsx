@@ -160,8 +160,8 @@ function ReportContent() {
                   <div className="border rounded-lg p-4">
                     <p className="text-xs text-muted-foreground">Хазайлт (Δ)</p>
                     <p className={`text-3xl font-bold ${
-                      latest.deviation < -0.3 ? "text-blue-500"
-                      : latest.deviation > 0.3 ? "text-red-500"
+                      latest.status === "khii_excess" ? "text-blue-500"
+                      : latest.status === "shar_badgan_excess" ? "text-red-500"
                       : "text-green-500"
                     }`}>
                       {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
@@ -246,8 +246,8 @@ function ReportContent() {
                         <td className="py-2">{new Date(r.date).toLocaleDateString("mn-MN")}</td>
                         <td className="text-right">{r.bedi.toFixed(2)}</td>
                         <td className={`text-right font-medium ${
-                          r.deviation < -0.3 ? "text-blue-500"
-                          : r.deviation > 0.3 ? "text-red-500"
+                          r.status === "khii_excess" ? "text-blue-500"
+                          : r.status === "shar_badgan_excess" ? "text-red-500"
                           : "text-green-500"
                         }`}>
                           {r.deviation >= 0 ? "+" : ""}{r.deviation.toFixed(2)}

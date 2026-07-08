@@ -11,8 +11,12 @@ export default auth((req) => {
 
   const publicPrefixes = ["/login", "/register", "/api/auth", "/api/register"];
   const isPublic = pathname === "/" || publicPrefixes.some((r) => pathname.startsWith(r));
+  // API routes authenticate in their own handlers and return 401 JSON. Redirecting
+  // them to the HTML login page breaks apiFetch (it would parse HTML as JSON), so
+  // let them fall through and answer with their own status codes.
+  const isApi = pathname.startsWith("/api");
 
-  if (!isLoggedIn && !isPublic) {
+  if (!isLoggedIn && !isPublic && !isApi) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

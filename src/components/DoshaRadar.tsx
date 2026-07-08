@@ -1,6 +1,7 @@
 "use client";
 
 import { DoshaKey } from "@/lib/ktMapping";
+import { BEDI_THRESHOLDS } from "@/lib/bediConfig";
 
 // Constitutional component proportions [Хий%, Шар%, Бадган%]
 // Based on traditional Mongolian medicine dosha theory
@@ -24,14 +25,14 @@ function applyDeviation(
   const [k, s, b] = base;
   const intensity = Math.min(28, Math.abs(deviation) * 32);
 
-  if (deviation < -0.3) {
+  if (deviation < BEDI_THRESHOLDS.khiiBelow) {
     // Хий arvidsan — wind excess pushes Хий axis out
     return [
       Math.min(97, k + intensity),
       Math.max(5, s - intensity * 0.55),
       Math.max(5, b - intensity * 0.45),
     ];
-  } else if (deviation > 0.3) {
+  } else if (deviation > BEDI_THRESHOLDS.sharBadganAbove) {
     // Шар/Бадган arvidsan — boost whichever is dominant in constitution
     if (s >= b) {
       return [Math.max(5, k - intensity * 0.5), Math.min(97, s + intensity), Math.max(5, b - intensity * 0.5)];
@@ -80,11 +81,11 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = 
   const current = applyDeviation(base, deviation);
 
   const statusColor =
-    deviation < -0.3 ? "#3b82f6" : deviation > 0.3 ? "#f87171" : "#10b981";
+    deviation < BEDI_THRESHOLDS.khiiBelow ? "#3b82f6" : deviation > BEDI_THRESHOLDS.sharBadganAbove ? "#f87171" : "#10b981";
   const statusLabel =
-    deviation < -0.3 ? "Хий арвидсан" : deviation > 0.3 ? "Шар/Бадган арвидсан" : "Тэнцвэртэй";
+    deviation < BEDI_THRESHOLDS.khiiBelow ? "Хий арвидсан" : deviation > BEDI_THRESHOLDS.sharBadganAbove ? "Шар/Бадган арвидсан" : "Тэнцвэртэй";
   const statusBadgeClass =
-    deviation < -0.3 ? "bg-blue-500" : deviation > 0.3 ? "bg-red-400" : "bg-emerald-500";
+    deviation < BEDI_THRESHOLDS.khiiBelow ? "bg-blue-500" : deviation > BEDI_THRESHOLDS.sharBadganAbove ? "bg-red-400" : "bg-emerald-500";
 
   const svgH = Math.round(size * (VH / VW));
 

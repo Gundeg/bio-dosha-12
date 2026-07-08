@@ -76,7 +76,7 @@ export default function FamilyPage() {
     setLoadError(null);
     try {
       const data = await apiFetch<Profile[]>("/api/profiles");
-      setProfiles(data);
+      setProfiles(Array.isArray(data) ? data : []);
     } catch (err) {
       setLoadError(
         err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
@@ -226,9 +226,7 @@ export default function FamilyPage() {
                   <div className="flex items-center justify-between bg-surface-container-low rounded-xl px-3 py-2.5">
                     <span className="text-xs text-on-surface-variant">Сүүлийн хазайлт</span>
                     <span className={`font-headline text-base font-bold ${
-                      latest.deviation < -0.3 ? "text-primary"
-                      : latest.deviation > 0.3 ? "text-secondary"
-                      : "text-primary"
+                      latest.status === "shar_badgan_excess" ? "text-secondary" : "text-primary"
                     }`}>
                       {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
                     </span>

@@ -9,11 +9,13 @@ const CSS = phaseCss(
 @keyframes q9-wg{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
 .q9-root .q9-flick{animation:q9-fl .8s ease-in-out infinite}
 @keyframes q9-fl{0%,100%{opacity:1}50%{opacity:.4}}
-.q9-root .q9-calm{animation:q9-cm 3s ease-in-out infinite}
-@keyframes q9-cm{0%,100%{opacity:.9}50%{opacity:.5}}`
+.q9-root .q9-drop{animation:q9-dp 2.4s ease-in infinite}
+@keyframes q9-dp{0%{transform:translateY(0);opacity:1}70%{opacity:1}100%{transform:translateY(12px);opacity:0}}
+.q9-root .q9-calm{transform-box:fill-box;transform-origin:center;animation:q9-cm 3.5s ease-in-out infinite}
+@keyframes q9-cm{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}`
 );
 
-/** Сэтгэл хөдлөлийн сорил: гэнэтийн бэрхшээлд үзүүлэх эхний хариу үйлдэл. */
+/** Стрессийн сорил: аянга шиг гэнэтийн бэрхшээлд царай ямар хувирахыг харуулна. */
 export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationProps) {
   return (
     <IllustrationRoot
@@ -23,83 +25,93 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: царай + гэнэтийн бэрхшээлийн тэмдэг (аянга) */}
+      {/* Суурь: том царай (баруун) + аянга — гэнэтийн бэрхшээл (зүүн дээр) */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx={120} cy={82} r={30} />
-        <path d="M64 22 L52 42 h8 L54 58 L70 38 h-8 L68 22 z" strokeWidth={2.2} />
+        <circle cx={150} cy={78} r={34} />
+        {/* үсний ирмэг */}
+        <path d="M124 65 C128 50 138 44 150 44 C162 44 172 50 176 65" />
+        {/* чих */}
+        <path d="M116.5 71 C110 72 109 82 116 84" />
+        {/* аянга */}
+        <path d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z" />
+      </g>
+      <g stroke="currentColor" strokeWidth={2} strokeLinecap="round" opacity={0.5}>
+        {/* үсний ширхэг */}
+        <path d="M137 47.5 q-2 4 -3 8 M149 44 q-.5 4 -.5 8 M161 47.5 q2 4 3 8" />
+        {/* аянгын цацраг */}
+        <path d="M30 26 l-8 -7 M28 58 l-10 3 M78 20 l8 -7" />
       </g>
 
-      {/* Х: түгшсэн царай — долгион ам, эргэлзээ */}
+      {/* Х: түгшсэн — дээш налуу хөмсөг, долгион ам, хөлс дусал, «?» */}
       <g className="q9-ph q9-ph-h">
-        <g stroke={ACCENT.H} strokeWidth={2.2} strokeLinecap="round" fill="none">
-          <path d="M103 70 q6 -5 12 -2 M137 70 q-6 -5 -12 -2" />
+        <g stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" fill="none">
+          <path d="M130 68 Q137 62 143 63 M170 68 Q163 62 157 63" />
           <g className="q9-wig q9-anim">
-            <path d="M107 98 q5 5 10 0 q5 -5 10 0" />
+            <path d="M138 94 q4 5 8 0 q4 -5 8 0 q4 5 8 0" />
           </g>
         </g>
-        <circle cx={110} cy={80} r={2.2} fill={ACCENT.H} />
-        <circle cx={130} cy={80} r={2.2} fill={ACCENT.H} />
-        <text
-          className="q9-flick q9-anim"
-          x={166}
-          y={46}
-          fontSize={17}
-          fontWeight={700}
-          fill={ACCENT.H}
-          fontFamily="inherit"
-        >
+        <circle cx={139} cy={77} r={2.6} fill={ACCENT.H} />
+        <circle cx={161} cy={77} r={2.6} fill={ACCENT.H} />
+        <path
+          className="q9-drop q9-anim"
+          d="M184 50 c3.5 5 5.5 8 4.8 11 a5 5 0 1 1 -9.6 0 c-.7 -3 1.3 -6 4.8 -11 z"
+          stroke={ACCENT.H}
+          strokeWidth={2.2}
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <text x={193} y={44} fontSize={19} fontWeight={700} fill={ACCENT.H} fontFamily="inherit">
           ?
         </text>
-        <path
-          d="M182 56 a8 8 0 1 1 -6 -12"
-          stroke={ACCENT.H}
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
+        <text x={210} y={62} fontSize={13} fontWeight={700} fill={ACCENT.H} opacity={0.6} fontFamily="inherit">
+          ?
+        </text>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
-      {/* Ш: хурц шийдэмгий царай — дөл, урагш сум */}
+      {/* Ш: хурц — уруу налуу хөмсөг, шулуун ам, дөл, урагш сум */}
       <g className="q9-ph q9-ph-s">
-        <g stroke={ACCENT.S} strokeWidth={2.2} strokeLinecap="round">
-          <path d="M102 68 l16 6 M138 68 l-16 6" />
-          <path d="M108 98 h24" />
+        <g stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round">
+          <path d="M131 63 L144 70 M169 63 L156 70" />
+          <path d="M141 95 L159 95" />
         </g>
-        <circle cx={110} cy={81} r={2.2} fill={ACCENT.S} />
-        <circle cx={130} cy={81} r={2.2} fill={ACCENT.S} />
-        <g className="q9-flick q9-anim">
-          <path
-            d="M166 44 c4 5 6 8 5 12 a7 7 0 0 1 -13 1 c-1 -5 2 -7 4 -9 c1 2 2 3 4 4 c0 -3 0 -5 0 -8 z"
-            stroke={ACCENT.S}
-            strokeWidth={2}
-            strokeLinejoin="round"
-          />
-        </g>
+        <circle cx={139} cy={78} r={2.4} fill={ACCENT.S} />
+        <circle cx={161} cy={78} r={2.4} fill={ACCENT.S} />
         <path
-          d="M162 74 h28 m0 0 l-7 -4 m7 4 l-7 4"
+          className="q9-flick q9-anim"
+          d="M186 42 c4 5.5 6.5 9 5.5 12.5 a6.5 6.5 0 0 1 -12.6 1.5 c-.8 -4.5 1.8 -7.5 3.6 -10 c.8 1.8 1.8 3 3.3 4 c.4 -2.6 .3 -5 .2 -8 z"
           stroke={ACCENT.S}
           strokeWidth={2.2}
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <path
+          d="M190 82 H226 m0 0 l-8 -5 m8 5 l-8 5"
+          stroke={ACCENT.S}
+          strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
-      {/* Б: тайван царай — анисан нүд, инээмсэглэл, навч */}
+      {/* Б: тайван — анисан нүд, зөөлөн инээмсэглэл, навч */}
       <g className="q9-ph q9-ph-b">
-        <g stroke={ACCENT.B} strokeWidth={2.2} strokeLinecap="round" fill="none">
-          <path d="M103 68 q6 -3 12 0 M125 68 q6 -3 12 0" />
-          <path d="M104 79 q6 5 12 0 M124 79 q6 5 12 0" />
-          <path d="M106 95 q14 10 28 0" />
+        <g stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round" fill="none">
+          <path d="M131 67 q6.5 -2 13 0 M156 67 q6.5 -2 13 0" />
+          <path d="M133 78 q6 5 12 0 M155 78 q6 5 12 0" />
+          <path d="M139 92 q11 8 22 0" />
         </g>
         <g className="q9-calm q9-anim">
           <path
-            d="M168 44 q11 4 9 16 q-11 -2 -9 -16 z"
+            d="M196 48 q15 4 12 21 q-16 -2 -12 -21 z"
             stroke={ACCENT.B}
-            strokeWidth={2}
+            strokeWidth={2.2}
             strokeLinejoin="round"
+            fill="none"
           />
-          <path d="M172 62 q1 6 4 10" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" />
+          <path d="M199 53 q4 7 6 13" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" opacity={0.7} />
+          <path d="M205 70 q1 5 4 8" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

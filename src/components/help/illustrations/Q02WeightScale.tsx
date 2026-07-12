@@ -12,7 +12,7 @@ const CSS = phaseCss(
 /** Дээрээс харсан хөл: сунасан ул + 4 хурууны тойрог (эрхий нь дотогшоо). */
 function Foot({ x, flip = false }: { x: number; flip?: boolean }) {
   return (
-    <g transform={`translate(${x} 86)${flip ? " scale(-1 1)" : ""}`}>
+    <g transform={`translate(${x} 86)${flip ? " scale(-1 1)" : ""} rotate(-6)`}>
       <path d="M-9 18 C-10 27 -5 31 0 31 C5 31 10 27 9 18 C8.3 9 9.8 -8 8.5 -16 C7.8 -21 4.5 -23.5 1 -23 C-4 -22.3 -7.5 -19 -8.6 -14 C-10.3 -4 -8.3 8 -9 18 Z" />
       <g strokeWidth={2}>
         <circle cx={5.5} cy={-27} r={3.2} />

@@ -30,7 +30,6 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
         <path d="M42 97 Q59 78 76 97" />
         {/* шууны үзүүрийн сул атгасан сарвуу */}
         <path d="M106 97 C118 92 132 95 137 104 C141 111 138 118 131 121 C121 125 111 124 104 122" />
-        <path d="M106 99 q-2 6 -1 11" strokeWidth={2} opacity={0.4} />
         <path d="M113 102 q8 3 7 11 M123 101 q8 3 7 11" strokeWidth={2} opacity={0.5} />
         {/* чимхэж буй гар: долоовор + эрхий хуруу, ард нь атгасан хуруунууд, бугуй дээшээ */}
         <g className="q3-pinch q3-anim">
@@ -40,8 +39,6 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
           <path d="M62.5 77 C63.5 80 68.5 80 69.5 77" strokeWidth={1.8} opacity={0.7} />
           <path d="M79 34 C88 27 99 29 103 37 C107 45 104 54 96 58" />
           <path d="M88 39 q7 2 5 10" strokeWidth={2} opacity={0.5} />
-          <path d="M66 24 C74 12 84 6 96 4" />
-          <path d="M103 40 C110 34 116 26 119 16" />
         </g>
       </g>
 

@@ -10,7 +10,9 @@ const CSS = phaseCss(
 .q10-root .q10-rise{animation:q10-up 1.8s linear infinite}
 @keyframes q10-up{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-9px);opacity:0}}
 .q10-root .q10-bob{animation:q10-bb 2.4s ease-in-out infinite}
-@keyframes q10-bb{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}`
+@keyframes q10-bb{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.q10-root .q10-mist{animation:q10-fd 2.8s ease-in-out infinite}
+@keyframes q10-fd{0%,100%{opacity:1}50%{opacity:.45}}`
 );
 
 /** Гар, хөлийн сорил: алгаа хацартаа тавьж дулааныг нь мэдрэх. */
@@ -94,8 +96,12 @@ export function Q10HandTouch({ variant, className, ariaLabel }: HelpIllustration
           />
         </g>
         <g stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" fill="none">
-          <path d="M176 62 q6 4 12 0 q6 -4 12 0 q6 4 12 0" />
-          <path d="M182 74 q6 4 12 0 q6 -4 12 0" />
+          <path className="q10-mist q10-anim" d="M176 62 q6 4 12 0 q6 -4 12 0 q6 4 12 0" />
+          <path
+            className="q10-mist q10-anim"
+            style={{ animationDelay: "-1.4s" }}
+            d="M182 74 q6 4 12 0 q6 -4 12 0"
+          />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

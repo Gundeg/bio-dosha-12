@@ -3,10 +3,28 @@ import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss }
 
 const HELP = QUESTION_HELP[3];
 
+/**
+ * Хореограф: фаз бүрийн эхэнд инсет доторх нугалаа доороосоо өргөгдөж
+ * (scaleY .55→1), тогтсоны дараа л арьсны онцлогийн тэмдгүүд (хагарал /
+ * улайлт / гялбаа) тодорно. Эцсийн байрлал нь атрибутад.
+ */
 const CSS = phaseCss(
   "q3",
   `.q3-root .q3-pinch{animation:q3-squeeze 2s ease-in-out infinite}
-@keyframes q3-squeeze{0%,100%{transform:translateY(0)}50%{transform:translateY(2px)}}`
+@keyframes q3-squeeze{0%,100%{transform:translateY(0)}50%{transform:translateY(2px)}}
+.q3-root .q3-fold-h{animation:q3-fh 9s linear infinite}
+.q3-root .q3-fold-s{animation:q3-fs 9s linear infinite}
+.q3-root .q3-fold-b{animation:q3-fb 9s linear infinite}
+.q3-root .q3-fold-h,.q3-root .q3-fold-s,.q3-root .q3-fold-b{transform-box:fill-box;transform-origin:50% 100%}
+@keyframes q3-fh{0%{transform:scaleY(.55)}4%,30%{transform:scaleY(1)}34%,100%{transform:scaleY(.55)}}
+@keyframes q3-fs{0%,33%{transform:scaleY(.55)}37%,63%{transform:scaleY(1)}67%,100%{transform:scaleY(.55)}}
+@keyframes q3-fb{0%,66%{transform:scaleY(.55)}70%,96%{transform:scaleY(1)}100%{transform:scaleY(.55)}}
+.q3-root .q3-cue-h{animation:q3-cueh 9s linear infinite}
+.q3-root .q3-cue-s{animation:q3-cues 9s linear infinite}
+.q3-root .q3-cue-b{animation:q3-cueb 9s linear infinite}
+@keyframes q3-cueh{0%,6%{opacity:0}9%,30%{opacity:1}34%,100%{opacity:0}}
+@keyframes q3-cues{0%,39%{opacity:0}42%,63%{opacity:1}67%,100%{opacity:0}}
+@keyframes q3-cueb{0%,72%{opacity:0}75%,96%{opacity:1}100%{opacity:0}}`
 );
 
 /** Инсет доторх томруулсан арьсны нугалаа (майхан хэлбэрийн атираа). */
@@ -52,10 +70,13 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
       {/* Х: хуурай — хагарсан зигзаг зураас, гуужсан ширхэг */}
       <g className="q3-ph q3-ph-h">
         <g stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path d="M146.5 88 Q162 86 170 70 L174 60 L178 65 L182 54 L186 65 L190 60 L194 70 Q202 86 217.5 88" />
-          <path d="M168 42 l4 -4 M192 38 l4 4" strokeWidth={2} />
+          <path
+            className="q3-fold-h q3-anim"
+            d="M146.5 88 Q162 86 170 70 L174 60 L178 65 L182 54 L186 65 L190 60 L194 70 Q202 86 217.5 88"
+          />
+          <path className="q3-cue-h q3-anim" d="M168 42 l4 -4 M192 38 l4 4" strokeWidth={2} />
         </g>
-        <g fill={ACCENT.H}>
+        <g className="q3-cue-h q3-anim" fill={ACCENT.H}>
           <circle cx={162} cy={49} r={1.7} />
           <circle cx={202} cy={49} r={1.7} />
         </g>
@@ -64,10 +85,18 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
 
       {/* Ш: дулаан — улайлтын толбо + халууны туяа */}
       <g className="q3-ph q3-ph-s">
-        <ellipse cx={182} cy={76} rx={24} ry={10} fill={ACCENT.S} fillOpacity={0.18} />
+        <ellipse
+          className="q3-cue-s q3-anim"
+          cx={182}
+          cy={76}
+          rx={24}
+          ry={10}
+          fill={ACCENT.S}
+          fillOpacity={0.18}
+        />
         <g stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path d={FOLD_D} />
-          <path d="M166 46 l-5 -9 M182 42 v-10 M198 46 l5 -9" strokeWidth={2} />
+          <path className="q3-fold-s q3-anim" d={FOLD_D} />
+          <path className="q3-cue-s q3-anim" d="M166 46 l-5 -9 M182 42 v-10 M198 46 l5 -9" strokeWidth={2} />
         </g>
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
@@ -75,9 +104,11 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
       {/* Б: чийглэг — усны дусал + гөлгөр гялбааны нум */}
       <g className="q3-ph q3-ph-b">
         <g stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path d={FOLD_D} />
-          <path d="M174 63 Q178 55 184 55" strokeWidth={2} opacity={0.6} />
-          <path d="M197 50 q6.5 9.5 0 15 q-6.5 -5.5 0 -15 z" strokeWidth={2} fill={ACCENT.B} fillOpacity={0.2} />
+          <path className="q3-fold-b q3-anim" d={FOLD_D} />
+          <g className="q3-cue-b q3-anim">
+            <path d="M174 63 Q178 55 184 55" strokeWidth={2} opacity={0.6} />
+            <path d="M197 50 q6.5 9.5 0 15 q-6.5 -5.5 0 -15 z" strokeWidth={2} fill={ACCENT.B} fillOpacity={0.2} />
+          </g>
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

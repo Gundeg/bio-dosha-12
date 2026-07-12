@@ -11,8 +11,12 @@ const CSS = phaseCss(
 @keyframes q4-shv{0%,100%{opacity:1}50%{opacity:.3}}
 .q4-root .q4-rays{animation:q4-glow 2s ease-in-out infinite}
 @keyframes q4-glow{0%,100%{opacity:1}50%{opacity:.45}}
+.q4-root .q4-raywrap{transform-box:fill-box;transform-origin:center;animation:q4-rayrot 14s linear infinite}
+@keyframes q4-rayrot{to{transform:rotate(360deg)}}
 .q4-root .q4-rain{animation:q4-drop 1.2s linear infinite}
-@keyframes q4-drop{0%{transform:translateY(0);opacity:1}80%{opacity:.9}100%{transform:translateY(12px);opacity:0}}`
+@keyframes q4-drop{0%{transform:translateY(0);opacity:1}80%{opacity:.9}100%{transform:translateY(12px);opacity:0}}
+.q4-root .q4-scarf{animation:q4-scv 1.8s ease-in-out infinite}
+@keyframes q4-scv{0%,42%,100%{transform:translateX(0)}10%,32%{transform:translateX(.7px)}21%{transform:translateX(-.7px)}}`
 );
 
 /** Цаг агаарын сорил: хүйтэн / халуун / чийгний аль нь их зовоодог вэ. */
@@ -52,7 +56,7 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
             </g>
           ))}
         </g>
-        <g stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" fill="none">
+        <g className="q4-scarf q4-anim" stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" fill="none">
           <path d="M108 52 Q122 61 136 52" />
           <path d="M129 57 Q133 64 129 71" />
         </g>
@@ -68,8 +72,10 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
       {/* Ш: нар (8 цацрагтай) + толгойноос үсрэх хөлс */}
       <g className="q4-ph q4-ph-s">
         <circle cx={186} cy={38} r={13} stroke={ACCENT.S} strokeWidth={2.5} fill={ACCENT.S} fillOpacity={0.1} />
-        <g className="q4-rays q4-anim" stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round">
-          <path d="M186 21 v-8 M186 55 v8 M169 38 h-8 M203 38 h8 M174 26 l-6 -6 M198 26 l6 -6 M174 50 l-6 6 M198 50 l6 6" />
+        <g className="q4-raywrap q4-anim">
+          <g className="q4-rays q4-anim" stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round">
+            <path d="M186 21 v-8 M186 55 v8 M169 38 h-8 M203 38 h8 M174 26 l-6 -6 M198 26 l6 -6 M174 50 l-6 6 M198 50 l6 6" />
+          </g>
         </g>
         <g
           className="q4-rain q4-anim"

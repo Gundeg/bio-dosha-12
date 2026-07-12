@@ -12,7 +12,11 @@ const CSS = phaseCss(
 .q9-root .q9-drop{animation:q9-dp 2.4s ease-in infinite}
 @keyframes q9-dp{0%{transform:translateY(0);opacity:1}70%{opacity:1}100%{transform:translateY(12px);opacity:0}}
 .q9-root .q9-calm{transform-box:fill-box;transform-origin:center;animation:q9-cm 3.5s ease-in-out infinite}
-@keyframes q9-cm{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}`
+@keyframes q9-cm{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.q9-root .q9-bolt{animation:q9-bf 1.6s ease-in-out infinite}
+@keyframes q9-bf{0%,100%{opacity:1}50%{opacity:.55}}
+.q9-root .q9-bob{animation:q9-qb 2.6s ease-in-out infinite}
+@keyframes q9-qb{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}`
 );
 
 /** Стрессийн сорил: аянга шиг гэнэтийн бэрхшээлд царай ямар хувирахыг харуулна. */
@@ -34,7 +38,12 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
         <path d="M116.5 71 C110 72 109 82 116 84" />
         <path d="M183.5 71 C190 72 191 82 184 84" />
         {/* аянга */}
-        <path d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z" fill="currentColor" fillOpacity={0.05} />
+        <path
+          className="q9-bolt q9-anim"
+          d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z"
+          fill="currentColor"
+          fillOpacity={0.05}
+        />
       </g>
       <g stroke="currentColor" strokeWidth={2} strokeLinecap="round" opacity={0.5}>
         {/* үсний ширхэг */}
@@ -62,10 +71,20 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
           fill={ACCENT.H}
           fillOpacity={0.1}
         />
-        <text x={193} y={44} fontSize={19} fontWeight={700} fill={ACCENT.H} fontFamily="inherit">
+        <text className="q9-bob q9-anim" x={193} y={44} fontSize={19} fontWeight={700} fill={ACCENT.H} fontFamily="inherit">
           ?
         </text>
-        <text x={210} y={62} fontSize={13} fontWeight={700} fill={ACCENT.H} opacity={0.6} fontFamily="inherit">
+        <text
+          className="q9-bob q9-anim"
+          style={{ animationDelay: "-1.3s" }}
+          x={210}
+          y={62}
+          fontSize={13}
+          fontWeight={700}
+          fill={ACCENT.H}
+          opacity={0.6}
+          fontFamily="inherit"
+        >
           ?
         </text>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />

@@ -14,6 +14,8 @@ const CSS = phaseCss(
 .q8-root[data-variant="B"] .q8-fb{animation:none;transform:scaleX(1)}
 .q8-root .q8-dash{animation:q8-dsh 1.4s linear infinite}
 @keyframes q8-dsh{to{stroke-dashoffset:-16}}
+.q8-root .q8-esc{animation:q8-up 2.1s linear infinite}
+@keyframes q8-up{0%{transform:translateY(0);opacity:.85}100%{transform:translateY(-8px);opacity:0}}
 @media (prefers-reduced-motion: reduce){.q8-root .q8-fh{transform:scaleX(.3)}.q8-root .q8-fb{transform:scaleX(1)}}`
 );
 
@@ -86,9 +88,23 @@ export function Q08Memory({ variant, className, ariaLabel }: HelpIllustrationPro
           opacity={0.6}
         />
         <g fill={ACCENT.H}>
-          <circle cx={217} cy={38} r={2.4} opacity={0.9} />
-          <circle cx={223} cy={29} r={2} opacity={0.55} />
-          <circle cx={228} cy={20} r={1.6} opacity={0.3} />
+          <circle className="q8-esc q8-anim" cx={217} cy={38} r={2.4} opacity={0.9} />
+          <circle
+            className="q8-esc q8-anim"
+            style={{ animationDelay: "-.7s" }}
+            cx={223}
+            cy={29}
+            r={2}
+            opacity={0.55}
+          />
+          <circle
+            className="q8-esc q8-anim"
+            style={{ animationDelay: "-1.4s" }}
+            cx={228}
+            cy={20}
+            r={1.6}
+            opacity={0.3}
+          />
         </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>

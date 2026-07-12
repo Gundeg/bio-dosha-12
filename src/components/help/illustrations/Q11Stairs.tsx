@@ -8,7 +8,9 @@ const CSS = phaseCss(
   `.q11-root .q11-blink{animation:q11-bl 1s ease-in-out infinite}
 @keyframes q11-bl{0%,100%{opacity:.9}50%{opacity:.25}}
 .q11-root .q11-puff{animation:q11-pf 1.6s linear infinite}
-@keyframes q11-pf{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-8px);opacity:0}}`
+@keyframes q11-pf{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-8px);opacity:0}}
+.q11-root .q11-climb{animation:q11-cl 1.2s ease-in-out infinite}
+@keyframes q11-cl{0%,100%{transform:translate(-7px,4.5px)}55%{transform:translate(6px,-3.5px)}}`
 );
 
 /** Тэсвэрийн сорил: шатаар өгсөхөд тэнхээ (батерей) хэр хурдан буурах вэ. */
@@ -25,22 +27,24 @@ export function Q11Stairs({ variant, className, ariaLabel }: HelpIllustrationPro
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         {/* шат — зүүнээс баруун тийш өгсөнө; гишгүүр 26, өндөр 16 бүгд тэнцүү */}
         <path d="M18 126 h26 v-16 h26 v-16 h26 v-16 h26 v-16 h26 v-16 h26" />
-        {/* өгсөж буй хүн: толгой, урагш налсан их бие */}
-        <circle cx={117} cy={25} r={8} />
-        <path d="M112.7 31.8 C107.5 40 103.5 47.5 100.5 55" />
-        {/* сэлгүүцэх гар: урд, ард */}
-        <path d="M110 36 L121 46 L129 39" strokeWidth={2.5} />
-        <path d="M110 36 L99.5 45 L91 51" strokeWidth={2.5} />
-        {/* урд хөл — дараагийн гишгүүр дээр нугалсан */}
-        <path d="M100.5 55 L113 62 L108.5 77" />
-        <path d="M108.5 77 L116 77.5" strokeWidth={2.5} />
-        {/* хойд хөл — доод гишгүүр дээр */}
-        <path d="M100.5 55 L95.5 74 L87 92.5" />
-        <path d="M87 92.5 L94.5 93.5" strokeWidth={2.5} />
-        {/* сарвуу — бугуйн үзүүрт жижиг дугуй */}
-        <g fill="currentColor" stroke="none">
-          <circle cx={130} cy={38.5} r={2.2} />
-          <circle cx={90} cy={51.5} r={2.2} />
+        {/* өгсөж буй хүн: толгой, урагш налсан их бие — гишгүүр дагуу хэмнэлтэй өгсөнө */}
+        <g className="q11-climb q11-anim">
+          <circle cx={117} cy={25} r={8} />
+          <path d="M112.7 31.8 C107.5 40 103.5 47.5 100.5 55" />
+          {/* сэлгүүцэх гар: урд, ард */}
+          <path d="M110 36 L121 46 L129 39" strokeWidth={2.5} />
+          <path d="M110 36 L99.5 45 L91 51" strokeWidth={2.5} />
+          {/* урд хөл — дараагийн гишгүүр дээр нугалсан */}
+          <path d="M100.5 55 L113 62 L108.5 77" />
+          <path d="M108.5 77 L116 77.5" strokeWidth={2.5} />
+          {/* хойд хөл — доод гишгүүр дээр */}
+          <path d="M100.5 55 L95.5 74 L87 92.5" />
+          <path d="M87 92.5 L94.5 93.5" strokeWidth={2.5} />
+          {/* сарвуу — бугуйн үзүүрт жижиг дугуй */}
+          <g fill="currentColor" stroke="none">
+            <circle cx={130} cy={38.5} r={2.2} />
+            <circle cx={90} cy={51.5} r={2.2} />
+          </g>
         </g>
         {/* батерей: их бие, толгойн товруу, 3 хэсгийн үүр — тэнцүү зайтай */}
         <rect x={192} y={24} width={22} height={42} rx={3.5} strokeWidth={2.5} />

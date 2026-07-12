@@ -8,7 +8,11 @@ const CSS = phaseCss(
   `.q6-root .q6-flick{animation:q6-flk .9s ease-in-out infinite}
 @keyframes q6-flk{0%,100%{opacity:1;transform:translateY(0)}40%{opacity:.45;transform:translateY(1px)}70%{opacity:.85}}
 .q6-root .q6-steady{animation:q6-std 2s ease-in-out infinite}
-@keyframes q6-std{0%,100%{opacity:1}50%{opacity:.75}}`
+@keyframes q6-std{0%,100%{opacity:1}50%{opacity:.75}}
+.q6-root .q6-min{transform-box:view-box;transform-origin:82px 27px;animation:q6-tick 12s steps(12) infinite}
+@keyframes q6-tick{to{transform:rotate(360deg)}}
+.q6-root .q6-trem{animation:q6-trm .35s ease-in-out infinite}
+@keyframes q6-trm{0%,100%{transform:translateX(0)}30%{transform:translateX(.8px)}70%{transform:translateX(-.8px)}}`
 );
 
 /** Ходоодны дүрс: улаан хоолой дээрээс орж, том биетэй, нарийн гэдэс рүү эргэсэн. */
@@ -39,7 +43,8 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
         {/* ханын цаг — үдийн 12 */}
         <circle cx={82} cy={27} r={15} />
         <path d="M82 14 v4 M82 36 v4 M69 27 h4 M91 27 h4" strokeWidth={2} opacity={0.5} />
-        <path d="M82 27 V16.5 M82 27 L84.5 19.5" strokeWidth={2.2} />
+        <path d="M82 27 L84.5 19.5" strokeWidth={2.2} />
+        <path className="q6-min q6-anim" d="M82 27 V16.5" strokeWidth={2.2} />
         {/* ширээний ирмэг */}
         <path d="M12 122 H148" />
         {/* хоосон таваг: хүрээ + ёроол */}
@@ -76,7 +81,9 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
 
       {/* Ш: ходоодыг дүүргэсэн том хүчтэй дөл + ууртай оч */}
       <g className="q6-ph q6-ph-s">
-        <Stomach c={ACCENT.S} />
+        <g className="q6-trem q6-anim">
+          <Stomach c={ACCENT.S} />
+        </g>
         <g className="q6-steady q6-anim">
           <path
             d="M172 62 c7 9 11.5 15 10 23 a12 12 0 0 1 -24 1 c-1.8 -9 4.5 -12.5 8 -17 c1 4.5 3 6.5 6.5 9.5 c1.8 -6 0 -10.5 -.5 -16.5 z"

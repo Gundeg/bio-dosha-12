@@ -3,11 +3,32 @@ import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss }
 
 const HELP = QUESTION_HELP[2];
 
+/**
+ * Хореограф: фаз бүрийн эхэнд хоол тавган дээр ширхэг ширхэгээрээ гарч ирж
+ * (pop + stagger), дараа нь л дэлгэцийн заалт асна. Эцсийн байрлал нь
+ * атрибутад — царцаасан үед бүрэн төлөв шууд харагдана.
+ */
 const CSS = phaseCss(
   "q2",
   `.q2-root .q2-blink{animation:q2-blink 1.6s ease-in-out infinite}
-@keyframes q2-blink{0%,100%{opacity:1}50%{opacity:.25}}`
+@keyframes q2-blink{0%,100%{opacity:1}50%{opacity:.25}}
+.q2-root .q2-food-h{animation:q2-fdh 9s linear infinite}
+.q2-root .q2-food-s{animation:q2-fds 9s linear infinite}
+.q2-root .q2-food-b{animation:q2-fdb 9s linear infinite}
+.q2-root .q2-food-h,.q2-root .q2-food-s,.q2-root .q2-food-b{transform-box:fill-box;transform-origin:center}
+@keyframes q2-fdh{0%{opacity:0;transform:scale(.4)}1.4%{opacity:1;transform:scale(1.15)}2.2%,30%{opacity:1;transform:scale(1)}34%,100%{opacity:0;transform:scale(.4)}}
+@keyframes q2-fds{0%,33%{opacity:0;transform:scale(.4)}34.4%{opacity:1;transform:scale(1.15)}35.2%,63%{opacity:1;transform:scale(1)}67%,100%{opacity:0;transform:scale(.4)}}
+@keyframes q2-fdb{0%,66%{opacity:0;transform:scale(.4)}67.4%{opacity:1;transform:scale(1.15)}68.2%,96%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.4)}}
+.q2-root .q2-dsp-h{animation:q2-dsph 9s linear infinite}
+.q2-root .q2-dsp-s{animation:q2-dsps 9s linear infinite}
+.q2-root .q2-dsp-b{animation:q2-dspb 9s linear infinite}
+@keyframes q2-dsph{0%,12%{opacity:0}15%,30%{opacity:1}34%,100%{opacity:0}}
+@keyframes q2-dsps{0%,43%{opacity:0}46%,63%{opacity:1}67%,100%{opacity:0}}
+@keyframes q2-dspb{0%,74%{opacity:0}77%,96%{opacity:1}100%{opacity:0}}`
 );
+
+/** Идсэн хоолны ээлж: i дэх элемент 0.25·i секундын дараа гарч ирнэ. */
+const foodDelay = (i: number) => ({ animationDelay: `${(i * 0.25 - 9).toFixed(2)}s` });
 
 /** Дээрээс харсан хөл: сунасан ул + 4 хурууны тойрог (эрхий нь дотогшоо). */
 function Foot({ x, flip = false }: { x: number; flip?: boolean }) {
@@ -57,33 +78,50 @@ export function Q02WeightScale({ variant, className, ariaLabel }: HelpIllustrati
       {/* Х: таваг дүүрэн идсэн ч заалт доошоо — жин нэмэгддэггүй */}
       <g className="q2-ph q2-ph-h">
         <rect x={132} y={27} width={36} height={12} rx={2.5} fill={ACCENT.H} fillOpacity={0.1} />
-        <path d="M24 88 Q44 58 64 88" stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" fill="none" />
-        <g fill={ACCENT.H}>
-          <circle cx={36} cy={80} r={2.4} />
-          <circle cx={44} cy={73} r={2.4} />
-          <circle cx={52} cy={80} r={2.4} />
-        </g>
         <path
-          className="q2-blink q2-anim"
-          d="M150 27 v12 m0 0 l-4.5 -5 m4.5 5 l4.5 -5"
+          className="q2-food-h q2-anim"
+          d="M24 88 Q44 58 64 88"
           stroke={ACCENT.H}
           strokeWidth={2.5}
           strokeLinecap="round"
-          strokeLinejoin="round"
           fill="none"
         />
+        <g fill={ACCENT.H}>
+          <circle className="q2-food-h q2-anim" style={foodDelay(1)} cx={36} cy={80} r={2.4} />
+          <circle className="q2-food-h q2-anim" style={foodDelay(2)} cx={44} cy={73} r={2.4} />
+          <circle className="q2-food-h q2-anim" style={foodDelay(3)} cx={52} cy={80} r={2.4} />
+        </g>
+        <g className="q2-dsp-h q2-anim">
+          <path
+            className="q2-blink q2-anim"
+            d="M150 27 v12 m0 0 l-4.5 -5 m4.5 5 l4.5 -5"
+            stroke={ACCENT.H}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
       {/* Ш: дунд зэрэг идээд заалт тэнцүү — тогтвортой */}
       <g className="q2-ph q2-ph-s">
         <rect x={132} y={27} width={36} height={12} rx={2.5} fill={ACCENT.S} fillOpacity={0.1} />
-        <path d="M28 88 Q44 68 60 88" stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round" fill="none" />
+        <path
+          className="q2-food-s q2-anim"
+          d="M28 88 Q44 68 60 88"
+          stroke={ACCENT.S}
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          fill="none"
+        />
         <g fill={ACCENT.S}>
-          <circle cx={38} cy={81} r={2.4} />
-          <circle cx={50} cy={81} r={2.4} />
+          <circle className="q2-food-s q2-anim" style={foodDelay(1)} cx={38} cy={81} r={2.4} />
+          <circle className="q2-food-s q2-anim" style={foodDelay(2)} cx={50} cy={81} r={2.4} />
         </g>
         <path
+          className="q2-dsp-s q2-anim"
           d="M144 30 h12 M144 36 h12"
           stroke={ACCENT.S}
           strokeWidth={2.5}
@@ -95,17 +133,26 @@ export function Q02WeightScale({ variant, className, ariaLabel }: HelpIllustrati
       {/* Б: бага идсэн ч заалт дээшээ — жин буурдаггүй */}
       <g className="q2-ph q2-ph-b">
         <rect x={132} y={27} width={36} height={12} rx={2.5} fill={ACCENT.B} fillOpacity={0.1} />
-        <path d="M33 88 Q44 76 55 88" stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round" fill="none" />
-        <circle cx={44} cy={83} r={2.4} fill={ACCENT.B} />
         <path
-          className="q2-blink q2-anim"
-          d="M150 39 V27 m0 0 l-4.5 5 m4.5 -5 l4.5 5"
+          className="q2-food-b q2-anim"
+          d="M33 88 Q44 76 55 88"
           stroke={ACCENT.B}
           strokeWidth={2.5}
           strokeLinecap="round"
-          strokeLinejoin="round"
           fill="none"
         />
+        <circle className="q2-food-b q2-anim" style={foodDelay(1)} cx={44} cy={83} r={2.4} fill={ACCENT.B} />
+        <g className="q2-dsp-b q2-anim">
+          <path
+            className="q2-blink q2-anim"
+            d="M150 39 V27 m0 0 l-4.5 5 m4.5 -5 l4.5 5"
+            stroke={ACCENT.B}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>
     </IllustrationRoot>

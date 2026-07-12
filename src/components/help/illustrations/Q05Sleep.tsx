@@ -21,71 +21,77 @@ export function Q05Sleep({ variant, className, ariaLabel }: HelpIllustrationProp
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: сар, одод, нойрны хугацааны зурвас */}
+      {/* Суурь: сар + одод, хажуугаас харсан ор — толгойвч, гудас, дэр, хүн, хөнжил */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M46 24 a14 14 0 1 0 10 24 a11 11 0 1 1 -10 -24 z" />
-        <path d="M76 30 v8 M72 34 h8 M92 46 v6 M89 49 h6" strokeWidth={1.8} opacity={0.5} />
-        <rect x={40} y={104} width={160} height={14} rx={7} />
+        {/* хавирган сар + одод */}
+        <path d="M30 12 a11 11 0 1 0 8 19 a8.5 8.5 0 1 1 -8 -19 z" />
+        <path d="M54 14 v8 M50 18 h8 M98 14 v6 M95 17 h6" strokeWidth={1.8} opacity={0.5} />
+        {/* орны толгойвч ба хөлийн багана (бөмбөлөгтэй) */}
+        <path d="M40 114 V48" />
+        <circle cx={40} cy={43} r={4.5} />
+        <path d="M202 114 V70" />
+        <circle cx={202} cy={66} r={4} />
+        {/* гудас/хүрээ */}
+        <rect x={44} y={88} width={154} height={18} rx={6} />
+        {/* шал */}
+        <path d="M28 114 H214" strokeWidth={2} opacity={0.4} />
+        {/* дэр — намхан дов, дээр нь толгой */}
+        <path d="M48 88 Q47 76 59 75 L77 75 Q89 76 89 88" />
+        {/* толгой дэрэн дээр */}
+        <circle cx={68} cy={66} r={9} />
+        {/* хөнжил — цээж, өвдөгний товгортой, хөлийн тавцан хүртэл */}
+        <path d="M79 71 Q95 60 111 65 Q124 69 134 71 Q149 68 159 74 Q177 82 195 87" />
+        <path d="M105 66 q5 9 2 16" strokeWidth={2} opacity={0.5} />
       </g>
-      <text x={40} y={132} fontSize={9} fill="currentColor" opacity={0.55} fontFamily="inherit">
-        0ц
-      </text>
-      <text
-        x={200}
-        y={132}
-        fontSize={9}
-        fill="currentColor"
-        opacity={0.55}
-        textAnchor="end"
-        fontFamily="inherit"
-      >
-        12ц
-      </text>
 
-      {/* Х: богино нойр + сэрэлтүүд */}
+      {/* Х: нүд нээлттэй + сэрээх «!» анивчина */}
       <g className="q5-ph q5-ph-h">
-        <rect x={43} y={107} width={72} height={8} rx={4} fill={ACCENT.H} opacity={0.5} />
-        <g className="q5-blink q5-anim" stroke={ACCENT.H} strokeWidth={2.2} strokeLinecap="round">
-          <path d="M70 98 v-8 M70 86 v-1.5" />
-          <path d="M96 98 v-8 M96 86 v-1.5" />
+        <circle cx={65} cy={64.5} r={1.8} fill={ACCENT.H} />
+        <g className="q5-blink q5-anim">
+          <text x={68} y={47} fontSize={15} fontWeight={700} fill={ACCENT.H} textAnchor="middle" fontFamily="inherit">
+            !
+          </text>
+          <path d="M59 41 l-6 -4 M77 41 l6 -4" stroke={ACCENT.H} strokeWidth={2} strokeLinecap="round" />
         </g>
-        <text x={198} y={97} fontSize={11.5} fontWeight={700} fill={ACCENT.H} textAnchor="end" fontFamily="inherit">
+        <text x={210} y={32} fontSize={11.5} fontWeight={700} fill={ACCENT.H} textAnchor="end" fontFamily="inherit">
           5–6ц
         </text>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
-      {/* Ш: тогтмол 7–8 цаг */}
+      {/* Ш: нүд аниастай, тайван + тэмдэг */}
       <g className="q5-ph q5-ph-s">
-        <rect x={43} y={107} width={104} height={8} rx={4} fill={ACCENT.S} opacity={0.5} />
+        <path d="M61.5 64.5 q3.5 3 7 0" stroke={ACCENT.S} strokeWidth={2} strokeLinecap="round" fill="none" />
         <path
-          d="M156 94 l5 5 9 -9"
+          d="M142 34 l6 6 12 -12"
           stroke={ACCENT.S}
           strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
+          fill="none"
         />
-        <text x={198} y={97} fontSize={11.5} fontWeight={700} fill={ACCENT.S} textAnchor="end" fontFamily="inherit">
+        <text x={210} y={32} fontSize={11.5} fontWeight={700} fill={ACCENT.S} textAnchor="end" fontFamily="inherit">
           7–8ц
         </text>
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
-      {/* Б: гүн урт нойр */}
+      {/* Б: гүн нойр — Z z z хөвнө, хөнжил гүнзгий нугалаастай */}
       <g className="q5-ph q5-ph-b">
-        <rect x={43} y={107} width={140} height={8} rx={4} fill={ACCENT.B} opacity={0.5} />
+        <path d="M61.5 64.5 q3.5 3 7 0" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" fill="none" />
+        <path d="M119 70 q6 9 3 15" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" fill="none" />
         <g className="q5-float q5-anim">
-          <text x={160} y={88} fontSize={14} fontWeight={700} fill={ACCENT.B} fontFamily="inherit">
+          <text x={84} y={52} fontSize={14} fontWeight={700} fill={ACCENT.B} fontFamily="inherit">
             Z
           </text>
-          <text x={172} y={80} fontSize={11} fontWeight={700} fill={ACCENT.B} fontFamily="inherit">
+          <text x={97} y={43} fontSize={11} fontWeight={700} fill={ACCENT.B} fontFamily="inherit">
             z
           </text>
-          <text x={181} y={73} fontSize={8.5} fontWeight={700} fill={ACCENT.B} fontFamily="inherit">
+          <text x={107} y={35} fontSize={8.5} fontWeight={700} fill={ACCENT.B} fontFamily="inherit">
             z
           </text>
         </g>
-        <text x={198} y={97} fontSize={11.5} fontWeight={700} fill={ACCENT.B} textAnchor="end" fontFamily="inherit">
+        <text x={210} y={32} fontSize={11.5} fontWeight={700} fill={ACCENT.B} textAnchor="end" fontFamily="inherit">
           9+ц
         </text>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />

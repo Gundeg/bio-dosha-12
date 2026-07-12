@@ -23,8 +23,8 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: газар ба алхаж буй хүн */}
-      <path d="M20 124 H220" stroke="currentColor" strokeWidth={2} opacity={0.4} strokeLinecap="round" />
+      {/* Суурь: газар ба баруун тийш алхаж буй хүн (хажуугаас) */}
+      <path d="M16 123 H224" stroke="currentColor" strokeWidth={2} opacity={0.4} strokeLinecap="round" />
       <g
         className="q7-fig q7-anim"
         stroke="currentColor"
@@ -32,46 +32,62 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <circle cx={138} cy={52} r={9} />
-        <path d="M138 61 L132 92" />
-        <path d="M136 68 L120 80 M136 68 L152 78" />
-        <path d="M132 92 L114 122 M132 92 L148 120" />
+        <circle cx={150} cy={42} r={9.5} />
+        {/* их бие — урагш бага зэрэг налсан */}
+        <path d="M147 53 L138 90" />
+        {/* гар: урд гар урагш, хойд гар хойш — хоёулаа тохойгоор нугарсан */}
+        <path d="M145 61 L158 71 L172 64" />
+        <path d="M145 61 L133 72 L120 66" />
+        {/* урд хөл сунгаж, өсгийгөөр газардана; ул хуруу өргөгдсөн */}
+        <path d="M138 90 L155 104 L166 121" />
+        <path d="M166 121 L176 116" />
+        {/* хойд хөл ардаа, хурууны үзүүрээр түлхэнэ */}
+        <path d="M138 90 L130 106 L118 117" />
+        <path d="M118 117 L110 122" />
       </g>
 
-      {/* Х: олон хурдны зураас + олон үгтэй ярианы бөмбөлөг */}
+      {/* Х: ард нь 3 урт хурдны зураас + том ярианы бөмбөлөг + жижиг хоёр дахь бөмбөлөг */}
       <g className="q7-ph q7-ph-h">
         <g className="q7-lines q7-anim" stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round">
-          <path d="M58 60 h26 M48 78 h30 M58 96 h24" />
+          <path d="M56 60 h32 M46 78 h36 M56 96 h30" />
         </g>
-        <ellipse cx={70} cy={34} rx={22} ry={13} stroke={ACCENT.H} strokeWidth={2.2} />
-        <path d="M84 44 l7 8" stroke={ACCENT.H} strokeWidth={2.2} strokeLinecap="round" />
+        <g stroke={ACCENT.H} strokeWidth={2.2} fill="none">
+          <ellipse cx={193} cy={28} rx={20} ry={12} />
+          <ellipse cx={222} cy={49} rx={9} ry={6.5} />
+        </g>
+        <path d="M180 37 L167 49 L188 39 Z" fill={ACCENT.H} />
+        <path d="M216 53 L210 61 L221 55 Z" fill={ACCENT.H} />
         <g fill={ACCENT.H}>
-          <circle cx={61} cy={34} r={2.2} />
-          <circle cx={70} cy={34} r={2.2} />
-          <circle cx={79} cy={34} r={2.2} />
+          <circle cx={185} cy={28} r={2.2} />
+          <circle cx={193} cy={28} r={2.2} />
+          <circle cx={201} cy={28} r={2.2} />
         </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
-      {/* Ш: зорилготой шулуун сум */}
+      {/* Ш: урагш чиглэсэн ганц зорилготой сум + 2 хурдны зураас */}
       <g className="q7-ph q7-ph-s">
-        <g stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M52 84 h44 m0 0 l-8 -5 m8 5 l-8 5" />
-          <g className="q7-lines q7-anim">
-            <path d="M60 66 h22 M60 102 h22" strokeWidth={2} />
-          </g>
+        <path
+          d="M180 76 H214 M214 76 l-9 -5.5 M214 76 l-9 5.5"
+          stroke={ACCENT.S}
+          strokeWidth={3.2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <g className="q7-lines q7-anim" stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round">
+          <path d="M58 68 h28 M62 90 h24" />
         </g>
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
-      {/* Б: нэг богино зураас + цөөн үгтэй бөмбөлөг */}
+      {/* Б: нэг богино зураас + нэг цэгтэй жижиг бөмбөлөг — бүгд тайван */}
       <g className="q7-ph q7-ph-b">
         <g className="q7-slow q7-anim" stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round">
-          <path d="M66 84 h14" />
+          <path d="M70 84 h16" />
         </g>
-        <ellipse cx={72} cy={40} rx={13} ry={9} stroke={ACCENT.B} strokeWidth={2.2} />
-        <path d="M81 47 l5 6" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" />
-        <circle cx={72} cy={40} r={2} fill={ACCENT.B} />
+        <ellipse cx={190} cy={32} rx={12} ry={8.5} stroke={ACCENT.B} strokeWidth={2.2} />
+        <path d="M182 38 L173 47 L188 40 Z" fill={ACCENT.B} />
+        <circle cx={190} cy={32} r={2} fill={ACCENT.B} />
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>
     </IllustrationRoot>

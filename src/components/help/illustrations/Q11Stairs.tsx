@@ -21,41 +21,61 @@ export function Q11Stairs({ variant, className, ariaLabel }: HelpIllustrationPro
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: шат, өгсөж буй хүн, тэнхээний батерей */}
+      {/* Суурь: 5 гишгүүрт шат, дундаа өгсөж буй хүн, баруун дээд буланд батерей */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M28 128 h28 v-18 h28 v-18 h28 v-18 h28 v-18 h28" />
-        <circle cx={121} cy={58} r={8} />
-        <path d="M121 66 L117 81" />
-        <path d="M119 70 L129 77 M119 70 L109 76" strokeWidth={2.2} />
-        <path d="M117 81 L108 92 M117 81 L125 90" strokeWidth={2.2} />
-        <rect x={192} y={26} width={20} height={36} rx={3} strokeWidth={2.2} />
-        <path d="M198 26 v-4 h8 v4" strokeWidth={2.2} />
+        {/* шат — зүүнээс баруун тийш өгсөнө */}
+        <path d="M18 126 h26 v-16 h26 v-16 h26 v-16 h26 v-16 h26 v-16 h28" />
+        {/* өгсөж буй хүн: толгой, урагш налсан их бие */}
+        <circle cx={117} cy={25} r={8} />
+        <path d="M111 33 C106.5 40 102.5 47 100.5 55" />
+        {/* сэлгүүцэх гар: урд, ард */}
+        <path d="M110 36 L121 46 L129 39" strokeWidth={2.4} />
+        <path d="M110 36 L99.5 45 L91 51" strokeWidth={2.4} />
+        {/* урд хөл — дараагийн гишгүүр дээр нугалсан */}
+        <path d="M100.5 55 L113 62 L108.5 77" />
+        <path d="M108.5 77 L116 77.5" strokeWidth={2.4} />
+        {/* хойд хөл — доод гишгүүр дээр */}
+        <path d="M100.5 55 L95.5 74 L87 92.5" />
+        <path d="M87 92.5 L94.5 93.5" strokeWidth={2.4} />
+        {/* батерей: их бие, толгойн товруу, 3 хэсгийн үүр */}
+        <rect x={192} y={24} width={22} height={42} rx={3.5} strokeWidth={2.2} />
+        <path d="M198 24 v-5 h10 v5" strokeWidth={2.2} />
+        <rect x={196} y={29} width={14} height={9} rx={1.5} strokeWidth={1.6} opacity={0.4} />
+        <rect x={196} y={41} width={14} height={9} rx={1.5} strokeWidth={1.6} opacity={0.4} />
+        <rect x={196} y={53} width={14} height={9} rx={1.5} strokeWidth={1.6} opacity={0.4} />
       </g>
 
-      {/* Х: тэнхээ хурдан дуусна — 1 хэсэг анивчина, амьсгаадалт */}
+      {/* Х: тэнхээ хурдан дуусна — 1 хэсэг анивчина, амьсгаадалт, хөлс */}
       <g className="q11-ph q11-ph-h">
-        <rect className="q11-blink q11-anim" x={195} y={51} width={14} height={8} rx={2} fill={ACCENT.H} />
+        <rect className="q11-blink q11-anim" x={196} y={53} width={14} height={9} rx={1.5} fill={ACCENT.H} />
         <g className="q11-puff q11-anim" stroke={ACCENT.H} strokeWidth={2} fill="none">
-          <circle cx={136} cy={50} r={3.2} />
-          <circle cx={143} cy={43} r={2.4} />
+          <circle cx={132} cy={24} r={3.4} />
+          <circle cx={139} cy={17} r={2.5} />
         </g>
+        <path
+          d="M146 28 q5 7.5 0 12 q-5 -4.5 0 -12 z"
+          stroke={ACCENT.H}
+          strokeWidth={1.8}
+          fill={ACCENT.H}
+          fillOpacity={0.25}
+        />
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
       {/* Ш: дундаж — 2 хэсэг тогтвортой */}
       <g className="q11-ph q11-ph-s">
-        <rect x={195} y={51} width={14} height={8} rx={2} fill={ACCENT.S} />
-        <rect x={195} y={41} width={14} height={8} rx={2} fill={ACCENT.S} opacity={0.8} />
+        <rect x={196} y={53} width={14} height={9} rx={1.5} fill={ACCENT.S} />
+        <rect x={196} y={41} width={14} height={9} rx={1.5} fill={ACCENT.S} opacity={0.85} />
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
       {/* Б: өндөр тэсвэр — 3 хэсэг дүүрэн + тэмдэг */}
       <g className="q11-ph q11-ph-b">
-        <rect x={195} y={51} width={14} height={8} rx={2} fill={ACCENT.B} />
-        <rect x={195} y={41} width={14} height={8} rx={2} fill={ACCENT.B} opacity={0.85} />
-        <rect x={195} y={31} width={14} height={8} rx={2} fill={ACCENT.B} opacity={0.7} />
+        <rect x={196} y={53} width={14} height={9} rx={1.5} fill={ACCENT.B} />
+        <rect x={196} y={41} width={14} height={9} rx={1.5} fill={ACCENT.B} opacity={0.85} />
+        <rect x={196} y={29} width={14} height={9} rx={1.5} fill={ACCENT.B} opacity={0.7} />
         <path
-          d="M192 72 l5 5 9 -9"
+          d="M195 76 l6 6 11 -11"
           stroke={ACCENT.B}
           strokeWidth={2.5}
           strokeLinecap="round"

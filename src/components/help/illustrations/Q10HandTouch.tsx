@@ -23,40 +23,57 @@ export function Q10HandTouch({ variant, className, ariaLabel }: HelpIllustration
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: царай + хацарт хүрсэн алга */}
+      {/* Суурь: баруун тийш харсан профиль царай + хацарт тавьсан алга */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx={78} cy={78} r={26} />
-        <circle cx={70} cy={72} r={2.2} fill="currentColor" stroke="none" />
-        <circle cx={87} cy={72} r={2.2} fill="currentColor" stroke="none" />
-        <path d="M70 88 q8 6 16 0" strokeWidth={2} />
-        <rect x={112} y={56} width={42} height={52} rx={16} transform="rotate(-8 133 82)" />
-        <path d="M112 94 q-9 -7 -4 -17" strokeWidth={2.2} />
-        <path d="M124 56 v13 M134 55 v13 M144 56 v12" strokeWidth={2} opacity={0.6} />
+        {/* дух → хамар → уруул → эрүү → эрүүний шугам */}
+        <path d="M105 18 C122 17 135 27 139 42 C140 46 139 50 140 53 C146 57 151 61 149.5 65.5 C148 68.5 143 69 140.5 69.5 C144.5 71.5 145.5 74.5 141.5 76.5 C145.5 79 146.5 83 141 85.5 C146 88.5 147.5 93.5 143 97 C138.5 100.5 132.5 103 127 104" />
+        {/* толгойн ар тал, үс */}
+        <path d="M105 18 C85 14 67 24 62 42 C58 57 61 70 59 80" />
+        <path d="M104 19 C112 23 117 29 119 36" strokeWidth={2} opacity={0.5} />
+        {/* хүзүү: ар, урд */}
+        <path d="M59 84 C60 97 57 110 51 121" />
+        <path d="M129 106 C133 114 139 120 147 124" />
+        {/* чих — алганы ард хагас харагдана */}
+        <path d="M78 61 C88 58.5 90.5 70 84 77.5 C80 81 76.5 78.5 77.5 73.5" strokeWidth={2.2} />
+        {/* аниастай нүд + хөмсөг */}
+        <path d="M126 54 q5.5 4 10.5 1.5" strokeWidth={2} />
+        <path d="M125 45 q6.5 -3.5 12 -1" strokeWidth={2} opacity={0.7} />
+        {/* хацар дээрх алга: 4 шовх хуруу дээшээ, эрхий эрүү дагуу */}
+        <path d="M90 103 L90.5 77 C90.6 72 90.8 67.5 91.1 63.8 C91.6 60 96.8 60 97.3 63.8 C97.6 67.5 97.8 71.5 98 75.2 C98.3 70 98.6 61.5 98.9 57.3 C99.4 53.4 104.6 53.4 105.1 57.3 C105.4 61.5 105.6 70 105.8 74.8 C106.1 69.5 106.4 60 106.7 55.8 C107.2 51.9 112.4 51.9 112.9 55.8 C113.2 60 113.4 69.5 113.6 74.6 C113.9 69.5 114.2 63 114.5 59.3 C115 55.4 120.2 55.4 120.7 59.3 C121 63.5 121.2 70 121.4 76.5 L121.6 82 C124.8 83.4 128.6 86.8 130.8 90.6 C132.8 94.2 129.8 97.4 126.3 95.6 C123.2 94 120.6 91.6 119 89.4 C119.6 94.4 118.9 99.6 116.8 103 C109.5 107.6 96.5 107.6 90 103" />
+        {/* бугуй, шуу доошоо */}
+        <path d="M96 107.4 C95.2 113 95.2 119 96 124.5" />
+        <path d="M114 106.8 C115 113 115.3 119 114.8 124.5" />
       </g>
 
-      {/* Х: хүйтэн — цасан ширхэг, хуурай зураас */}
+      {/* Х: хүйтэн — 6 салаат цасан ширхэг эргэлдэнэ + хуурай зураас */}
       <g className="q10-ph q10-ph-h">
-        <g className="q10-spin q10-anim" stroke={ACCENT.H} strokeWidth={2} strokeLinecap="round">
-          <path d="M192 32 V56 M182 37 L202 51 M202 37 L182 51" />
-        </g>
-        <path
-          d="M166 76 l5 5 M176 86 l5 5"
+        <g
+          className="q10-spin q10-anim"
           stroke={ACCENT.H}
           strokeWidth={2}
           strokeLinecap="round"
-        />
+          strokeLinejoin="round"
+          fill="none"
+        >
+          <path d="M196 32 V60 M183.9 39 L208.1 53 M208.1 39 L183.9 53" />
+          <path
+            d="M193.8 32.7 L196 36.5 L198.2 32.7 M193.8 59.3 L196 55.5 L198.2 59.3 M206.4 37.4 L204.2 41.3 L208.6 41.3 M185.6 54.6 L187.8 50.8 L183.4 50.8 M185.6 37.4 L187.8 41.3 L183.4 41.3 M206.4 54.6 L204.2 50.8 L208.6 50.8"
+            strokeWidth={1.8}
+          />
+        </g>
+        <path d="M167 74 l7 7 M176 88 l7 7" stroke={ACCENT.H} strokeWidth={2} strokeLinecap="round" />
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
-      {/* Ш: халуун — дээш өгсөх илчний долгион + хөлс */}
+      {/* Ш: халуун — гар орчмоос өгсөх илчний долгион + хөлсний дусал */}
       <g className="q10-ph q10-ph-s">
         <g className="q10-rise q10-anim" stroke={ACCENT.S} strokeWidth={2.2} strokeLinecap="round" fill="none">
-          <path d="M152 44 q4 -6 0 -12 q-4 -6 0 -12" />
-          <path d="M168 46 q4 -6 0 -12 q-4 -6 0 -12" />
-          <path d="M184 44 q4 -6 0 -12 q-4 -6 0 -12" />
+          <path d="M156 50 q4 -6 0 -12 q-4 -6 0 -12" />
+          <path d="M170 48 q4 -6 0 -12 q-4 -6 0 -12" />
+          <path d="M184 50 q4 -6 0 -12 q-4 -6 0 -12" />
         </g>
         <path
-          d="M204 54 q5.5 8 0 13 q-5.5 -5 0 -13 z"
+          d="M200 58 q5.5 8 0 13 q-5.5 -5 0 -13 z"
           stroke={ACCENT.S}
           strokeWidth={1.8}
           fill={ACCENT.S}
@@ -69,7 +86,7 @@ export function Q10HandTouch({ variant, className, ariaLabel }: HelpIllustration
       <g className="q10-ph q10-ph-b">
         <g className="q10-bob q10-anim">
           <path
-            d="M188 34 q7 10 0 16 q-7 -6 0 -16 z"
+            d="M192 30 q7 10 0 16 q-7 -6 0 -16 z"
             stroke={ACCENT.B}
             strokeWidth={2}
             fill={ACCENT.B}
@@ -77,8 +94,8 @@ export function Q10HandTouch({ variant, className, ariaLabel }: HelpIllustration
           />
         </g>
         <g stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" fill="none">
-          <path d="M172 62 q6 4 12 0 q6 -4 12 0" />
-          <path d="M176 72 q6 4 12 0" />
+          <path d="M176 62 q6 4 12 0 q6 -4 12 0 q6 4 12 0" />
+          <path d="M182 74 q6 4 12 0 q6 -4 12 0" />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

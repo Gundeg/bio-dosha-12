@@ -25,67 +25,67 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: хүн дүрс */}
+      {/* Суурь: дээлтэй хүн — толгой, хүзүү, ханцуйтай их бие, хөл */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx={120} cy={54} r={10} />
-        <path d="M120 64 V98" />
-        <path d="M120 72 L104 84 M120 72 L136 84" />
-        <path d="M120 98 L108 122 M120 98 L132 122" />
+        <circle cx={122} cy={34} r={11} />
+        <path d="M118 45 L117 50 M126 45 L127 50" strokeWidth={2} />
+        {/* дээлийн силуэт: мөр → ханцуй → бугуйвч → суга → хормой */}
+        <path d="M112 50 C104 51 98 54 96 59 L74 90 Q71 94 75 96 L84 98 Q88 99 89 95 L104 72 L99 106 L145 106 L140 72 L155 95 Q156 99 160 98 L169 96 Q173 94 170 90 L148 59 C146 54 140 51 132 50" />
+        {/* энгэрийн зах + бүс */}
+        <path d="M122 56 V80 M103 84 H141" strokeWidth={2} opacity={0.5} />
+        {/* хөл, ул */}
+        <path d="M112 106 V121 H104 M132 106 V121 H140" />
       </g>
 
-      {/* Х: цасан ширхэг + чичрэх */}
+      {/* Х: 6 салаат цасан ширхэг + ороолт + чичрэх */}
       <g className="q4-ph q4-ph-h">
-        <g
-          className="q4-spin q4-anim"
-          stroke={ACCENT.H}
-          strokeWidth={2}
-          strokeLinecap="round"
-        >
-          <path d="M58 30 V56 M47 36 L69 50 M69 36 L47 50" />
+        <g className="q4-spin q4-anim" stroke={ACCENT.H} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none">
+          {[0, 60, 120].map((a) => (
+            <g key={a} transform={`rotate(${a} 54 42)`}>
+              <path d="M54 22 V62" />
+              <path d="M49 24 L54 29 L59 24 M49 60 L54 55 L59 60" />
+            </g>
+          ))}
         </g>
-        <g
-          className="q4-shiver q4-anim"
-          stroke={ACCENT.H}
-          strokeWidth={2}
-          strokeLinecap="round"
-          fill="none"
-        >
-          <path d="M96 76 q-6 9 0 18" />
-          <path d="M144 76 q6 9 0 18" />
+        <g stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" fill="none">
+          <path d="M108 52 Q122 61 136 52" />
+          <path d="M129 57 Q133 64 129 71" />
+        </g>
+        <g className="q4-shiver q4-anim" stroke={ACCENT.H} strokeWidth={2} strokeLinecap="round" fill="none">
+          <path d="M76 58 q-8 10 0 20" />
+          <path d="M67 64 q-6 7 0 14" />
+          <path d="M168 58 q8 10 0 20" />
+          <path d="M177 64 q6 7 0 14" />
         </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
-      {/* Ш: нар + хөлс */}
+      {/* Ш: нар (8 цацрагтай) + толгойноос үсрэх хөлс */}
       <g className="q4-ph q4-ph-s">
-        <circle cx={182} cy={40} r={10} stroke={ACCENT.S} strokeWidth={2.5} />
+        <circle cx={186} cy={38} r={13} stroke={ACCENT.S} strokeWidth={2.5} />
         <g className="q4-rays q4-anim" stroke={ACCENT.S} strokeWidth={2} strokeLinecap="round">
-          <path d="M182 24 v-6 M182 56 v6 M166 40 h-6 M198 40 h6 M170 28 l-4 -4 M194 28 l4 -4 M170 52 l-4 4 M194 52 l4 4" />
+          <path d="M186 21 v-8 M186 55 v8 M169 38 h-8 M203 38 h8 M174 26 l-6 -6 M198 26 l6 -6 M174 50 l-6 6 M198 50 l6 6" />
         </g>
-        <g className="q4-rain q4-anim">
-          <path
-            d="M140 58 q4.5 6.5 0 11 q-4.5 -4.5 0 -11 z"
-            stroke={ACCENT.S}
-            strokeWidth={1.8}
-            fill={ACCENT.S}
-            fillOpacity={0.25}
-          />
+        <g className="q4-rain q4-anim" stroke={ACCENT.S} strokeWidth={1.8} fill={ACCENT.S} fillOpacity={0.25}>
+          <path d="M141 27 q4.5 6.5 0 11 q-4.5 -4.5 0 -11 z" />
+          <path d="M148 43 q4 6 0 10 q-4 -4 0 -10 z" />
+          <path d="M100 34 q4 6 0 10 q-4 -4 0 -10 z" />
         </g>
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
-      {/* Б: борооны үүл + шалбааг */}
+      {/* Б: борооны үүл + бороо + хөл доорх шалбааг */}
       <g className="q4-ph q4-ph-b">
         <path
-          d="M56 46 a9 9 0 0 1 15 -7 a10 10 0 0 1 18 3 a8 8 0 0 1 5 12 h-36 a8 8 0 0 1 -2 -8 z"
+          d="M30 56 C26 44 38 36 48 40 C52 28 70 26 76 36 C88 32 96 44 88 56 Z"
           stroke={ACCENT.B}
           strokeWidth={2.2}
           strokeLinejoin="round"
         />
         <g className="q4-rain q4-anim" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round">
-          <path d="M62 62 l-3 8 M76 62 l-3 8 M90 62 l-3 8" />
+          <path d="M40 64 l-3 9 M54 64 l-3 9 M68 64 l-3 9 M82 64 l-3 9" />
         </g>
-        <ellipse cx={120} cy={127} rx={24} ry={4} stroke={ACCENT.B} strokeWidth={2} />
+        <ellipse cx={122} cy={124} rx={26} ry={3} stroke={ACCENT.B} strokeWidth={2} />
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>
     </IllustrationRoot>

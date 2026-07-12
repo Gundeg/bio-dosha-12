@@ -21,6 +21,9 @@ export function Q05Sleep({ variant, className, ariaLabel }: HelpIllustrationProp
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      {/* газрын зөөлөн сүүдэр — орны доор */}
+      <ellipse cx={121} cy={115.5} rx={74} ry={2.2} fill="currentColor" opacity={0.07} />
+
       {/* Суурь: сар + одод, хажуугаас харсан ор — толгойвч, гудас, дэр, хүн, хөнжил */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         {/* хавирган сар + одод */}
@@ -29,10 +32,10 @@ export function Q05Sleep({ variant, className, ariaLabel }: HelpIllustrationProp
         {/* орны толгойвч ба хөлийн багана (бөмбөлөгтэй) */}
         <path d="M40 114 V48" />
         <circle cx={40} cy={43} r={4.5} />
-        <path d="M202 114 V70" />
-        <circle cx={202} cy={66} r={4} />
+        <path d="M202 114 V70.5" />
+        <circle cx={202} cy={66} r={4.5} />
         {/* гудас/хүрээ */}
-        <rect x={44} y={88} width={154} height={18} rx={6} />
+        <rect x={44} y={88} width={154} height={18} rx={6} fill="currentColor" fillOpacity={0.05} />
         {/* шал */}
         <path d="M28 114 H214" strokeWidth={2} opacity={0.4} />
         {/* дэр — намхан дов, дээр нь толгой */}
@@ -40,7 +43,7 @@ export function Q05Sleep({ variant, className, ariaLabel }: HelpIllustrationProp
         {/* толгой дэрэн дээр */}
         <circle cx={68} cy={66} r={9} />
         {/* хөнжил — цээж, өвдөгний товгортой, хөлийн тавцан хүртэл */}
-        <path d="M79 71 Q95 60 111 65 Q124 69 134 71 Q149 68 159 74 Q177 82 195 87" />
+        <path d="M79 71 C88 63 99 61 108 64.5 C117 68 125 70.5 133 71 C142 71.5 151 69.5 158 72.5 C171 78 183 84 195 87.5" />
         <path d="M105 66 q5 9 2 16" strokeWidth={2} opacity={0.5} />
       </g>
 

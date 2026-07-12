@@ -13,7 +13,7 @@ const CSS = phaseCss(
 function Foot({ x, flip = false }: { x: number; flip?: boolean }) {
   return (
     <g transform={`translate(${x} 86)${flip ? " scale(-1 1)" : ""} rotate(-6)`}>
-      <path d="M-9 18 C-10 27 -5 31 0 31 C5 31 10 27 9 18 C8.3 9 9.8 -8 8.5 -16 C7.8 -21 4.5 -23.5 1 -23 C-4 -22.3 -7.5 -19 -8.6 -14 C-10.3 -4 -8.3 8 -9 18 Z" />
+      <path d="M-9 18 C-10 27 -5 31 0 31 C5 31 10 27 9 18 C9.4 8 9.5 -6 8.5 -15 C7.9 -20.3 4.5 -23.4 1 -23 C-3.9 -22.4 -7.5 -19.5 -8.4 -14.5 C-9.4 -5 -9.4 8 -9 18 Z" />
       <g strokeWidth={2}>
         <circle cx={5.5} cy={-27} r={3.2} />
         <circle cx={0} cy={-26.5} r={2.4} />
@@ -34,6 +34,10 @@ export function Q02WeightScale({ variant, className, ariaLabel }: HelpIllustrati
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      {/* газрын зөөлөн сүүдэр — жин ба тавган доор */}
+      <ellipse cx={150} cy={126} rx={56} ry={2.4} fill="currentColor" opacity={0.07} />
+      <ellipse cx={44} cy={102.5} rx={25} ry={2.2} fill="currentColor" opacity={0.07} />
+
       {/* Суурь: жингийн тавцан + дэлгэц + хоёр хөл, зүүн талд таваг + сэрээ + уур */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         <rect x={92} y={16} width={116} height={108} rx={16} />
@@ -47,11 +51,12 @@ export function Q02WeightScale({ variant, className, ariaLabel }: HelpIllustrati
         <path d="M82 98 V66" />
         <path d="M77 52 v8 q0 6 5 6 q5 0 5 -6 v-8 M82 52 v9" strokeWidth={2} />
         {/* уур */}
-        <path d="M38 62 q-4 -6 0 -11 q4 -5 0 -11 M52 62 q-4 -6 0 -11 q4 -5 0 -11" strokeWidth={2} opacity={0.5} />
+        <path d="M38 62 q-4 -5.5 0 -11 q4 -5.5 0 -11 M52 62 q-4 -5.5 0 -11 q4 -5.5 0 -11" strokeWidth={2} opacity={0.5} />
       </g>
 
       {/* Х: таваг дүүрэн идсэн ч заалт доошоо — жин нэмэгддэггүй */}
       <g className="q2-ph q2-ph-h">
+        <rect x={132} y={27} width={36} height={12} rx={2.5} fill={ACCENT.H} fillOpacity={0.1} />
         <path d="M24 88 Q44 58 64 88" stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" fill="none" />
         <g fill={ACCENT.H}>
           <circle cx={36} cy={80} r={2.4} />
@@ -72,6 +77,7 @@ export function Q02WeightScale({ variant, className, ariaLabel }: HelpIllustrati
 
       {/* Ш: дунд зэрэг идээд заалт тэнцүү — тогтвортой */}
       <g className="q2-ph q2-ph-s">
+        <rect x={132} y={27} width={36} height={12} rx={2.5} fill={ACCENT.S} fillOpacity={0.1} />
         <path d="M28 88 Q44 68 60 88" stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round" fill="none" />
         <g fill={ACCENT.S}>
           <circle cx={38} cy={81} r={2.4} />
@@ -88,6 +94,7 @@ export function Q02WeightScale({ variant, className, ariaLabel }: HelpIllustrati
 
       {/* Б: бага идсэн ч заалт дээшээ — жин буурдаггүй */}
       <g className="q2-ph q2-ph-b">
+        <rect x={132} y={27} width={36} height={12} rx={2.5} fill={ACCENT.B} fillOpacity={0.1} />
         <path d="M33 88 Q44 76 55 88" stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round" fill="none" />
         <circle cx={44} cy={83} r={2.4} fill={ACCENT.B} />
         <path

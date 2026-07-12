@@ -13,7 +13,7 @@ const CSS = phaseCss(
 
 /** Ходоодны дүрс: улаан хоолой дээрээс орж, том биетэй, нарийн гэдэс рүү эргэсэн. */
 const STOMACH_D =
-  "M176 36 C176 41 175 46 174 50 C166 40 152 45 150 57 C147 70 148 84 154 94 C161 104 174 109 185 105 C195 102 202 96 205 89 C212 91 215 97 212 102 C209 107 201 106 201 99 C202 95 203 92 200 88 C195 81 190 73 188 65 C186 58 186 50 186 43 L186 36";
+  "M176 36 L176 44 C176 47 175.4 50 174.2 52.6 C170 44 165 41.5 160 42 C153 42.8 148.8 48.5 148 56 C146.8 69 148.5 83 155 93 C162 103 175 108 185.5 104.5 C194.5 101.5 201 96 204.5 89 C211 91 215.5 96.5 214 101.5 C213 105.8 208 106.3 206.5 102 C205.5 98 203 93 199.5 88.5 C194.5 81 190 73 188.3 65 C186.7 58 186 50 186 44 L186 36";
 
 function Stomach({ c }: { c: string }) {
   return (
@@ -31,6 +31,9 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      {/* тавган доорх зөөлөн сүүдэр — ширээний ирмэг дээр */}
+      <ellipse cx={82} cy={122} rx={33} ry={2.2} fill="currentColor" opacity={0.07} />
+
       {/* Суурь: ханын цаг 12:00, ширээний ирмэг дээр хоосон таваг + сэрээ, хутга */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         {/* ханын цаг — үдийн 12 */}
@@ -61,6 +64,8 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
             stroke={ACCENT.H}
             strokeWidth={2.2}
             strokeLinejoin="round"
+            fill={ACCENT.H}
+            fillOpacity={0.1}
           />
         </g>
         <text x={206} y={56} fontSize={17} fontWeight={700} fill={ACCENT.H} fontFamily="inherit">
@@ -100,6 +105,8 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
             stroke={ACCENT.B}
             strokeWidth={2.2}
             strokeLinejoin="round"
+            fill={ACCENT.B}
+            fillOpacity={0.1}
           />
         </g>
         <g fill={ACCENT.B}>

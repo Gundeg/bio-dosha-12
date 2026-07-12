@@ -27,17 +27,18 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
     >
       {/* Суурь: том царай (баруун) + аянга — гэнэтийн бэрхшээл (зүүн дээр) */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx={150} cy={78} r={34} />
+        <circle cx={150} cy={78} r={34} fill="currentColor" fillOpacity={0.05} />
         {/* үсний ирмэг */}
         <path d="M124 65 C128 50 138 44 150 44 C162 44 172 50 176 65" />
-        {/* чих */}
+        {/* чих — хоёр талдаа тэгш хэмтэй */}
         <path d="M116.5 71 C110 72 109 82 116 84" />
+        <path d="M183.5 71 C190 72 191 82 184 84" />
         {/* аянга */}
-        <path d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z" />
+        <path d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z" fill="currentColor" fillOpacity={0.05} />
       </g>
       <g stroke="currentColor" strokeWidth={2} strokeLinecap="round" opacity={0.5}>
         {/* үсний ширхэг */}
-        <path d="M137 47.5 q-2 4 -3 8 M149 44 q-.5 4 -.5 8 M161 47.5 q2 4 3 8" />
+        <path d="M138 47.5 q-2 4 -3 8 M150 44 q0 4 0 8 M162 47.5 q2 4 3 8" />
         {/* аянгын цацраг */}
         <path d="M30 26 l-8 -7 M28 58 l-10 3 M78 20 l8 -7" />
       </g>
@@ -56,9 +57,10 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
           className="q9-drop q9-anim"
           d="M184 50 c3.5 5 5.5 8 4.8 11 a5 5 0 1 1 -9.6 0 c-.7 -3 1.3 -6 4.8 -11 z"
           stroke={ACCENT.H}
-          strokeWidth={2.2}
+          strokeWidth={2}
           strokeLinejoin="round"
-          fill="none"
+          fill={ACCENT.H}
+          fillOpacity={0.1}
         />
         <text x={193} y={44} fontSize={19} fontWeight={700} fill={ACCENT.H} fontFamily="inherit">
           ?
@@ -81,14 +83,15 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
           className="q9-flick q9-anim"
           d="M186 42 c4 5.5 6.5 9 5.5 12.5 a6.5 6.5 0 0 1 -12.6 1.5 c-.8 -4.5 1.8 -7.5 3.6 -10 c.8 1.8 1.8 3 3.3 4 c.4 -2.6 .3 -5 .2 -8 z"
           stroke={ACCENT.S}
-          strokeWidth={2.2}
+          strokeWidth={2}
           strokeLinejoin="round"
-          fill="none"
+          fill={ACCENT.S}
+          fillOpacity={0.1}
         />
         <path
-          d="M190 82 H226 m0 0 l-8 -5 m8 5 l-8 5"
+          d="M196 82 H228 m0 0 l-8 -5 m8 5 l-8 5"
           stroke={ACCENT.S}
-          strokeWidth={3}
+          strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -106,11 +109,12 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
           <path
             d="M196 48 q15 4 12 21 q-16 -2 -12 -21 z"
             stroke={ACCENT.B}
-            strokeWidth={2.2}
+            strokeWidth={2}
             strokeLinejoin="round"
-            fill="none"
+            fill={ACCENT.B}
+            fillOpacity={0.1}
           />
-          <path d="M199 53 q4 7 6 13" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" opacity={0.7} />
+          <path d="M199 53 q4 7 6 13" stroke={ACCENT.B} strokeWidth={1.8} strokeLinecap="round" opacity={0.6} />
           <path d="M205 70 q1 5 4 8" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />

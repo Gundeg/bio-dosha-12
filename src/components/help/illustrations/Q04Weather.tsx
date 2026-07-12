@@ -26,11 +26,16 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
       {/* Суурь: дээлтэй хүн — толгой, хүзүү, ханцуйтай их бие, хөл */}
+      <ellipse cx={122} cy={124} rx={28} ry={3.5} fill="currentColor" opacity={0.07} />
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
         <circle cx={122} cy={34} r={11} />
         <path d="M118 45 L117 50 M126 45 L127 50" strokeWidth={2} />
         {/* дээлийн силуэт: мөр → ханцуй → бугуйвч → суга → хормой */}
-        <path d="M112 50 C104 51 98 54 96 59 L74 90 Q71 94 75 96 L84 98 Q88 99 89 95 L104 72 L99 106 L145 106 L140 72 L155 95 Q156 99 160 98 L169 96 Q173 94 170 90 L148 59 C146 54 140 51 132 50" />
+        <path
+          d="M112 50 C106 50.5 100 51.8 94.5 60 L74 90 Q71 94 75 96 L84 98 Q88 99 89 95 L104 72 L99 106 L145 106 L140 72 L155 95 Q156 99 160 98 L169 96 Q173 94 170 90 L149.5 60 C144 51.8 138 50.5 132 50"
+          fill="currentColor"
+          fillOpacity={0.05}
+        />
         {/* энгэрийн зах + бүс */}
         <path d="M122 56 V80 M103 84 H141" strokeWidth={2} opacity={0.5} />
         {/* хөл, ул */}
@@ -62,14 +67,21 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
 
       {/* Ш: нар (8 цацрагтай) + толгойноос үсрэх хөлс */}
       <g className="q4-ph q4-ph-s">
-        <circle cx={186} cy={38} r={13} stroke={ACCENT.S} strokeWidth={2.5} />
-        <g className="q4-rays q4-anim" stroke={ACCENT.S} strokeWidth={2} strokeLinecap="round">
+        <circle cx={186} cy={38} r={13} stroke={ACCENT.S} strokeWidth={2.5} fill={ACCENT.S} fillOpacity={0.1} />
+        <g className="q4-rays q4-anim" stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round">
           <path d="M186 21 v-8 M186 55 v8 M169 38 h-8 M203 38 h8 M174 26 l-6 -6 M198 26 l6 -6 M174 50 l-6 6 M198 50 l6 6" />
         </g>
-        <g className="q4-rain q4-anim" stroke={ACCENT.S} strokeWidth={1.8} fill={ACCENT.S} fillOpacity={0.25}>
-          <path d="M141 27 q4.5 6.5 0 11 q-4.5 -4.5 0 -11 z" />
-          <path d="M148 43 q4 6 0 10 q-4 -4 0 -10 z" />
-          <path d="M100 34 q4 6 0 10 q-4 -4 0 -10 z" />
+        <g
+          className="q4-rain q4-anim"
+          stroke={ACCENT.S}
+          strokeWidth={1.8}
+          strokeLinejoin="round"
+          fill={ACCENT.S}
+          fillOpacity={0.12}
+        >
+          <path d="M141 26 c2.4 3.5 3.8 5.6 3.4 7.7 a3.5 3.5 0 1 1 -6.8 0 c-.5 -2.1 .9 -4.2 3.4 -7.7 z" />
+          <path d="M151 39 c2.4 3.5 3.8 5.6 3.4 7.7 a3.5 3.5 0 1 1 -6.8 0 c-.5 -2.1 .9 -4.2 3.4 -7.7 z" />
+          <path d="M100 33 c2.4 3.5 3.8 5.6 3.4 7.7 a3.5 3.5 0 1 1 -6.8 0 c-.5 -2.1 .9 -4.2 3.4 -7.7 z" />
         </g>
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
@@ -79,13 +91,15 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
         <path
           d="M30 56 C26 44 38 36 48 40 C52 28 70 26 76 36 C88 32 96 44 88 56 Z"
           stroke={ACCENT.B}
-          strokeWidth={2.2}
+          strokeWidth={2.5}
           strokeLinejoin="round"
+          fill={ACCENT.B}
+          fillOpacity={0.1}
         />
         <g className="q4-rain q4-anim" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round">
           <path d="M40 64 l-3 9 M54 64 l-3 9 M68 64 l-3 9 M82 64 l-3 9" />
         </g>
-        <ellipse cx={122} cy={124} rx={26} ry={3} stroke={ACCENT.B} strokeWidth={2} />
+        <ellipse cx={122} cy={124} rx={26} ry={3.5} stroke={ACCENT.B} strokeWidth={2} fill={ACCENT.B} fillOpacity={0.12} />
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>
     </IllustrationRoot>

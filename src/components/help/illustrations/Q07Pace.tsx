@@ -25,6 +25,7 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
     >
       {/* Суурь: газар ба баруун тийш алхаж буй хүн (хажуугаас) */}
       <path d="M16 123 H224" stroke="currentColor" strokeWidth={2} opacity={0.4} strokeLinecap="round" />
+      <ellipse cx={143} cy={124} rx={34} ry={3} fill="currentColor" opacity={0.07} />
       <g
         className="q7-fig q7-anim"
         stroke="currentColor"
@@ -32,18 +33,23 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <circle cx={150} cy={42} r={9.5} />
-        {/* их бие — урагш бага зэрэг налсан */}
-        <path d="M147 53 L138 90" />
+        <circle cx={150} cy={43} r={8.5} />
+        {/* их бие — хүзүүнээс урагш бага зэрэг налсан */}
+        <path d="M148.7 51.4 C146.5 64 142.5 77 138 90" />
         {/* гар: урд гар урагш, хойд гар хойш — хоёулаа тохойгоор нугарсан */}
-        <path d="M145 61 L158 71 L172 64" />
-        <path d="M145 61 L133 72 L120 66" />
+        <path d="M146 61 L158 71 L172 64" />
+        <path d="M146 61 L133 72 L120 66" />
         {/* урд хөл сунгаж, өсгийгөөр газардана; ул хуруу өргөгдсөн */}
-        <path d="M138 90 L155 104 L166 121" />
-        <path d="M166 121 L176 116" />
+        <path d="M138 90 L155 104 L166 122" />
+        <path d="M166 122 L176 117" />
         {/* хойд хөл ардаа, хурууны үзүүрээр түлхэнэ */}
         <path d="M138 90 L130 106 L118 117" />
         <path d="M118 117 L110 122" />
+        {/* сарвуу — бугуйн үзүүрт жижиг дугуй */}
+        <g fill="currentColor" stroke="none">
+          <circle cx={173.5} cy={63.5} r={2.4} />
+          <circle cx={118.5} cy={65.5} r={2.4} />
+        </g>
       </g>
 
       {/* Х: ард нь 3 урт хурдны зураас + том ярианы бөмбөлөг + жижиг хоёр дахь бөмбөлөг */}
@@ -51,7 +57,7 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         <g className="q7-lines q7-anim" stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round">
           <path d="M56 60 h32 M46 78 h36 M56 96 h30" />
         </g>
-        <g stroke={ACCENT.H} strokeWidth={2.2} fill="none">
+        <g stroke={ACCENT.H} strokeWidth={2.5} fill={ACCENT.H} fillOpacity={0.1}>
           <ellipse cx={193} cy={28} rx={20} ry={12} />
           <ellipse cx={222} cy={49} rx={9} ry={6.5} />
         </g>
@@ -70,7 +76,7 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         <path
           d="M180 76 H214 M214 76 l-9 -5.5 M214 76 l-9 5.5"
           stroke={ACCENT.S}
-          strokeWidth={3.2}
+          strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -85,7 +91,7 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         <g className="q7-slow q7-anim" stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round">
           <path d="M70 84 h16" />
         </g>
-        <ellipse cx={190} cy={32} rx={12} ry={8.5} stroke={ACCENT.B} strokeWidth={2.2} />
+        <ellipse cx={190} cy={32} rx={12} ry={8.5} stroke={ACCENT.B} strokeWidth={2.5} fill={ACCENT.B} fillOpacity={0.1} />
         <path d="M182 38 L173 47 L188 40 Z" fill={ACCENT.B} />
         <circle cx={190} cy={32} r={2} fill={ACCENT.B} />
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />

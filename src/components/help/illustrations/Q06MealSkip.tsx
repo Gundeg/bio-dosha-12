@@ -79,7 +79,7 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
         <Stomach c={ACCENT.S} />
         <g className="q6-steady q6-anim">
           <path
-            d="M172 60 c8 10 13 17 11 26 a13.5 13.5 0 0 1 -27 1 c-2 -10 5 -14 9 -19 c1 5 3.5 7.5 7.5 10.5 c2 -6.5 0 -11.5 -.5 -18.5 z"
+            d="M172 62 c7 9 11.5 15 10 23 a12 12 0 0 1 -24 1 c-1.8 -9 4.5 -12.5 8 -17 c1 4.5 3 6.5 6.5 9.5 c1.8 -6 0 -10.5 -.5 -16.5 z"
             stroke={ACCENT.S}
             strokeWidth={2.4}
             strokeLinejoin="round"
@@ -101,7 +101,7 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
         <Stomach c={ACCENT.B} />
         <g className="q6-steady q6-anim">
           <path
-            d="M175 84 c3.5 4.5 5.5 7 4.5 11 a6.5 6.5 0 0 1 -12.5 .5 c-.5 -4.5 2 -6.5 4 -9 c.5 2 1.5 3.5 3 4.5 c.5 -2.5 .5 -4.5 1 -7 z"
+            d="M175 82 c3.5 4.5 5.5 7 4.5 11 a6.5 6.5 0 0 1 -12.5 .5 c-.5 -4.5 2 -6.5 4 -9 c.5 2 1.5 3.5 3 4.5 c.5 -2.5 .5 -4.5 1 -7 z"
             stroke={ACCENT.B}
             strokeWidth={2.2}
             strokeLinejoin="round"

@@ -22,7 +22,7 @@ export function Q05Sleep({ variant, className, ariaLabel }: HelpIllustrationProp
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
       {/* газрын зөөлөн сүүдэр — орны доор */}
-      <ellipse cx={121} cy={115.5} rx={74} ry={2.2} fill="currentColor" opacity={0.07} />
+      <ellipse cx={121} cy={115.5} rx={86} ry={2.2} fill="currentColor" opacity={0.07} />
 
       {/* Суурь: сар + одод, хажуугаас харсан ор — толгойвч, гудас, дэр, хүн, хөнжил */}
       <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">

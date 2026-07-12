@@ -16,6 +16,10 @@ import { getRemedies, RemedyResult } from "@/lib/remedyEngine";
 import { getCurrentSeason, SEASON_LABELS, SeasonKey } from "@/lib/seasonFactors";
 import { DoshaKey } from "@/lib/ktMapping";
 import { QUESTIONNAIRE, scoreQuestionnaire, DominantType } from "@/lib/questionnaireEngine";
+import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
+import { QUESTION_HELP } from "@/lib/questionHelp";
+import { QuestionHelpButton } from "@/components/help/QuestionHelpDialog";
+import { HelpIllustration } from "@/components/help/illustrations";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -55,18 +59,6 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
   child: "Хүүхэд",
   parent: "Эцэг эх",
   other: "Бусад",
-};
-
-const DOSHA_COLOR: Record<DominantType, string> = {
-  H: "text-primary",
-  S: "text-secondary",
-  B: "text-tertiary",
-};
-
-const DOSHA_BG: Record<DominantType, string> = {
-  H: "bg-primary/5",
-  S: "bg-secondary/5",
-  B: "bg-tertiary/5",
 };
 
 const CATEGORIES = [...new Set(QUESTIONNAIRE.map((q) => q.category))];
@@ -580,6 +572,7 @@ function CalculatorInner() {
                         <h2 className="font-headline text-xl font-bold text-on-surface leading-snug mt-3">
                           {q.question}
                         </h2>
+                        <QuestionHelpButton question={q} />
                       </div>
                       {currentQ > 0 && (
                         <button
@@ -1128,23 +1121,39 @@ function CalculatorInner() {
                   </div>
                   <h3 className="font-headline font-bold text-on-surface text-sm">{q.category}</h3>
                 </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
+                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-3">
                   Байгалийн мөн чанартаа тулгуурлан хариулаарай — өнөөгийн биш, угийн байдлаараа.
                 </p>
-                <div className="space-y-2.5">
-                  {[
-                    { dot: "bg-primary", text: "text-primary", label: "Хий (H) хариулт", body: "Хөнгөн, уян, хувьсамтгай шинжийг илэрхийлнэ." },
-                    { dot: "bg-secondary-container", text: "text-secondary", label: "Шар (S) хариулт", body: "Хурц, дулаан, шийдэмгий шинжийг илэрхийлнэ." },
-                    { dot: "bg-tertiary-container", text: "text-tertiary", label: "Бадган (B) хариулт", body: "Тогтвортой, хүнд, тайван шинжийг илэрхийлнэ." },
-                  ].map(({ dot, text, label, body }) => (
-                    <div key={label} className="rounded-xl p-3 bg-surface-container-low">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${dot}`} />
-                        <p className={`font-bold text-xs ${text}`}>{label}</p>
-                      </div>
-                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
+                {QUESTION_HELP[q.id] && (
+                  <div className="mb-3">
+                    <div className="rounded-xl bg-surface-container-low p-1.5">
+                      <HelpIllustration
+                        questionId={q.id}
+                        className="w-full h-auto text-on-surface"
+                      />
                     </div>
-                  ))}
+                    <p className="text-[10px] text-on-surface-variant/70 leading-relaxed mt-1.5 px-0.5">
+                      {QUESTION_HELP[q.id].instruction}
+                    </p>
+                  </div>
+                )}
+                <div className="space-y-2.5">
+                  {([
+                    { dot: "bg-primary", text: "text-primary", value: "H" as DominantType, label: "Хий (H) хариулт", body: "Хөнгөн, уян, хувьсамтгай шинжийг илэрхийлнэ." },
+                    { dot: "bg-secondary-container", text: "text-secondary", value: "S" as DominantType, label: "Шар (S) хариулт", body: "Хурц, дулаан, шийдэмгий шинжийг илэрхийлнэ." },
+                    { dot: "bg-tertiary-container", text: "text-tertiary", value: "B" as DominantType, label: "Бадган (B) хариулт", body: "Тогтвортой, хүнд, тайван шинжийг илэрхийлнэ." },
+                  ]).map(({ dot, text, value, label, body }) => {
+                    const outcome = QUESTION_HELP[q.id]?.outcomes[value];
+                    return (
+                      <div key={label} className="rounded-xl p-3 bg-surface-container-low">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-2 h-2 rounded-full ${dot}`} />
+                          <p className={`font-bold text-xs ${text}`}>{outcome?.label ?? label}</p>
+                        </div>
+                        <p className="text-[10px] text-on-surface-variant leading-relaxed">{outcome?.description ?? body}</p>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="mt-3 pt-3 border-t border-outline-variant/15">
                   <p className="text-[10px] text-on-surface-variant/60">

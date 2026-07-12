@@ -34,11 +34,12 @@ export function phaseCss(p: string, extra = ""): string {
 .${p}-root .${p}-ph-h{animation:${p}-ph1 9s linear infinite}
 .${p}-root .${p}-ph-s{animation:${p}-ph2 9s linear infinite}
 .${p}-root .${p}-ph-b{animation:${p}-ph3 9s linear infinite}
-@keyframes ${p}-ph1{0%,30%{opacity:1}36%,94%{opacity:0}100%{opacity:1}}
-@keyframes ${p}-ph2{0%,27%{opacity:0}33%,63%{opacity:1}69%,100%{opacity:0}}
-@keyframes ${p}-ph3{0%,60%{opacity:0}66%,96%{opacity:1}100%{opacity:0}}
+@keyframes ${p}-ph1{0%,30%{opacity:1;transform:translateY(0)}36%,94%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes ${p}-ph2{0%,27%{opacity:0;transform:translateY(4px)}33%,63%{opacity:1;transform:translateY(0)}69%,100%{opacity:0;transform:translateY(4px)}}
+@keyframes ${p}-ph3{0%,60%{opacity:0;transform:translateY(4px)}66%,96%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(4px)}}
 .${p}-root[data-variant="H"] .${p}-ph,.${p}-root[data-variant="S"] .${p}-ph,.${p}-root[data-variant="B"] .${p}-ph{animation:none;opacity:0}
 .${p}-root[data-variant="H"] .${p}-ph-h,.${p}-root[data-variant="S"] .${p}-ph-s,.${p}-root[data-variant="B"] .${p}-ph-b{opacity:1}
+.${p}-root[data-variant="H"] .${p}-anim,.${p}-root[data-variant="S"] .${p}-anim,.${p}-root[data-variant="B"] .${p}-anim{animation:none!important}
 ${extra}
 @media (prefers-reduced-motion: reduce){
 .${p}-root .${p}-ph,.${p}-root .${p}-anim{animation:none!important}

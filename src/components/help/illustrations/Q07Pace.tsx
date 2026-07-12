@@ -5,8 +5,16 @@ const HELP = QUESTION_HELP[7];
 
 const CSS = phaseCss(
   "q7",
-  `.q7-root .q7-fig{animation:q7-bob 1.4s ease-in-out infinite}
+  `.q7-root .q7-fig{animation:q7-bob .45s ease-in-out infinite}
 @keyframes q7-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+.q7-root .q7-legf{transform-box:view-box;transform-origin:138px 90px;animation:q7-lf .9s ease-in-out infinite}
+.q7-root .q7-legb{transform-box:view-box;transform-origin:138px 90px;animation:q7-lb .9s ease-in-out infinite}
+.q7-root .q7-armf{transform-box:view-box;transform-origin:146px 61px;animation:q7-af .9s ease-in-out infinite}
+.q7-root .q7-armb{transform-box:view-box;transform-origin:146px 61px;animation:q7-ab .9s ease-in-out infinite}
+@keyframes q7-lf{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+@keyframes q7-lb{0%,100%{transform:rotate(0)}50%{transform:rotate(22deg)}}
+@keyframes q7-af{0%,100%{transform:rotate(0)}50%{transform:rotate(24deg)}}
+@keyframes q7-ab{0%,100%{transform:rotate(0)}50%{transform:rotate(-24deg)}}
 .q7-root .q7-lines{animation:q7-drift 1s linear infinite}
 @keyframes q7-drift{0%{transform:translateX(0);opacity:1}100%{transform:translateX(-7px);opacity:.35}}
 .q7-root .q7-slow{animation:q7-fade 2.6s ease-in-out infinite}
@@ -36,19 +44,23 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         <circle cx={150} cy={43} r={8.5} />
         {/* их бие — хүзүүнээс урагш бага зэрэг налсан */}
         <path d="M148.7 51.4 C146.5 64 142.5 77 138 90" />
-        {/* гар: урд гар урагш, хойд гар хойш — хоёулаа тохойгоор нугарсан */}
-        <path d="M146 61 L158 71 L172 64" />
-        <path d="M146 61 L133 72 L120 66" />
-        {/* урд хөл сунгаж, өсгийгөөр газардана; ул хуруу өргөгдсөн */}
-        <path d="M138 90 L155 104 L166 122" />
-        <path d="M166 122 L176 117" />
-        {/* хойд хөл ардаа, хурууны үзүүрээр түлхэнэ */}
-        <path d="M138 90 L130 106 L118 117" />
-        <path d="M118 117 L110 122" />
-        {/* сарвуу — бугуйн үзүүрт жижиг дугуй */}
-        <g fill="currentColor" stroke="none">
-          <circle cx={173.5} cy={63.5} r={2.4} />
-          <circle cx={118.5} cy={65.5} r={2.4} />
+        {/* гар: мөрний үеэр савлана (алхааны эсрэг хэмнэлээр) */}
+        <g className="q7-armf q7-anim">
+          <path d="M146 61 L158 71 L172 64" />
+          <circle cx={173.5} cy={63.5} r={2.4} fill="currentColor" stroke="none" />
+        </g>
+        <g className="q7-armb q7-anim">
+          <path d="M146 61 L133 72 L120 66" />
+          <circle cx={118.5} cy={65.5} r={2.4} fill="currentColor" stroke="none" />
+        </g>
+        {/* хөл: ташааны үеэр ээлжлэн савлаж алхана */}
+        <g className="q7-legf q7-anim">
+          <path d="M138 90 L155 104 L166 122" />
+          <path d="M166 122 L176 117" />
+        </g>
+        <g className="q7-legb q7-anim">
+          <path d="M138 90 L130 106 L118 117" />
+          <path d="M118 117 L110 122" />
         </g>
       </g>
 

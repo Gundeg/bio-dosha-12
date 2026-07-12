@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bio-Dosha-12
 
-## Getting Started
+**Биеийн тэнцвэрийн хяналт** — Монгол уламжлалт анагаах ухааны махбодын онолыг
+(Хий · Шар · Бадган) орчин үеийн тооцооллын аргатай хослуулсан веб апп.
+Хэрэглэгч төрөлхийн махбодоо нэг удаа тодорхойлоод, өдөр тутмын жингээрээ
+биеийн тэнцвэрийн **BEDI индексээ** хянаж, тохирсон зөвлөмж (ерөндөг) авна.
 
-First, run the development server:
+## Гол боломжууд
+
+- **Махбодын үнэлгээ** — 12 асуулттай сорил. Асуулт бүр **хөдөлгөөнт дүрслэлтэй
+  тусламжийн карттай**: «Хэрхэн тодорхойлох вэ?» товчоор тухайн шинжийг бодитоор
+  шалгах аргыг (жишээ нь ясны хэмжээний **бугуйн сорил** — бугуйгаа атгаад эрхий,
+  долоовор хурууны нийлэлтийг харах) гурван үр дүнгийн төлөвтэй нь үзүүлнэ.
+  Хариулт дээр дарвал зураг тухайн төлөвт царцана; `prefers-reduced-motion`
+  тохиргоог хүндэтгэнэ.
+- **BEDI тооцоолуур** — жин, өндөр, нас, улирал, махбодын Kt коэффициентыг
+  нэгтгэсэн тэнцвэрийн индекс, хазайлтын луужин, түүхийн график.
+- **Ерөндөг зөвлөмж** — хазайлт болон насны онцлогт тохирсон хоол хүнс,
+  дэглэмийн зөвлөмж.
+- **Гэр бүлийн профайл** — гишүүн бүрд тусдаа үнэлгээ, хяналт.
+- **Эмчийн (Тб оточ) горим** — өвчтөний бүртгэл, үзлэгийн карт, эмчилгээний
+  хуудас, кирилл үсэгтэй PDF тайлан. Дэлгэрэнгүй: [docs/clinical-intake-setup.md](docs/clinical-intake-setup.md).
+
+## Технологи
+
+| Давхарга | Сонголт |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack), React 19, TypeScript |
+| Загвар | Tailwind CSS v4 (CSS-first токенууд), shadcn / Base UI, Material Symbols |
+| Өгөгдөл | PostgreSQL + Prisma 7 (`prisma/schema.prisma`) |
+| Нэвтрэлт | NextAuth v5 (credentials), `src/proxy.ts` (Next 16-д middleware-ийн шинэ нэр) |
+| Бусад | next-intl (MN/EN chrome), recharts, @react-pdf/renderer, vitest |
+
+> ⚠️ Кодод оруулах өөрчлөлтийн өмнө [AGENTS.md](AGENTS.md)-г уншина уу — энэ
+> төслийн Next.js хувилбарын онцлогуудыг `node_modules/next/dist/docs/`-оос
+> шалгах шаардлагатай.
+
+## Хөгжүүлэлтийн орчин
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install                 # postinstall нь prisma generate ажиллуулна
+
+# Орчны хувьсагчид (.env):
+#   DATABASE_URL="postgresql://user:pass@localhost:5432/biodosha"
+#   AUTH_SECRET="ямар нэг нууц тэмдэгт мөр"
+#   AUTH_TRUST_HOST=true    # локал орчинд
+
+npx prisma migrate deploy   # эсвэл: npx prisma migrate dev
+npm run dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Бүртгүүлэх хуудсаар (`/register`) хэрэглэгч үүсгээд нэвтэрнэ. Эмчийн эрх
+хүссэн бүртгэлийг админ баталсны дараа эмчийн цэс нээгдэнэ.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Скриптүүд
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Команд | Үйлдэл |
+|---|---|
+| `npm run dev` | Хөгжүүлэлтийн сервер |
+| `npm run build` / `npm start` | Production build / сервер |
+| `npm run lint` | ESLint |
+| `npm test` | Vitest (`src/lib/__tests__/`) |
 
-## Learn More
+## Кодын бүтэц (товч)
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/            # App Router: (app)/ = нэвтэрсэн хэсэг, api/ = route handlers
+  components/     # UI компонентууд
+    help/         # Асуултын тусламжийн карт + 12 хөдөлгөөнт SVG дүрслэл
+    ui/           # shadcn/Base UI суурь элементүүд
+    clinical/     # Эмчийн горимын маягтууд
+  lib/            # Инженерүүд: questionnaireEngine, bediEngine, remedyEngine,
+                  # questionHelp (сорилын тусламжийн агуулга), glossary г.м.
+  proxy.ts        # Auth middleware (Next 16 нэршил)
+prisma/           # Схем ба миграцууд
+docs/             # Нэмэлт баримтууд
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Тусламжийн хөдөлгөөнт дүрслэлийн архитектур, шинэ карт нэмэх заавар:
+[docs/help-illustrations.md](docs/help-illustrations.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Судалгааны үндэслэл ба анхааруулга
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+BEDI аргачлал нь «Төмөрбаатар Оточ» эмнэлэгт 2023–2025 онд хийгдсэн 400 өвчний
+түүх хамарсан судалгаагаар баталгаажсан (эмчийн оноштой 81% нийцэл, p < 0.01).
+Энэхүү систем нь эмчийн үзлэг, оношилгоог орлохгүй — зөвлөмжийг хэрэгжүүлэхийн
+өмнө мэргэжлийн эмчтэй зөвлөлдөнө үү.

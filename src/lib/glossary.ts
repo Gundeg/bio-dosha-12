@@ -102,6 +102,15 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "Each season tilts the balance differently: winter adds heaviness, summer lightness. Applied automatically.",
     },
   },
+  {
+    key: "buguin-soril",
+    emoji: "🖐️",
+    term: { mn: "Бугуйн сорил", en: "Wrist test" },
+    short: {
+      mn: "Ясны хэмжээг мэдэх энгийн сорил: нэг гарынхаа бугуйг (алга шуутай залгагдах хэсгийг) нөгөө гараараа атгана. Эрхий, долоовор хуруу давж гарвал жижиг, үзүүрүүд яг хүрвэл дундаж, хүрэхгүй бол том ястай.",
+      en: "A simple bone-size self-check: grasp one wrist with the other hand. Thumb and index overlapping = small frame, tips just touching = medium, not touching = large.",
+    },
+  },
 ];
 
 export const GLOSSARY_BY_KEY: Record<string, GlossaryEntry> = Object.fromEntries(

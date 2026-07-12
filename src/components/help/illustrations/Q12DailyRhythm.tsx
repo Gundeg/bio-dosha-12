@@ -65,6 +65,15 @@ export function Q12DailyRhythm({ variant, className, ariaLabel }: HelpIllustrati
             <path key={i} d={cross(DAY_CX[i])} />
           ))}
         </g>
+        {/* өтгөний хэлбэр: хатуу, цэцэрхэй бөөгнөрөл */}
+        <text x={196} y={131} textAnchor="middle" fontSize={8.5} fill={ACCENT.H} opacity={0.85} fontFamily="inherit">
+          өтгөн
+        </text>
+        <g stroke={ACCENT.H} strokeWidth={2.2} fill="none">
+          <circle cx={186} cy={113} r={4.5} />
+          <circle cx={197} cy={109} r={4} />
+          <circle cx={206} cy={115} r={4.5} />
+        </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
 
@@ -84,13 +93,21 @@ export function Q12DailyRhythm({ variant, className, ariaLabel }: HelpIllustrati
           />
         ))}
         <path
-          d="M110 110 l7 7 13 -13"
+          d="M104 110 l7 7 13 -13"
           stroke={ACCENT.S}
           strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
         />
+        {/* өтгөний хэлбэр: зөөлөн, гөлгөр хэвийн */}
+        <text x={196} y={131} textAnchor="middle" fontSize={8.5} fill={ACCENT.S} opacity={0.85} fontFamily="inherit">
+          өтгөн
+        </text>
+        <g stroke={ACCENT.S} strokeWidth={2.2} fill="none" strokeLinecap="round">
+          <rect x={178} y={107} width={36} height={11} rx={5.5} />
+          <path d="M190 107 q1.5 5.5 0 11 M202 107 q1.5 5.5 0 11" strokeWidth={1.8} opacity={0.6} />
+        </g>
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
@@ -107,6 +124,14 @@ export function Q12DailyRhythm({ variant, className, ariaLabel }: HelpIllustrati
           {[0, 2, 4, 6].map((i) => (
             <path key={i} d={boldCheck(DAY_CX[i])} />
           ))}
+        </g>
+        {/* өтгөний хэлбэр: зузаан, их хэмжээтэй */}
+        <text x={195} y={131} textAnchor="middle" fontSize={8.5} fill={ACCENT.B} opacity={0.85} fontFamily="inherit">
+          өтгөн
+        </text>
+        <g stroke={ACCENT.B} strokeWidth={2.6} fill="none" strokeLinecap="round">
+          <rect x={172} y={104} width={46} height={16} rx={8} />
+          <path d="M188 104 q2 8 0 16 M204 104 q2 8 0 16" strokeWidth={2} opacity={0.6} />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

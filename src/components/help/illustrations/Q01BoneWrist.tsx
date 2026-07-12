@@ -10,13 +10,13 @@ const CSS = phaseCss(
 @keyframes q1-nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(1.5px)}}`
 );
 
-/** Томруулсан дугуй доторх хоёр хурууны үзүүр (долоовор зүүнээс, эрхий баруунаас). */
+/** Томруулсан дугуй доторх атгаж буй гарын хоёр хурууны үзүүр. */
 function Fingers({ d, tipL, tipR }: { d: DominantType; tipL: [number, number]; tipR: [number, number] }) {
   const [lx, ly] = tipL;
   const [rx, ry] = tipR;
   return (
     <g stroke={ACCENT[d]} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-      {/* баруун хуруу эхэлж зурагдана — Х үед зүүн нь дээгүүр давхарлана */}
+      {/* баруун хуруу эхэлж зурагдана — Х үед зүүн нь дээгүүр давж гарна */}
       <path
         d={`M204 112 C202 94 ${rx + 18} ${ry + 12} ${rx + 8} ${ry} C${rx + 5} ${ry - 4} ${rx - 1} ${ry - 4} ${rx - 3} ${ry} C${rx - 5} ${ry + 4} ${rx - 2} ${ry + 8} ${rx + 2} ${ry + 12} C${rx + 12} ${ry + 24} 192 100 194 114`}
       />
@@ -29,7 +29,7 @@ function Fingers({ d, tipL, tipR }: { d: DominantType; tipL: [number, number]; t
   );
 }
 
-/** Бугуйн сорил: эрхий, долоовор хуруу давхарлах / хүрэх / хүрэлцэхгүй. */
+/** Бугуйн сорил: алга шуутай залгагдах хэсгийг атгаж, хурууны нийлэлтийг харна. */
 export function Q01BoneWrist({ variant, className, ariaLabel }: HelpIllustrationProps) {
   return (
     <IllustrationRoot
@@ -39,27 +39,33 @@ export function Q01BoneWrist({ variant, className, ariaLabel }: HelpIllustration
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: шуу + сарвуу, бугуйг ороосон гар (бүслүүр + нударга) */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 96 L88 60" />
-        <path d="M26 124 L100 88" />
-        {/* хэмжигдэж буй гарын сарвуу */}
-        <path d="M88 60 C102 53 116 55 120 64 C124 73 119 83 109 87 C106 88 103 88 100 88" />
-        <path d="M104 62 C110 64 112 70 108 76" strokeWidth={2} opacity={0.5} />
-        {/* ороож буй гар: бугуйн бүслүүр */}
-        <ellipse cx={72} cy={92} rx={9} ry={23} transform="rotate(26 72 92)" />
-        {/* атгасан нударга бүслүүрийн доод талд */}
-        <path d="M64 108 C52 108 44 118 50 128 C56 137 72 135 76 125" />
-        <path d="M56 116 q5 4 10 1 M54 124 q5 4 10 1" strokeWidth={2} opacity={0.5} />
+      {/* Хэмжигдэж буй гар: дэлгэсэн алга (5 хуруутай) + доошоо шуу */}
+      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d="M54 86 L53 64 C51 56 44 51 38 47 C33 43.5 35.5 37 41 39 C47 41.5 54 47 57 53 C57 44 57.5 34 58 27 C58.4 21.8 65 21.8 65.4 27 C65.8 33 66 41 66.2 47 C66.4 38 67 25 67.4 18 C67.8 12.8 74.4 12.8 74.8 18 C75.2 25 75.6 38 75.8 47 C76 36 76.5 27 77 22 C77.4 16.8 84 16.8 84.4 22 C84.8 28 85.2 38 85.4 48 C85.6 40 86.2 33 86.8 29 C87.2 24.4 93 24.4 93.2 29 C93.4 35 93 44 92 52 C92.5 64 92 76 90 86" />
+        <path d="M54 86 C52 98 50 112 46 128" />
+        <path d="M90 86 C92 98 95 112 99 128" />
+        <path d="M60 62 Q72 70 86 60" strokeWidth={2} opacity={0.35} />
       </g>
-      {/* томруулагч: хурууны үзүүр уулзах цэгээс инсет рүү */}
+
+      {/* Атгаж буй гар: бугуйн бүслүүр + нударга, хоёр хуруу нь зүүн тийш тойрно */}
+      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <ellipse cx={72} cy={90} rx={23} ry={8.5} />
+        <path d="M95 84 C110 80 122 88 121 100 C120 112 106 118 96 112 C92 109.5 90.5 105 91 100" />
+        <path d="M121 96 L138 100 M118 108 L134 114" strokeWidth={2.2} />
+        <path d="M101 113 q6 3 11 -1" strokeWidth={2} opacity={0.5} />
+        {/* эрхий (дээгүүр) ба долоовор (доогуур) хуруу — үзүүр нь бугуйн урд нийлнэ */}
+        <path d="M95 84 C88 80 80 79 73 81" />
+        <path d="M96 112 C86 112 76 106 70 97" />
+      </g>
+
+      {/* томруулагч: хурууны үзүүр нийлэх цэгээс инсет рүү */}
       <g stroke="currentColor" strokeWidth={2} fill="none" opacity={0.55}>
-        <circle cx={62} cy={70} r={11} strokeDasharray="3 4" />
-        <path d="M72 63 C96 44 118 40 134 44" strokeDasharray="3 4" />
+        <circle cx={71} cy={90} r={13} strokeDasharray="3 4" />
+        <path d="M85 84 C104 66 118 60 133 62" strokeDasharray="3 4" />
       </g>
       <circle cx={176} cy={76} r={44} stroke="currentColor" strokeWidth={2.5} fill="none" />
 
-      {/* Х: үзүүрүүд давхарлана — зүүн хуруу баруун дээгүүр гарна */}
+      {/* Х: үзүүрүүд давж гарна — зүүн хуруу баруун дээгүүр давхарлана */}
       <g className="q1-ph q1-ph-h">
         <g className="q1-tip q1-anim">
           <Fingers d="H" tipL={[188, 62]} tipR={[178, 70]} />
@@ -76,7 +82,7 @@ export function Q01BoneWrist({ variant, className, ariaLabel }: HelpIllustration
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
-      {/* Б: үзүүрүүд хүрэлцэхгүй, зай үлдэнэ */}
+      {/* Б: үзүүрүүд хүрэхгүй, зай үлдэнэ */}
       <g className="q1-ph q1-ph-b">
         <g className="q1-tip q1-anim">
           <Fingers d="B" tipL={[162, 72]} tipR={[190, 72]} />

@@ -27,7 +27,7 @@ export function Q11Stairs({ variant, className, ariaLabel }: HelpIllustrationPro
         <path d="M18 126 h26 v-16 h26 v-16 h26 v-16 h26 v-16 h26 v-16 h28" />
         {/* өгсөж буй хүн: толгой, урагш налсан их бие */}
         <circle cx={117} cy={25} r={8} />
-        <path d="M111 33 C106.5 40 102.5 47 100.5 55" />
+        <path d="M112 32.5 C107.5 40 103.5 47.5 100.5 55" />
         {/* сэлгүүцэх гар: урд, ард */}
         <path d="M110 36 L121 46 L129 39" strokeWidth={2.4} />
         <path d="M110 36 L99.5 45 L91 51" strokeWidth={2.4} />

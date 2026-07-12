@@ -30,37 +30,37 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
         <path d="M42 97 Q59 78 76 97" />
         {/* шууны үзүүрийн сул атгасан сарвуу */}
         <path d="M106 97 C118 92 132 95 137 104 C141 111 138 118 131 121 C121 125 111 124 104 122" />
-        <path d="M123 101 q8 3 7 11" strokeWidth={2} opacity={0.5} />
-        {/* чимхэж буй гар: сарвууны ар + хоёр хуруу (хумсны нумтай) */}
+        <path d="M106 99 q-2 6 -1 11" strokeWidth={2} opacity={0.4} />
+        <path d="M113 102 q8 3 7 11 M123 101 q8 3 7 11" strokeWidth={2} opacity={0.5} />
+        {/* чимхэж буй гар: долоовор + эрхий хуруу, ард нь атгасан хуруунууд, бугуй дээшээ */}
         <g className="q3-pinch q3-anim">
-          <path d="M31 34 C28 18 40 9 55 10 C72 11 85 18 89 32" />
-          <path d="M31 34 C36 52 43 68 47.5 79 C46.5 83.5 49 87 52 87 C55 87 57.5 83.5 56.5 79 C53 67 47 48 44 31" />
-          <path d="M48.5 78 C49.5 81 54.5 81 55.5 78" strokeWidth={1.8} opacity={0.7} />
-          <path d="M89 32 C84 49 75 66 70.5 78 C71.5 83 69 86 66 86 C63 86 60.5 83 61.5 78 C65 66 71 47 74 30" />
+          <path d="M66 24 C56 40 49 62 47 76 C46 81 49 85 52.5 85 C56 85 58.5 81 57.5 76.5 C59 64 68 47 79 34" />
+          <path d="M48.5 77 C49.5 80 54.5 80 55.5 77" strokeWidth={1.8} opacity={0.7} />
+          <path d="M96 58 C88 64 78 72 71 77 C72.5 82 70 86 66.5 86 C63 86 60.5 82 62 77.5 C68 70 78 60 90 46" />
           <path d="M62.5 77 C63.5 80 68.5 80 69.5 77" strokeWidth={1.8} opacity={0.7} />
+          <path d="M79 34 C88 27 99 29 103 37 C107 45 104 54 96 58" />
+          <path d="M88 39 q7 2 5 10" strokeWidth={2} opacity={0.5} />
+          <path d="M66 24 C74 12 84 6 96 4" />
+          <path d="M103 40 C110 34 116 26 119 16" />
         </g>
       </g>
 
       {/* томруулагч: нугалаанаас инсет рүү */}
       <g stroke="currentColor" strokeWidth={2} fill="none" opacity={0.55}>
         <circle cx={59} cy={90} r={14} strokeDasharray="3 4" />
-        <path d="M73 82 C98 52 122 38 148 37" strokeDasharray="3 4" />
+        <path d="M74 86 C102 64 126 50 146 44" strokeDasharray="3 4" />
       </g>
       <circle cx={182} cy={66} r={42} stroke="currentColor" strokeWidth={2.5} fill="none" />
 
       {/* Х: хуурай — хагарсан зигзаг зураас, гуужсан ширхэг */}
       <g className="q3-ph q3-ph-h">
         <g stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path d={FOLD_D} />
-          <g strokeWidth={2}>
-            <path d="M172 68 l4 -3 -3 -4 4 -3" />
-            <path d="M192 68 l-4 -3 3 -4 -4 -3" />
-            <path d="M171 39 l4 -4 M194 37 l4 -4" />
-          </g>
+          <path d="M148 88 Q162 86 170 70 L174 60 L178 65 L182 55 L186 64 L190 59 L194 70 Q202 86 216 88" />
+          <path d="M168 42 l4 -4 M196 40 l4 -4" strokeWidth={2} />
         </g>
         <g fill={ACCENT.H}>
-          <circle cx={164} cy={46} r={1.7} />
-          <circle cx={200} cy={44} r={1.7} />
+          <circle cx={162} cy={50} r={1.7} />
+          <circle cx={202} cy={48} r={1.7} />
         </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
@@ -79,8 +79,8 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
       <g className="q3-ph q3-ph-b">
         <g stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
           <path d={FOLD_D} />
-          <path d="M173 67 Q182 54 191 67" strokeWidth={2} opacity={0.6} />
-          <path d="M203 45 q6.5 9.5 0 15 q-6.5 -5.5 0 -15 z" strokeWidth={2} fill={ACCENT.B} fillOpacity={0.2} />
+          <path d="M174 63 Q178 55 184 55" strokeWidth={2} opacity={0.6} />
+          <path d="M197 50 q6.5 9.5 0 15 q-6.5 -5.5 0 -15 z" strokeWidth={2} fill={ACCENT.B} fillOpacity={0.2} />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

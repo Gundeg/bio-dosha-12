@@ -5,7 +5,7 @@ const HELP = QUESTION_HELP[12];
 
 /** 7 хоногийн нүдний төв цэгүүд (x). */
 const DAY_CX = [52.5, 75, 97.5, 120, 142.5, 165, 187.5];
-const DAY_CY = 68;
+const DAY_CY = 73;
 
 const check = (c: number) => `M${c - 5.5} ${DAY_CY} l4.5 5 7.5 -9`;
 const cross = (c: number) => `M${c - 4.5} ${DAY_CY - 4.5} l9 9 m0 -9 l-9 9`;
@@ -49,7 +49,7 @@ export function Q12DailyRhythm({ variant, className, ariaLabel }: HelpIllustrati
       </text>
       <g stroke="currentColor" strokeWidth={2} opacity={0.85}>
         {DAY_CX.map((c) => (
-          <rect key={c} x={c - 10.5} y={54} width={21} height={26} rx={3} />
+          <rect key={c} x={c - 10.5} y={60} width={21} height={26} rx={3} />
         ))}
       </g>
 

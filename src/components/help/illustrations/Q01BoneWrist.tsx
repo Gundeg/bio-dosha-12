@@ -1,58 +1,77 @@
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SKIN,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 import { DominantType } from "@/lib/questionnaireEngine";
 
 const HELP = QUESTION_HELP[1];
 
-/**
- * Хуруунууд фаз бүрийн эхэнд хоёр талаас дөхөж ирээд үр дүнгийн байрлалдаа
- * тогтоно (9с мастер цагт синк хийгдсэн). Царцаасан үед шууд эцсийн байрлал.
- */
 const CSS = phaseCss(
   "q1",
-  `.q1-root .q1-fl-h{animation:q1-inlh 9s linear infinite}
-.q1-root .q1-fr-h{animation:q1-inrh 9s linear infinite}
-.q1-root .q1-fl-s{animation:q1-inls 9s linear infinite}
-.q1-root .q1-fr-s{animation:q1-inrs 9s linear infinite}
-.q1-root .q1-fl-b{animation:q1-inlb 9s linear infinite}
-.q1-root .q1-fr-b{animation:q1-inrb 9s linear infinite}
-@keyframes q1-inlh{0%{transform:translate(-16px,12px)}7%,30%{transform:translate(0,0)}36%,100%{transform:translate(-16px,12px)}}
-@keyframes q1-inrh{0%{transform:translate(16px,12px)}7%,30%{transform:translate(0,0)}36%,100%{transform:translate(16px,12px)}}
-@keyframes q1-inls{0%,33%{transform:translate(-16px,12px)}40%,63%{transform:translate(0,0)}69%,100%{transform:translate(-16px,12px)}}
-@keyframes q1-inrs{0%,33%{transform:translate(16px,12px)}40%,63%{transform:translate(0,0)}69%,100%{transform:translate(16px,12px)}}
-@keyframes q1-inlb{0%,66%{transform:translate(-13px,10px)}73%,96%{transform:translate(0,0)}100%{transform:translate(-13px,10px)}}
-@keyframes q1-inrb{0%,66%{transform:translate(13px,10px)}73%,96%{transform:translate(0,0)}100%{transform:translate(13px,10px)}}
-.q1-root .q1-cue-s{animation:q1-cues 9s linear infinite}
-.q1-root .q1-cue-b{animation:q1-cueb 9s linear infinite}
-@keyframes q1-cues{0%,39%{opacity:0}43%,63%{opacity:1}66%,100%{opacity:0}}
-@keyframes q1-cueb{0%,72%{opacity:0}76%,96%{opacity:1}98%,100%{opacity:0}}`
+  `.q1-root .q1-thumb-h,.q1-root .q1-thumb-s,.q1-root .q1-thumb-b{transform-box:view-box;transform-origin:118px 96px}
+.q1-root .q1-thumb-h{animation:q1-th 9s ease-in-out infinite}
+.q1-root .q1-thumb-s{animation:q1-ts 9s ease-in-out infinite}
+.q1-root .q1-thumb-b{animation:q1-tb 9s ease-in-out infinite}
+@keyframes q1-th{0%{transform:rotate(-9deg)}7%,30%{transform:rotate(0)}36%,100%{transform:rotate(-9deg)}}
+@keyframes q1-ts{0%,33%{transform:rotate(-8deg)}40%,63%{transform:rotate(0)}69%,100%{transform:rotate(-8deg)}}
+@keyframes q1-tb{0%,66%{transform:rotate(-7deg)}73%,96%{transform:rotate(0)}100%{transform:rotate(-7deg)}}`
 );
 
-/** Томруулсан дугуй доторх атгаж буй гарын хоёр хурууны үзүүр. */
-function Fingers({ d, tipL, tipR }: { d: DominantType; tipL: [number, number]; tipR: [number, number] }) {
-  const [lx, ly] = tipL;
-  const [rx, ry] = tipR;
-  const v = d.toLowerCase();
+/** Нэг үр дүнгийн эрхий+долоовор хурууны байрлал (давхарлах/хүрэх/зайтай). */
+function Grip({ d, thumbTip, indexTip, thumbOver }: { d: DominantType; thumbTip: number; indexTip: number; thumbOver: boolean }) {
+  // долоовор хуруу баруунаас зүүн тийш нумарч, үзүүр нь indexTip дээр
+  const index = (
+    <g>
+      <path
+        d={`M156 108 C160 98 158 90 149 88 C140 86 ${indexTip + 4} 85 ${indexTip} 88 C${indexTip - 4} 91 ${indexTip - 3} 96 ${indexTip + 2} 98 C${indexTip + 8} 100 148 100 152 104 Z`}
+        fill="url(#q1-skin2)"
+        stroke={INK}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <ellipse cx={indexTip + 1} cy={90} rx={2.6} ry={3.4} fill={SKIN.light} opacity={0.7} />
+    </g>
+  );
+  // эрхий хуруу зүүнээс баруун тийш нумарч, үзүүр нь thumbTip дээр (бага зэрэг эргэлдэнэ)
+  const thumb = (
+    <g className={`q1-thumb-${d.toLowerCase()} q1-anim`}>
+      <path
+        d={`M90 112 C86 100 90 92 100 91 C110 90 ${thumbTip - 4} 91 ${thumbTip} 94 C${thumbTip + 4} 97 ${thumbTip + 3} 102 ${thumbTip - 2} 104 C${thumbTip - 8} 106 98 106 94 110 Z`}
+        fill="url(#q1-skin2)"
+        stroke={INK}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <ellipse cx={thumbTip - 1} cy={96} rx={2.6} ry={3.4} fill={SKIN.light} opacity={0.7} />
+    </g>
+  );
   return (
-    <g stroke={ACCENT[d]} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-      {/* баруун хуруу эхэлж зурагдана — Х үед зүүн нь дээгүүр давж гарна */}
-      <g className={`q1-fr-${v} q1-anim`}>
-        <path
-          d={`M204 112 C202 94 ${rx + 18} ${ry + 12} ${rx + 8} ${ry} C${rx + 5} ${ry - 4} ${rx - 1} ${ry - 4} ${rx - 3} ${ry} C${rx - 5} ${ry + 4} ${rx - 2} ${ry + 8} ${rx + 2} ${ry + 12} C${rx + 12} ${ry + 24} 192 100 194 114`}
-        />
-        <path d={`M${rx + 6} ${ry - 1} C${rx + 4} ${ry - 3} ${rx} ${ry - 3} ${rx - 2} ${ry - 1}`} strokeWidth={1.8} opacity={0.7} />
-      </g>
-      <g className={`q1-fl-${v} q1-anim`}>
-        <path
-          d={`M148 112 C150 94 ${lx - 18} ${ly + 12} ${lx - 8} ${ly} C${lx - 5} ${ly - 4} ${lx + 1} ${ly - 4} ${lx + 3} ${ly} C${lx + 5} ${ly + 4} ${lx + 2} ${ly + 8} ${lx - 2} ${ly + 12} C${lx - 12} ${ly + 24} 160 100 158 114`}
-        />
-        <path d={`M${lx - 6} ${ly - 1} C${lx - 4} ${ly - 3} ${lx} ${ly - 3} ${lx + 2} ${ly - 1}`} strokeWidth={1.8} opacity={0.7} />
-      </g>
+    <g>
+      {thumbOver ? (
+        <>
+          {index}
+          {thumb}
+        </>
+      ) : (
+        <>
+          {thumb}
+          {index}
+        </>
+      )}
     </g>
   );
 }
 
-/** Бугуйн сорил: алга шуутай залгагдах хэсгийг атгаж, хурууны нийлэлтийг харна. */
+/** Бугуйн сорил: бугуйгаа атгаж, эрхий/долоовор хурууны нийлэлтийг харна. */
 export function Q01BoneWrist({ variant, className, ariaLabel }: HelpIllustrationProps) {
   return (
     <IllustrationRoot
@@ -62,57 +81,59 @@ export function Q01BoneWrist({ variant, className, ariaLabel }: HelpIllustration
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Хэмжигдэж буй гар: дэлгэсэн алга (5 хуруутай) + доошоо шуу */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M54 86 L53 64 C51 56 44 51 38 47 C33 43.5 35.5 37 41 39 C47 41.5 54 47 57 53 C57 44 57.5 34 58 27 C58.4 21.8 65 21.8 65.4 27 C65.8 33 66 41 66.2 47 C66.4 38 67 25 67.4 18 C67.8 12.8 74.4 12.8 74.8 18 C75.2 25 75.6 38 75.8 47 C76 36 76.5 27 77 22 C77.4 16.8 84 16.8 84.4 22 C84.8 28 85.2 38 85.4 48 C85.6 40 86.2 33 86.8 29 C87.2 24.4 93 24.4 93.2 29 C93.4 35 93 44 92 52 C92.5 64 92 76 90 86" />
-        <path d="M54 86 C52 98 50 112 46 128" />
-        <path d="M90 86 C92 98 95 112 99 128" />
-        <path d="M60 62 Q72 70 86 60" strokeWidth={2} opacity={0.35} />
+      <SkinDefs p="q1" />
+
+      {/* ── Суурь дүр зураг: доошоо шуу + дээшээ сарвуу ── */}
+      {/* газрын сүүдэр */}
+      <ellipse cx={120} cy={150} rx={40} ry={5} fill={INK} opacity={0.06} />
+
+      {/* шуу (босоо багана) */}
+      <path
+        d="M103 158 L103 96 C103 82 111 74 120 74 C129 74 137 82 137 96 L137 158 Z"
+        fill="url(#q1-skin)"
+        stroke={INK}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+      />
+      {/* дээд сарвуу — тайван, зөөлөн атиалсан хуруунууд */}
+      <g fill="url(#q1-skin)" stroke={INK} strokeWidth={2.3} strokeLinejoin="round" strokeLinecap="round">
+        {/* алга */}
+        <path d="M104 76 C101 66 102 56 106 50 C114 44 126 44 134 50 C138 56 139 66 136 76 Z" />
+        {/* 4 хуруу зөөлөн урагш атиалсан */}
+        <path d="M106 52 C104 42 105 33 110 30 C114 28 117 31 116 36 C115 42 114 47 113 51" />
+        <path d="M114 50 C113 39 114 29 119 27 C123 26 125 29 124 34 C123 41 122 46 121 50" />
+        <path d="M122 50 C122 40 123 31 128 29 C132 28 134 32 132 37 C131 43 130 47 129 51" />
+        <path d="M130 52 C131 44 133 37 137 36 C141 35 142 40 140 45 C138 50 136 53 134 56" />
+        {/* эрхий — баруун доод талд */}
+        <path d="M136 68 C142 64 147 67 146 73 C145 78 140 80 135 78" />
       </g>
 
-      {/* Атгаж буй гар: бугуйн бүслүүр + нударга, хоёр хуруу нь урд талд нийлнэ */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <ellipse cx={72} cy={90} rx={23} ry={8.5} />
-        <path d="M95 84 C110 80 122 88 121 100 C120 112 106 118 96 112 C92 109.5 90.5 105 91 100" />
-        <path d="M121 96 L138 100 M118 108 L134 114" strokeWidth={2.2} />
-        <path d="M101 113 q6 3 11 -1" strokeWidth={2} opacity={0.5} />
-        <path d="M95 84 C88 80 80 79 73 81" />
-        <path d="M96 112 C86 112 76 106 70 97" />
+      {/* атгаж буй гарын далдуур (бугуйн урд талд) */}
+      <path
+        d="M92 120 C86 107 92 92 108 91 L150 91 C164 92 167 106 161 118 C157 128 102 130 92 120 Z"
+        fill={SKIN.shade}
+        stroke={INK}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+      />
+      {/* атгасан хурууны үений товгор дээд ирмэг дээр */}
+      <g stroke={INK} strokeWidth={1.5} opacity={0.4} fill="none">
+        <path d="M110 93 q4 5 8 0 M122 93 q4 5 8 0 M134 93 q4 5 8 0" />
       </g>
 
-      {/* томруулагч: хурууны үзүүр нийлэх цэгээс инсет рүү */}
-      <g stroke="currentColor" strokeWidth={2} fill="none" opacity={0.55}>
-        <circle cx={71} cy={90} r={13} strokeDasharray="3 4" />
-        <path d="M85 84 C104 66 118 60 133 62" strokeDasharray="3 4" />
-      </g>
-      <circle cx={176} cy={76} r={44} stroke="currentColor" strokeWidth={2.5} fill="none" />
-
-      {/* Х: үзүүрүүд дөхөж ирээд давж гарна */}
+      {/* ── Фазууд: эрхий+долоовор хурууны уулзалт ── */}
       <g className="q1-ph q1-ph-h">
-        <Fingers d="H" tipL={[188, 62]} tipR={[178, 70]} />
+        <Grip d="H" thumbTip={128} indexTip={114} thumbOver />
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
-
-      {/* Ш: үзүүрүүд дөхөж ирээд яг хүрнэ — хүрэлтийн оч */}
       <g className="q1-ph q1-ph-s">
-        <Fingers d="S" tipL={[172, 66]} tipR={[180, 66]} />
-        <path
-          className="q1-cue-s q1-anim"
-          d="M176 50 v-6 M166 53 l-4 -4 M186 53 l4 -4"
-          stroke={ACCENT.S}
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
+        <Grip d="S" thumbTip={119} indexTip={121} thumbOver={false} />
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
-
-      {/* Б: үзүүрүүд дөхөвч хүрэхгүй — зай хэмжигдэнэ */}
       <g className="q1-ph q1-ph-b">
-        <Fingers d="B" tipL={[162, 72]} tipR={[190, 72]} />
-        <g className="q1-cue-b q1-anim" stroke={ACCENT.B} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path d="M167 62 L185 62" strokeWidth={2} strokeDasharray="2 3" />
-          <path d="M170 58 l-3 4 3 4 M182 58 l3 4 -3 4" strokeWidth={1.8} />
-        </g>
+        <Grip d="B" thumbTip={110} indexTip={130} thumbOver={false} />
+        {/* зайг тэмдэглэх сум */}
+        <path d="M114 90 L126 90 M116 87 l-3 3 3 3 M124 87 l3 3 -3 3" stroke={ACCENT.B} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" fill="none" />
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>
     </IllustrationRoot>

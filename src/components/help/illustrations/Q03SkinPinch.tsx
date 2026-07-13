@@ -1,5 +1,14 @@
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SKIN,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 
 const HELP = QUESTION_HELP[3];
 
@@ -27,8 +36,11 @@ const CSS = phaseCss(
 @keyframes q3-cueb{0%,72%{opacity:0}75%,96%{opacity:1}100%{opacity:0}}`
 );
 
-/** Инсет доторх томруулсан арьсны нугалаа (майхан хэлбэрийн атираа). */
-const FOLD_D = "M146.5 88 Q162 86 170 70 Q182 44 194 70 Q202 86 217.5 88";
+/** Инсет доторх томруулсан арьсны нугалаа — өргөгдсөн атираа (crescent ribbon). */
+const FOLD_RIDGE =
+  "M146.5 88 Q162 86 170 70 Q182 44 194 70 Q202 86 217.5 88 Q198 90 182 72 Q166 90 146.5 88 Z";
+/** Атирааны оройн гэрлийн зураас. */
+const FOLD_CREST = "M170 68 Q182 46 194 68";
 
 /** Арьсны сорил: шууны арьсыг чимхээд томруулж харна — хуурай / улайсан / чийглэг. */
 export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustrationProps) {
@@ -40,45 +52,106 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: хэвтээ шуу + сул атгасан сарвуу, дээрээс чимхэж буй эрхий/долоовор хуруу */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        {/* шуу */}
-        <path d="M6 97 H42 M76 97 H106 M6 122 H104" />
-        {/* чимхээд өргөгдсөн арьсны нугалаа */}
-        <path d="M42 97 Q59 78 76 97" />
-        {/* шууны үзүүрийн сул атгасан сарвуу */}
-        <path d="M106 97 C118 92 132 95 137 104 C141 111 138 118 131 121 C121 125 111 124 104 122" />
-        <path d="M113 102 q8 3 7 11 M123 101 q8 3 7 11" strokeWidth={2} opacity={0.5} />
-        {/* чимхэж буй гар: том сарвуу (атгасан хуруунуудын гурван товгор) + богино эрхий, долоовор */}
-        <g className="q3-pinch q3-anim">
-          {/* долоовор хуруу: гадна ирмэг + үзүүр + дотор зураас (сарвуу руу орно) */}
-          <path d="M60 36 C54.5 47.5 49.5 63 47.5 76 C46.7 81 49.2 85 52.5 85 C55.8 85 58.3 81 57.6 76.5 C59.4 62 66 46.5 76 36" />
-          <path d="M48.5 77 C49.5 80 54.5 80 55.5 77" strokeWidth={1.8} opacity={0.7} />
-          {/* сарвууны ар + атгасан хуруунуудын товгорууд + эрхий хуруу */}
-          <path d="M60 36 C63.5 26.5 71 21 80 20.5 C88.5 20 96 22 100.5 26.5 C104.5 30.5 104.5 36.5 100.5 40 C106.5 41.5 108.5 49 104 53.5 C101 56.5 96 58.5 90 58.5 C83 64.5 76.5 70.5 70.5 76 C72 81 69.3 85 66 85 C62.7 85 60.3 81 61.9 76.5 C67 70.5 73 64.5 79.5 57.5" />
-          <path d="M62.5 77 C63.5 80 68.5 80 69.5 77" strokeWidth={1.8} opacity={0.7} />
-        </g>
+      <SkinDefs p="q3" />
+
+      {/* газрын зөөлөн сүүдэр */}
+      <ellipse cx={56} cy={126} rx={58} ry={4} fill={INK} opacity={0.06} />
+
+      {/* ── Хэвтээ шуу (арьсаар дүүргэсэн, зүүн тийш зурагнаас гарна) ── */}
+      <path
+        d="M-4 97 H42 Q59 78 76 97 H112 V122 H-4 Z"
+        fill="url(#q3-skin)"
+        stroke={INK}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+      />
+      {/* шууны доод сүүдэр + чимхсэн нугалааны гэрэл */}
+      <path d="M-4 118 H108" stroke={SKIN.shade} strokeWidth={4} opacity={0.4} strokeLinecap="round" />
+      <path d="M45 94 Q59 80 73 94" stroke={SKIN.light} strokeWidth={2.5} fill="none" opacity={0.6} strokeLinecap="round" />
+
+      {/* шууны үзүүрийн сул атгасан сарвуу */}
+      <path
+        d="M106 97 C118 92 132 95 137 104 C141 111 138 118 131 121 C121 125 111 124 104 122 Z"
+        fill="url(#q3-skin2)"
+        stroke={INK}
+        strokeWidth={2.3}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M113 102 q8 3 7 11 M123 101 q8 3 7 11"
+        stroke={INK}
+        strokeWidth={1.6}
+        opacity={0.4}
+        fill="none"
+        strokeLinecap="round"
+      />
+      <ellipse cx={121} cy={104} rx={7} ry={4} fill={SKIN.light} opacity={0.45} />
+
+      {/* ── Чимхэж буй гар: сарвуу + долоовор, эрхий хоёр прон ── */}
+      <g className="q3-pinch q3-anim">
+        {/* сарвууны ар */}
+        <path
+          d="M58 34 C62 24 73 19 84 19 C95 19 104 26 103 36 C102 45 95 53 85 55 C77 57 67 55 60 50 C55 45 55 39 58 34 Z"
+          fill="url(#q3-skin2)"
+          stroke={INK}
+          strokeWidth={2.3}
+          strokeLinejoin="round"
+        />
+        <ellipse cx={84} cy={31} rx={9} ry={5.5} fill={SKIN.light} opacity={0.45} transform="rotate(-8 84 31)" />
+        {/* үений доод сүүдэр — хуруунуудыг суулгах */}
+        <path d="M60 49 C68 54 78 56 87 54" stroke={SKIN.shade} strokeWidth={3} opacity={0.4} fill="none" strokeLinecap="round" />
+        {/* эрхий хуруу (баруун прон) */}
+        <path
+          d="M72 51 C70.5 61 68.5 71 68 78 C67.4 82.5 70 85.5 72.5 85.5 C75 85.5 77.6 82.5 77 78 C78 71 81 61 84 53 Z"
+          fill="url(#q3-skin2)"
+          stroke={INK}
+          strokeWidth={2.3}
+          strokeLinejoin="round"
+        />
+        {/* долоовор хуруу (зүүн прон) */}
+        <path
+          d="M61 47 C56.5 57 52 69 51 78 C50.4 83 53 86 55.5 86 C58 86 60.6 83 60 78 C61 69 64 57 67 49 Z"
+          fill="url(#q3-skin2)"
+          stroke={INK}
+          strokeWidth={2.3}
+          strokeLinejoin="round"
+        />
+        {/* хумсны гялбаа + үений зураас */}
+        <ellipse cx={55} cy={80} rx={2.4} ry={3.2} fill={SKIN.light} opacity={0.6} />
+        <ellipse cx={72.5} cy={80} rx={2.4} ry={3.2} fill={SKIN.light} opacity={0.6} />
+        <path d="M50 77 C51 80 55.5 80 56.5 77 M67 77 C68 80 72.5 80 73.5 77" stroke={INK} strokeWidth={1.4} opacity={0.4} fill="none" />
       </g>
 
       {/* томруулагч: нугалаанаас инсет рүү */}
-      <g stroke="currentColor" strokeWidth={2} fill="none" opacity={0.55}>
-        <circle cx={59} cy={90} r={14} strokeDasharray="3 4" />
-        <path d="M74 86 C98 78 124 62 144 46" strokeDasharray="3 4" />
+      <g stroke={INK} strokeWidth={1.6} fill="none" opacity={0.32}>
+        <circle cx={63} cy={84} r={13} strokeDasharray="3 4" />
+        <path d="M76 78 C100 70 124 58 144 48" strokeDasharray="3 4" />
       </g>
-      <circle cx={182} cy={66} r={42} stroke="currentColor" strokeWidth={2.5} fill="none" />
+
+      {/* ── Инсет: томруулсан арьсны хэсэг ── */}
+      <circle cx={182} cy={66} r={42} fill="url(#q3-skin)" stroke={INK} strokeWidth={2.5} />
+      <ellipse cx={165} cy={50} rx={13} ry={7} fill={SKIN.light} opacity={0.4} transform="rotate(-28 165 50)" />
 
       {/* Х: хуурай — хагарсан зигзаг зураас, гуужсан ширхэг */}
       <g className="q3-ph q3-ph-h">
-        <g stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path
-            className="q3-fold-h q3-anim"
-            d="M146.5 88 Q162 86 170 70 L174 60 L178 65 L182 54 L186 65 L190 60 L194 70 Q202 86 217.5 88"
-          />
-          <path className="q3-cue-h q3-anim" d="M168 42 l4 -4 M192 38 l4 4" strokeWidth={2} />
+        <g className="q3-fold-h q3-anim">
+          <path d={FOLD_RIDGE} fill="url(#q3-skin2)" stroke={SKIN.deep} strokeWidth={1.5} strokeLinejoin="round" />
+          <path d={FOLD_CREST} stroke={SKIN.light} strokeWidth={2.5} fill="none" opacity={0.7} strokeLinecap="round" />
         </g>
-        <g className="q3-cue-h q3-anim" fill={ACCENT.H}>
-          <circle cx={162} cy={49} r={1.7} />
-          <circle cx={202} cy={49} r={1.7} />
+        <g className="q3-cue-h q3-anim">
+          <path
+            d="M170 68 L174 59 L178 64 L182 53 L186 64 L190 59 L194 68"
+            stroke={ACCENT.H}
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <path d="M166 44 l4 -4 M194 40 l4 4" stroke={ACCENT.H} strokeWidth={2} strokeLinecap="round" fill="none" />
+          <g fill={ACCENT.H}>
+            <circle cx={161} cy={50} r={1.8} />
+            <circle cx={203} cy={50} r={1.8} />
+          </g>
         </g>
         <PhaseBadge d="H" label={HELP.outcomes.H.label} />
       </g>
@@ -88,27 +161,36 @@ export function Q03SkinPinch({ variant, className, ariaLabel }: HelpIllustration
         <ellipse
           className="q3-cue-s q3-anim"
           cx={182}
-          cy={76}
+          cy={78}
           rx={24}
           ry={10}
           fill={ACCENT.S}
-          fillOpacity={0.18}
+          fillOpacity={0.2}
         />
-        <g stroke={ACCENT.S} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path className="q3-fold-s q3-anim" d={FOLD_D} />
-          <path className="q3-cue-s q3-anim" d="M166 46 l-5 -9 M182 42 v-10 M198 46 l5 -9" strokeWidth={2} />
+        <g className="q3-fold-s q3-anim">
+          <path d={FOLD_RIDGE} fill="url(#q3-skin2)" stroke={SKIN.deep} strokeWidth={1.5} strokeLinejoin="round" />
+          <path d={FOLD_CREST} stroke={SKIN.light} strokeWidth={2.5} fill="none" opacity={0.7} strokeLinecap="round" />
         </g>
+        <path
+          className="q3-cue-s q3-anim"
+          d="M166 46 l-5 -9 M182 42 v-10 M198 46 l5 -9"
+          stroke={ACCENT.S}
+          strokeWidth={2}
+          strokeLinecap="round"
+          fill="none"
+        />
         <PhaseBadge d="S" label={HELP.outcomes.S.label} />
       </g>
 
       {/* Б: чийглэг — усны дусал + гөлгөр гялбааны нум */}
       <g className="q3-ph q3-ph-b">
-        <g stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <path className="q3-fold-b q3-anim" d={FOLD_D} />
-          <g className="q3-cue-b q3-anim">
-            <path d="M174 63 Q178 55 184 55" strokeWidth={2} opacity={0.6} />
-            <path d="M197 50 q6.5 9.5 0 15 q-6.5 -5.5 0 -15 z" strokeWidth={2} fill={ACCENT.B} fillOpacity={0.2} />
-          </g>
+        <g className="q3-fold-b q3-anim">
+          <path d={FOLD_RIDGE} fill="url(#q3-skin2)" stroke={SKIN.deep} strokeWidth={1.5} strokeLinejoin="round" />
+          <path d={FOLD_CREST} stroke={SKIN.light} strokeWidth={2.5} fill="none" opacity={0.7} strokeLinecap="round" />
+        </g>
+        <g className="q3-cue-b q3-anim">
+          <path d="M173 63 Q177 55 183 55" stroke={ACCENT.B} strokeWidth={2} opacity={0.7} fill="none" strokeLinecap="round" />
+          <path d="M199 49 q6.5 9.5 0 15 q-6.5 -5.5 0 -15 z" stroke={ACCENT.B} strokeWidth={2} fill={ACCENT.B} fillOpacity={0.28} strokeLinejoin="round" />
         </g>
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />
       </g>

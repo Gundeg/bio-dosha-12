@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export interface IntakeHistoryEntry {
   id: string;
@@ -29,11 +30,13 @@ export function IntakeHistory({
   selectedIntakeId,
   onSelect,
 }: IntakeHistoryProps) {
+  const t = useTranslations("clinical.history");
+
   if (intakes.length === 0) {
     return (
       <Card>
         <CardContent className="py-10 text-center text-sm text-muted-foreground">
-          Үзлэгийн түүх байхгүй байна.
+          {t("empty")}
         </CardContent>
       </Card>
     );
@@ -60,24 +63,25 @@ export function IntakeHistory({
                   )}
                 </p>
                 <p className="text-xs text-muted-foreground line-clamp-1">
-                  {intake.diagnosis ?? "Онош тэмдэглээгүй"}
+                  {intake.diagnosis ?? t("noDiagnosis")}
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
+                aria-current={active ? "true" : undefined}
                 onClick={() => onSelect(intake.id)}
               >
-                {active ? "Идэвхтэй" : "Үзэх"}
+                {active ? t("active") : t("view")}
               </Button>
               <Link
                 href={`/api/patients/${patientId}/intakes/${intake.id}/pdf`}
                 target="_blank"
                 rel="noopener"
+                aria-label={t("pdfLabel", { date: formatDate(intake.admissionDate) })}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
               >
-                <Button variant="outline" size="sm">
-                  PDF
-                </Button>
+                {t("pdf")}
               </Link>
             </CardContent>
           </Card>

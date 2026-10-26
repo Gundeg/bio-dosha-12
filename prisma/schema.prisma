@@ -33,11 +33,20 @@ model User {
   name                    String
   practitionerRequestedAt DateTime?
   practitionerApprovedAt  DateTime?
+  /// When the user accepted the privacy notice at registration.
+  privacyAcceptedAt       DateTime?
   createdAt               DateTime         @default(now())
   updatedAt               DateTime         @updatedAt
   profiles                Profile[]
   patients                Patient[]        @relation("PractitionerPatients")
   intakes                 ClinicalIntake[] @relation("PractitionerIntakes")
+}
+
+/// Fixed-window counters for login and registration throttling.
+model RateLimit {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
 }
 
 model Profile {

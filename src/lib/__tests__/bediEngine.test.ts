@@ -1,122 +1,110 @@
 import { describe, expect, it } from "vitest";
-import { calcAge, calculateBEDI, expectedWeight, type BEDIStatus } from "../bediEngine";
+import { calcAge, calculateBEDI, type BEDIInput } from "../bediEngine";
 import { BEDI_THRESHOLDS } from "../bediConfig";
-import type { SeasonKey } from "../seasonFactors";
+import { SEASON_COEFFICIENTS } from "../seasonFactors";
 
-const SEASONS: SeasonKey[] = ["WINTER", "SPRING", "SUMMER", "AUTUMN"];
-
-function run(weightKg: number, kt: number, season: SeasonKey, overrides?: Partial<Parameters<typeof calculateBEDI>[0]>) {
+/**
+ * These cases lock the BEDI formula to the first web build (commit 25e015a),
+ * which the owner confirmed as correct on 2026-10-26:
+ *
+ *   BEDI = (W · Kg · Ks · Kc) / (H · Age · Kt)
+ *   Kg: male 1.1, female 1.0 · Ks: winter 2.0, spring 1.5, summer 1.0, autumn 1.3
+ *   Δ = BEDI − 1 · Δ < −0.3 → Хий арвидсан · Δ > +0.3 → Шар/Бадган арвидсан · else Тэнцвэртэй
+ *
+ * Do not edit the expected values without the owner's approval (see lessons.md).
+ */
+function run(overrides: Partial<BEDIInput>) {
   return calculateBEDI({
-    weightKg,
+    weightKg: 70,
     heightCm: 170,
-    age: 30,
-    sex: "FEMALE",
-    season,
-    kt,
+    age: 35,
+    sex: "MALE",
+    season: "SUMMER",
+    kt: 1.0,
     ...overrides,
   });
 }
 
-describe("expectedWeight", () => {
-  it("is reference BMI × height² at kt = 1.0", () => {
-    expect(expectedWeight(170, 1.0)).toBeCloseTo(22 * 1.7 * 1.7, 2);
+describe("first-build coefficients", () => {
+  it("uses winter 2.0, spring 1.5, summer 1.0, autumn 1.3", () => {
+    expect(SEASON_COEFFICIENTS).toEqual({ WINTER: 2.0, SPRING: 1.5, SUMMER: 1.0, AUTUMN: 1.3 });
   });
 
-  it("is lower for Хий (kt 0.70) and higher for Бадган (kt 1.50), damped", () => {
-    const khii = expectedWeight(170, 0.7);
-    const badgan = expectedWeight(170, 1.5);
-    const neutral = expectedWeight(170, 1.0);
-    expect(khii).toBeLessThan(neutral);
-    expect(badgan).toBeGreaterThan(neutral);
-    // damping: Бадганы хэвийн жин +50% биш ~+22% байх ёстой
-    expect(badgan / neutral).toBeLessThan(1.3);
+  it("uses a ±0.3 balanced band on Δ", () => {
+    expect(BEDI_THRESHOLDS).toEqual({ khiiBelow: -0.3, sharBadganAbove: 0.3 });
+  });
+
+  it("weights men by 1.1 and women by 1.0", () => {
+    const male = run({ sex: "MALE" });
+    const female = run({ sex: "FEMALE" });
+    expect(male.bedi / female.bedi).toBeCloseTo(1.1, 1);
   });
 });
 
-describe("calculateBEDI — recalibrated deviation", () => {
-  it("ideal-weight adult is balanced in EVERY season (the old baseline made this impossible)", () => {
-    const ideal = expectedWeight(170, 1.0);
-    for (const season of SEASONS) {
-      const r = run(ideal, 1.0, season);
-      expect(r.status, `season=${season} dev=${r.deviation}`).toBe("balanced");
+describe("calculateBEDI — first-build formula", () => {
+  it("computes BEDI = (W·Kg·Ks·Kc) / (H·Age·Kt)", () => {
+    // 70 · 1.1 · 1.0 · 1.0 / (1.70 · 35 · 1.0) = 77 / 59.5
+    const r = run({});
+    expect(r.bedi).toBe(1.29);
+    expect(r.deviation).toBe(0.29);
+  });
+
+  it("measures deviation from the zero point: Δ = BEDI − 1", () => {
+    for (const season of ["WINTER", "SPRING", "SUMMER", "AUTUMN"] as const) {
+      const r = run({ season });
+      expect(Math.abs(r.deviation - (r.bedi - 1))).toBeLessThanOrEqual(0.011);
     }
   });
 
-  it("all three statuses are reachable", () => {
-    const seen = new Set<BEDIStatus>();
-    for (const weightKg of [45, 55, 64, 75, 90]) {
-      for (const kt of [0.7, 1.0, 1.5]) {
-        for (const season of SEASONS) {
-          seen.add(run(weightKg, kt, season).status);
-        }
-      }
-    }
-    expect([...seen].sort()).toEqual(
-      ["balanced", "khii_excess", "shar_badgan_excess"].sort()
-    );
+  it("applies the cultural factor in the numerator", () => {
+    expect(run({ culturalFactor: 2 }).bedi).toBeCloseTo(run({}).bedi * 2, 1);
   });
 
-  it("underweight in summer reads Хий арвидсан; overweight in winter reads Шар/Бадган арвидсан", () => {
-    expect(run(50, 1.0, "SUMMER").status).toBe("khii_excess");
-    expect(run(85, 1.0, "WINTER").status).toBe("shar_badgan_excess");
+  it.each([
+    // Worked examples, checked by hand against the formula
+    { name: "man 35y 170cm 70kg Kt1.00 summer", input: {}, bedi: 1.29, deviation: 0.29, status: "balanced" },
+    { name: "man 35y 170cm 70kg Kt1.00 winter", input: { season: "WINTER" }, bedi: 2.59, deviation: 1.59, status: "shar_badgan_excess" },
+    { name: "woman 35y 160cm 55kg Kt1.00 summer", input: { sex: "FEMALE", heightCm: 160, weightKg: 55 }, bedi: 0.98, deviation: -0.02, status: "balanced" },
+    { name: "man 60y 172cm 80kg Kt1.35 summer", input: { age: 60, heightCm: 172, weightKg: 80, kt: 1.35 }, bedi: 0.63, deviation: -0.37, status: "khii_excess" },
+    { name: "man 60y 172cm 80kg Kt1.35 autumn", input: { age: 60, heightCm: 172, weightKg: 80, kt: 1.35, season: "AUTUMN" }, bedi: 0.82, deviation: -0.18, status: "balanced" },
+  ] as const)("$name → BEDI $bedi, Δ $deviation, $status", ({ input, bedi, deviation, status }) => {
+    const r = run(input as Partial<BEDIInput>);
+    expect(r.bedi).toBe(bedi);
+    expect(r.deviation).toBe(deviation);
+    expect(r.status).toBe(status);
   });
 
-  it("winter tilts deviation up and summer down for the same weight", () => {
-    const winter = run(64, 1.0, "WINTER").deviation;
-    const summer = run(64, 1.0, "SUMMER").deviation;
-    expect(winter).toBeGreaterThan(summer);
+  it("depends on age: the same body reads differently at 20, 40 and 80", () => {
+    expect(run({ age: 20 }).status).toBe("shar_badgan_excess"); // Δ +1.26
+    expect(run({ age: 40 }).status).toBe("balanced"); //          Δ +0.13
+    expect(run({ age: 80 }).status).toBe("khii_excess"); //       Δ −0.43
   });
 
-  it("keeps the patented BEDI index formula untouched", () => {
-    // 70kg female, 170cm, 30y, summer(1.0), kt 1.0 → 70/(1.7·30·1) = 1.37
-    const r = run(70, 1.0, "SUMMER");
-    expect(r.bedi).toBeCloseTo(70 / (1.7 * 30 * 1.0), 2);
+  it("classifies just inside and just outside the ±0.3 band", () => {
+    // woman, 100 cm, 10 y, Kt 1.0, summer → BEDI = weight / 10
+    const at = (weightKg: number) =>
+      run({ sex: "FEMALE", heightCm: 100, age: 10, kt: 1.0, weightKg }).status;
+    expect(at(6.9)).toBe("khii_excess");
+    expect(at(7.1)).toBe("balanced");
+    expect(at(12.9)).toBe("balanced");
+    expect(at(13.1)).toBe("shar_badgan_excess");
   });
 
-  it("guards degenerate inputs (age 0, tiny height) without NaN/Infinity", () => {
-    const r = calculateBEDI({
-      weightKg: 10,
-      heightCm: 0,
-      age: 0,
-      sex: "MALE",
-      season: "WINTER",
-      kt: 0.7,
-    });
-    expect(Number.isFinite(r.bedi)).toBe(true);
-    expect(Number.isFinite(r.deviation)).toBe(true);
+  it("returns the localized status label", () => {
+    expect(run({ season: "WINTER" }).statusLabel.mn).toBe("Шар/Бадган арвидсан");
+    expect(run({}).statusLabel.mn).toBe("Тэнцвэртэй");
   });
 
   it("rounds bedi and deviation to 2 decimals", () => {
-    const r = run(67.123, 1.1, "AUTUMN");
+    const r = run({ weightKg: 67.123, kt: 1.1, season: "AUTUMN" });
     expect(r.bedi).toBe(Math.round(r.bedi * 100) / 100);
     expect(r.deviation).toBe(Math.round(r.deviation * 100) / 100);
   });
 
-  it("prints the owner-review outcome matrix", () => {
-    // ЭЗЭМШИГЧИЙН ХЯНАЛТ: доорх матрицыг Тб оточ баталгаажуулна.
-    const rows: Array<Record<string, string | number>> = [];
-    for (const weightKg of [50, 64, 75, 90]) {
-      for (const kt of [0.7, 1.0, 1.5]) {
-        const row: Record<string, string | number> = {
-          "жин(кг)": weightKg,
-          Kt: kt,
-        };
-        for (const season of SEASONS) {
-          const r = run(weightKg, kt, season);
-          row[season] = `${r.deviation >= 0 ? "+" : ""}${r.deviation} ${r.statusLabel.mn}`;
-        }
-        rows.push(row);
-      }
-    }
-    console.table(rows);
-    expect(rows.length).toBe(12);
-  });
-});
-
-describe("thresholds", () => {
-  it("derive from the validation study (mean 0.0133, SD 0.2006, ±1.5·SD)", () => {
-    expect(BEDI_THRESHOLDS.khiiBelow).toBeCloseTo(0.0133 - 1.5 * 0.2006, 4);
-    expect(BEDI_THRESHOLDS.sharBadganAbove).toBeCloseTo(0.0133 + 1.5 * 0.2006, 4);
+  it("guards age 0 without NaN/Infinity", () => {
+    const r = run({ age: 0 });
+    expect(Number.isFinite(r.bedi)).toBe(true);
+    expect(Number.isFinite(r.deviation)).toBe(true);
   });
 });
 
@@ -130,7 +118,6 @@ describe("calcAge", () => {
   it("subtracts a year before the birthday has passed", () => {
     const now = new Date();
     const tomorrow = new Date(now.getFullYear() - 20, now.getMonth(), now.getDate() + 1);
-    // handles month rollover implicitly via Date normalization
     const age = calcAge(tomorrow);
     expect(age === 19 || age === 20).toBe(true);
     if (tomorrow.getMonth() === now.getMonth()) expect(age).toBe(19);

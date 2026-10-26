@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { pulseTableSchema, type PulseTable } from "@/lib/apiSchemas";
 import { ALL_THERAPY_KEYS } from "@/lib/clinicalConstants";
 import { calcAge } from "@/lib/bediEngine";
 import { PatientDetailTabs, type PatientDetailIntake } from "@/components/clinical/PatientDetailTabs";
+import { DeletePatientButton } from "@/components/clinical/DeletePatientButton";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -47,6 +49,7 @@ export default async function PatientDetailPage({ params }: PageProps) {
 
   if (!patient) notFound();
 
+  const [t, ts] = await Promise.all([getTranslations("patients"), getTranslations("shared")]);
   const profile = patient.profile;
   const age = calcAge(profile.birthDate.toISOString());
 
@@ -85,15 +88,21 @@ export default async function PatientDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">
-          {profile.lastName ? `${profile.lastName} ` : ""}
-          {profile.name}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {age} нас • {profile.sex === "MALE" ? "Эрэгтэй" : "Эмэгтэй"}
-          {profile.phone ? ` • ${profile.phone}` : ""}
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">
+            {profile.lastName ? `${profile.lastName} ` : ""}
+            {profile.name}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("ageSex", { age, sex: ts(`sex.${profile.sex === "MALE" ? "MALE" : "FEMALE"}`) })}
+            {profile.phone ? ` • ${profile.phone}` : ""}
+          </p>
+        </div>
+        <DeletePatientButton
+          patientId={patient.id}
+          patientName={`${profile.lastName ?? ""} ${profile.name}`.trim()}
+        />
       </div>
 
       <PatientDetailTabs

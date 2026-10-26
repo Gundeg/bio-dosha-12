@@ -25,5 +25,6 @@ export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
   },
-  session: { strategy: "jwt" },
+  // Health data: keep sessions short. The token is refreshed hourly while in use.
+  session: { strategy: "jwt", maxAge: 12 * 60 * 60, updateAge: 60 * 60 },
 };

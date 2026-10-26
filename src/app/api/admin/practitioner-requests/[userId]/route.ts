@@ -6,7 +6,10 @@ import { prisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 
 const actionSchema = z.object({
-  action: z.enum(["approve", "reject"]),
+  // approve: pending → PRACTITIONER
+  // reject:  pending request is dismissed
+  // revoke:  PRACTITIONER → INDIVIDUAL; the request stays so it can be approved again
+  action: z.enum(["approve", "reject", "revoke"]),
 });
 
 export async function PATCH(
@@ -36,7 +39,15 @@ export async function PATCH(
     return NextResponse.json({ error: "Хүсэлт олдсонгүй" }, { status: 404 });
   }
 
+  // An admin's role must never be overwritten through this endpoint.
+  if (user.role === "ADMIN") {
+    return NextResponse.json({ error: "Админ эрхтэй хэрэглэгчийн эрхийг энд өөрчлөхгүй" }, { status: 409 });
+  }
+
   if (parsed.data.action === "approve") {
+    if (user.role !== "INDIVIDUAL") {
+      return NextResponse.json({ error: "Хүсэлт аль хэдийн шийдвэрлэгдсэн" }, { status: 409 });
+    }
     const updated = await prisma.user.update({
       where: { id: userId },
       data: { role: "PRACTITIONER", practitionerApprovedAt: new Date() },
@@ -45,6 +56,22 @@ export async function PATCH(
     return NextResponse.json(updated);
   }
 
+  if (parsed.data.action === "revoke") {
+    if (user.role !== "PRACTITIONER") {
+      return NextResponse.json({ error: "Энэ хэрэглэгч эмчийн эрхгүй байна" }, { status: 409 });
+    }
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { role: "INDIVIDUAL", practitionerApprovedAt: null },
+      select: { id: true, role: true },
+    });
+    return NextResponse.json(updated);
+  }
+
+  // reject: only a still-pending request can be dismissed.
+  if (user.role !== "INDIVIDUAL") {
+    return NextResponse.json({ error: "Эмчийн эрхийг цуцлахдаа «Эрх цуцлах» үйлдлийг ашиглана уу" }, { status: 409 });
+  }
   const updated = await prisma.user.update({
     where: { id: userId },
     data: { practitionerRequestedAt: null, practitionerApprovedAt: null },

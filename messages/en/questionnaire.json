@@ -1,0 +1,218 @@
+{
+  "q1": {
+    "category": "Body build",
+    "question": "What is your bone and joint structure like?",
+    "options": {
+      "H": {
+        "label": "Thin, small",
+        "hint": "Bony elbows, visible veins, a small frame"
+      },
+      "S": {
+        "label": "Medium, average",
+        "hint": "A medium build, neither thin nor broad"
+      },
+      "B": {
+        "label": "Large, broad, heavy",
+        "hint": "A broad back, large bones, a heavy build"
+      }
+    }
+  },
+  "q2": {
+    "category": "Body build",
+    "question": "How stable is your weight?",
+    "options": {
+      "H": {
+        "label": "Hard to gain weight",
+        "hint": "Does not gain weight even after eating a lot; stays lean"
+      },
+      "S": {
+        "label": "Stable weight",
+        "hint": "Weight neither rises nor falls much"
+      },
+      "B": {
+        "label": "Hard to lose weight",
+        "hint": "Gains weight even on little food; hard to lose"
+      }
+    }
+  },
+  "q3": {
+    "category": "Skin and face",
+    "question": "What is your skin like?",
+    "options": {
+      "H": {
+        "label": "Dry, rough, prone to cracking",
+        "hint": "Skin dries out and needs extra oil"
+      },
+      "S": {
+        "label": "Warm, reddish, sweaty",
+        "hint": "Skin feels hot and reddens easily"
+      },
+      "B": {
+        "label": "Pale, moist, soft",
+        "hint": "Skin is moist and full, and feels cool"
+      }
+    }
+  },
+  "q4": {
+    "category": "Sensitivity",
+    "question": "How do you react to heat and cold?",
+    "options": {
+      "H": {
+        "label": "Sensitive to cold",
+        "hint": "Copes poorly with cold; prefers warm places"
+      },
+      "S": {
+        "label": "Sensitive to heat",
+        "hint": "Copes poorly with heat; prefers cool places"
+      },
+      "B": {
+        "label": "Sensitive to damp and wet",
+        "hint": "Tires in humid weather; prefers dry, warm places"
+      }
+    }
+  },
+  "q5": {
+    "category": "Sleep",
+    "question": "What is your sleep pattern like?",
+    "options": {
+      "H": {
+        "label": "Light sleep, few hours",
+        "hint": "Wakes easily, slow to fall asleep; 5–6 hours is enough"
+      },
+      "S": {
+        "label": "Average, regular sleep",
+        "hint": "Sleeps a regular 7–8 hours; normal sleep"
+      },
+      "B": {
+        "label": "Deep sleep, long hours",
+        "hint": "Loves sleeping, sleeps 9–10+ hours, hard to get up"
+      }
+    }
+  },
+  "q6": {
+    "category": "Digestion",
+    "question": "What are your digestion and appetite like?",
+    "options": {
+      "H": {
+        "label": "Irregular, depends on the time",
+        "hint": "Sometimes has an appetite, sometimes not"
+      },
+      "S": {
+        "label": "Digests fast, strong appetite",
+        "hint": "Food digests easily; gets irritable when a meal is skipped"
+      },
+      "B": {
+        "label": "Digests slowly, eats little",
+        "hint": "Satisfied with small meals; slow digestion"
+      }
+    }
+  },
+  "q7": {
+    "category": "Activity",
+    "question": "How fast do you speak and move?",
+    "options": {
+      "H": {
+        "label": "Fast, talks a lot",
+        "hint": "Thoughts jump quickly, talks a lot, walks fast"
+      },
+      "S": {
+        "label": "Sharp, purposeful",
+        "hint": "Speaks clearly and decisively, walks fast"
+      },
+      "B": {
+        "label": "Calm, slow, steady",
+        "hint": "Speaks thoughtfully, walks slowly, steady"
+      }
+    }
+  },
+  "q8": {
+    "category": "Mind",
+    "question": "How do you learn and remember?",
+    "options": {
+      "H": {
+        "label": "Learns fast, forgets fast",
+        "hint": "Grasps new things quickly but soon forgets them"
+      },
+      "S": {
+        "label": "Learns fast, remembers well",
+        "hint": "Understands quickly and remembers for a long time"
+      },
+      "B": {
+        "label": "Learns slowly, never forgets",
+        "hint": "Needs time to understand, but once learned never forgets"
+      }
+    }
+  },
+  "q9": {
+    "category": "Emotions",
+    "question": "What is your emotional state like?",
+    "options": {
+      "H": {
+        "label": "Worried, restless",
+        "hint": "Worries about the future, indecisive, attitude changes often"
+      },
+      "S": {
+        "label": "Driven, quick to anger",
+        "hint": "Clear-minded, loves reaching goals, straightforward"
+      },
+      "B": {
+        "label": "Calm, steady, low-spirited",
+        "hint": "Rarely angry; steady but sometimes gloomy"
+      }
+    }
+  },
+  "q10": {
+    "category": "Hands and feet",
+    "question": "What are your hands and feet like?",
+    "options": {
+      "H": {
+        "label": "Cold, dry",
+        "hint": "Hands and feet are always cold, especially in winter"
+      },
+      "S": {
+        "label": "Hot, sweaty",
+        "hint": "Hands and feet are warm and sweat easily"
+      },
+      "B": {
+        "label": "Cool, moist",
+        "hint": "Hands generally feel cool and moist"
+      }
+    }
+  },
+  "q11": {
+    "category": "Stamina",
+    "question": "What is your physical stamina like?",
+    "options": {
+      "H": {
+        "label": "Low, tires quickly",
+        "hint": "Good at short tasks but tires during long work"
+      },
+      "S": {
+        "label": "Average, steady",
+        "hint": "Good at steady work; may fall short under a very heavy load"
+      },
+      "B": {
+        "label": "High, very enduring",
+        "hint": "Good at long work; the body does not tire quickly"
+      }
+    }
+  },
+  "q12": {
+    "category": "Abdomen",
+    "question": "What are your bowels and abdomen like?",
+    "options": {
+      "H": {
+        "label": "Hard, dry",
+        "hint": "Prone to constipation; hard stools"
+      },
+      "S": {
+        "label": "Soft, regular",
+        "hint": "Regular and normal; yellowish colour"
+      },
+      "B": {
+        "label": "Bulky, slow, steady",
+        "hint": "Large volume; a feeling of bloating"
+      }
+    }
+  }
+}

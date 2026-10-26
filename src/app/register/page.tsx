@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { PASSWORD_MIN_LENGTH } from "@/lib/credentials";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [wantsPractitioner, setWantsPractitioner] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
   const personas = [
     { value: false, label: t("individualLabel"), icon: "👤", desc: t("individualDesc") },
@@ -29,14 +31,21 @@ export default function RegisterPage() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, wantsPractitioner }),
+        body: JSON.stringify({ ...form, wantsPractitioner, acceptPrivacy }),
       });
       const text = await res.text();
       let data: { error?: string } = {};
       try { data = JSON.parse(text); } catch { /* non-JSON response */ }
       if (!res.ok) {
         console.error("[register] status:", res.status, "body:", text);
-        toast.error(data.error ?? t("errorWithStatus", { status: res.status }));
+        // Known failures get a message in the active language; anything else
+        // falls back to the server's text.
+        const known: Record<number, string> = {
+          400: t("invalidInput"),
+          409: t("emailTaken"),
+          429: t("rateLimited"),
+        };
+        toast.error(known[res.status] ?? data.error ?? t("errorWithStatus", { status: res.status }));
         return;
       }
 
@@ -116,13 +125,17 @@ export default function RegisterPage() {
                 id="password"
                 type="password"
                 required
-                minLength={6}
+                minLength={PASSWORD_MIN_LENGTH}
+                aria-describedby="password-hint"
                 autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder={t("passwordPlaceholder")}
                 className="border-slate-200 h-11"
               />
+              <p id="password-hint" className="text-xs text-slate-500">
+                {t("passwordHint", { min: PASSWORD_MIN_LENGTH })}
+              </p>
             </div>
 
             {/* Persona selector — эрх биш, зөвхөн хүсэлт */}
@@ -158,7 +171,26 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full h-11 font-semibold mt-2" disabled={loading}>
+            <label className="flex items-start gap-2.5 text-xs text-slate-600 leading-relaxed">
+              <input
+                type="checkbox"
+                required
+                checked={acceptPrivacy}
+                onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-blue-600"
+              />
+              <span>
+                {t.rich("privacyConsent", {
+                  link: (chunks) => (
+                    <Link href="/privacy" target="_blank" className="text-blue-600 font-semibold hover:underline">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </span>
+            </label>
+
+            <Button type="submit" className="w-full h-11 font-semibold mt-2" disabled={loading || !acceptPrivacy}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

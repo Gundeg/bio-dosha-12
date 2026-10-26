@@ -1,0 +1,55 @@
+{
+  "eyebrow": "Bio-Dosha-12 · Dashboard",
+  "greeting": "Hello,",
+  "lastMeasurement": "Last measurement: {date}",
+  "newCalculation": "Calculate",
+  "assessment": "Assessment",
+  "profilesLabel": "Choose a profile",
+  "noProfileTitle": "No profile yet",
+  "noProfileBody": "Start with the 12-question assessment",
+  "startAssessment": "Start assessment",
+  "balanceTitle": "Constitution balance",
+  "statWeight": "Weight",
+  "statSeason": "Season",
+  "weightValue": "{weight} kg",
+  "ktMissing": "No assessment yet, so the Kt coefficient is not set",
+  "takeAssessment": "Take the assessment",
+  "noRecord": "No calculation yet",
+  "doCalculation": "Run a calculation",
+  "constitutionMissingTitle": "Constitution not assessed yet",
+  "constitutionMissingBody": "Answer 12 questions to determine your Kt coefficient",
+  "bediIndex": "BEDI index",
+  "bediIndexBadge": "B",
+  "bediGauge": "BEDI gauge",
+  "deviation": "Deviation (Δ)",
+  "trendTitle": "BEDI trend",
+  "now": "NOW",
+  "quickActions": "Quick actions",
+  "seeAll": "See all →",
+  "actions": {
+    "calculator": {
+      "title": "BEDI calculation",
+      "desc": "Enter today's weight to calculate your BEDI index",
+      "cta": "CALCULATE →"
+    },
+    "recommendations": {
+      "title": "Remedies",
+      "desc": "Food and lifestyle advice suited to your constitution",
+      "cta": "VIEW REMEDIES →"
+    }
+  },
+  "info": {
+    "eyebrow": "How it works",
+    "title": "What is the BEDI index?",
+    "body": "Bio-Energetic Dosha Index — a measure that combines weight, height, age, season and the constitution's Kt coefficient.",
+    "balancedBody": "Your constitution is in balance. Keep up your current routine.",
+    "khiiBody": "Khii (Wind) is dominant. Warmth, oil massage and rest are needed.",
+    "sharBadganTitle": "Shar/Badgan",
+    "sharBadganBody": "Shar (Fire) or Badgan (Earth) is in excess. A diet plan and cooling exercise are needed.",
+    "ktNote": "The Kt coefficient is determined once, by the 12-question assessment."
+  },
+  "practitionerBanner": {
+    "approved": "Your practitioner access is approved. Sign out and sign in again to turn on the practitioner menu.",
+    "pending": "Your practitioner request is waiting for admin approval. You'll be told here once it's approved — meanwhile every personal feature is available."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "eyebrow": "BEDI протокол · Гэр бүл",
+  "title": "Гэр бүлийн Хяналт",
+  "subtitle": "{count} гишүүний BEDI индекс хяналтад байна",
+  "addMember": "Гишүүн нэмэх",
+  "selfBadge": "ӨӨРИЙНХ",
+  "ageValue": "{age} нас",
+  "heightValue": "{height} см",
+  "sexShort": {
+    "MALE": "Эр",
+    "FEMALE": "Эм"
+  },
+  "notAssessed": "Үнэлгээ хийгдээгүй байна",
+  "latestDeviation": "Сүүлийн хазайлт",
+  "calculate": "Тооцоолох",
+  "assess": "Үнэлгээ хийх",
+  "deleteAria": "{name} профайлыг устгах",
+  "addDialog": {
+    "title": "Гэр бүлийн гишүүн нэмэх",
+    "name": "Нэр",
+    "namePlaceholder": "Гишүүний нэр",
+    "birthDate": "Төрсөн огноо",
+    "sex": "Хүйс",
+    "height": "Өндөр (см)",
+    "relationship": "Хамаарал",
+    "cancel": "Болих",
+    "submit": "Нэмэх",
+    "submitting": "Нэмж байна..."
+  },
+  "deleteDialog": {
+    "title": "Гишүүн устгах",
+    "body": "<strong>{name}</strong> гишүүнийг устгах уу? Гишүүний бүх хэмжилтийн түүх хамт устана.",
+    "cancel": "Болих",
+    "confirm": "Устгах",
+    "deleting": "Устгаж байна..."
+  },
+  "toast": {
+    "added": "Гэр бүлийн гишүүн нэмэгдлээ!",
+    "addError": "Нэмэх явцад алдаа гарлаа.",
+    "deleted": "Устгагдлаа.",
+    "deleteError": "Устгах явцад алдаа гарлаа."
+  }
+}

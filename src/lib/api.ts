@@ -34,12 +34,58 @@ export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
 
   const data = await res.json().catch(() => null);
   if (!res.ok) {
-    throw new ApiError(
-      res.status,
-      (data as { error?: string } | null)?.error ??
-        `Алдаа гарлаа (${res.status}). Дахин оролдоно уу.`,
-      (data as { fieldErrors?: Record<string, string[]> } | null)?.fieldErrors
-    );
+    const { message, fieldErrors } = describeError(data, res.status);
+    throw new ApiError(res.status, message, fieldErrors);
   }
   return data as T;
+}
+
+/** Field names used by the API schemas, shown to the user in validation errors. */
+const FIELD_LABELS: Record<string, string> = {
+  name: "Нэр",
+  lastName: "Овог",
+  email: "Имэйл",
+  password: "Нууц үг",
+  birthDate: "Төрсөн огноо",
+  sex: "Хүйс",
+  heightCm: "Өндөр",
+  weightKg: "Жин",
+  season: "Улирал",
+  ktScore: "Kt коэффициент",
+  doshaType: "Махбодын төрөл",
+  profileId: "Профайл",
+  notes: "Тэмдэглэл",
+};
+
+type FlattenedZodError = { formErrors?: string[]; fieldErrors?: Record<string, string[]> };
+
+/**
+ * API routes answer errors in two shapes: `{ error: "text", fieldErrors }` or
+ * `{ error: zodError.flatten() }`. Passing the second shape straight to
+ * `new Error()` produced the message "[object Object]".
+ */
+function describeError(
+  data: unknown,
+  status: number
+): { message: string; fieldErrors?: Record<string, string[]> } {
+  const body = (data ?? {}) as { error?: unknown; fieldErrors?: Record<string, string[]> };
+  const fallback = `Алдаа гарлаа (${status}). Дахин оролдоно уу.`;
+
+  if (typeof body.error === "string") {
+    return { message: body.error, fieldErrors: body.fieldErrors };
+  }
+
+  if (body.error && typeof body.error === "object") {
+    const flat = body.error as FlattenedZodError;
+    const fieldErrors = flat.fieldErrors ?? body.fieldErrors;
+    const fields = Object.keys(fieldErrors ?? {}).map((k) => FIELD_LABELS[k] ?? k);
+    if (fields.length > 0) {
+      return { message: `Оруулсан утга буруу байна: ${fields.join(", ")}.`, fieldErrors };
+    }
+    if (flat.formErrors?.length) {
+      return { message: `Оруулсан мэдээлэл буруу байна: ${flat.formErrors.join(", ")}`, fieldErrors };
+    }
+  }
+
+  return { message: fallback, fieldErrors: body.fieldErrors };
 }

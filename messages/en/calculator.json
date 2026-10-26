@@ -1,0 +1,223 @@
+{
+  "loadError": "Something went wrong while loading the data.",
+  "toast": {
+    "profileNotFound": "The selected profile was not found. Please choose a profile from the list.",
+    "bediSaved": "Calculation saved successfully!",
+    "saveError": "Something went wrong while saving.",
+    "profileCreated": "Profile created for {name}!",
+    "assessmentUpdated": "Assessment updated!"
+  },
+  "actions": {
+    "back": "Back",
+    "saving": "Saving..."
+  },
+  "wizard": {
+    "stepAria": "Step {number}: {name}",
+    "steps": {
+      "assessment": "Constitution assessment",
+      "measurement": "Measurements",
+      "result": "Result"
+    }
+  },
+  "header": {
+    "bediResult": {
+      "title": "BEDI Index Calculation",
+      "subtitle": "Your analysis is complete. Review the result and save it."
+    },
+    "measurement": {
+      "title": "Enter Measurements",
+      "subtitle": "Enter the biometric data and the current season."
+    },
+    "questions": {
+      "title": "Constitution Questions",
+      "subtitle": "Answer from your innate nature — not from how you feel today."
+    },
+    "assessmentResult": {
+      "title": "Assessment Result",
+      "subtitle": "Your Kt coefficient has been determined. Save it to continue to the BEDI calculation."
+    },
+    "profile": {
+      "title": "Constitution Profile",
+      "subtitle": "Complete the constitution questionnaire to determine the Kt coefficient."
+    }
+  },
+  "quiz": {
+    "counter": "{current} / {total} questions",
+    "questionOf": "Question {current} of {total}",
+    "progressLabel": "Questionnaire progress"
+  },
+  "doshaLetter": {
+    "H": "K",
+    "S": "S",
+    "B": "B"
+  },
+  "profileSelect": {
+    "prompt": "Who is this assessment for?",
+    "retake": "Retake",
+    "start": "Start assessment",
+    "newProfile": "New profile",
+    "newProfileDesc": "Details and assessment for a new person"
+  },
+  "form": {
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "birthDate": "Date of birth",
+    "height": "Height (cm)",
+    "sex": "Sex",
+    "relationship": "Relationship",
+    "startQuestions": "Start questions"
+  },
+  "assessmentResult": {
+    "title": "Assessment result",
+    "newProfileNote": "The profile will be saved and you will continue to the calculation",
+    "updateNote": "The Kt of this profile will be updated",
+    "elements": {
+      "H": "Khii (Wind)",
+      "S": "Shar (Fire)",
+      "B": "Badgan (Earth)"
+    },
+    "points": "{score, plural, one {# point} other {# points}}",
+    "ktLabel": "Resulting Kt coefficient",
+    "retake": "Retake",
+    "saveAndCalculate": "Save and calculate"
+  },
+  "calc": {
+    "noProfiles": "Complete a constitution assessment to get started.",
+    "startAssessment": "Take the assessment",
+    "whose": "Whose calculation is this?",
+    "profileGroup": "Choose a profile",
+    "selectProfile": "Choose the profile to calculate for.",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "age": "Age",
+    "sex": "Sex",
+    "season": "Current season",
+    "notes": "Notes",
+    "optional": "(optional)",
+    "notesPlaceholder": "Additional notes...",
+    "weightRange": "Weight must be between {min} and {max} kg.",
+    "calculate": "Calculate BEDI",
+    "retakeAssessment": "Retake the assessment"
+  },
+  "bediResult": {
+    "heading": "BEDI calculation result",
+    "index": "BEDI index",
+    "deviation": "Deviation (Δ)",
+    "explanation": {
+      "balanced": "Your Khii, Shar and Badgan are in balance. Keep up your current lifestyle.",
+      "khii_excess": "Khii (Wind) is in excess. Add warm meals, a restful routine and warming exercises.",
+      "shar_badgan_excess": "Shar (Fire) or Badgan (Earth) is dominant. Light meals and exercise that avoids the cold are recommended."
+    },
+    "chartTitle": "Constitution balance chart",
+    "chartLegend": "Dashed grey — base constitution  ·  Coloured — current state",
+    "metrics": {
+      "age": { "label": "Age", "unit": "years" },
+      "weight": { "label": "Weight", "unit": "kg" },
+      "height": { "label": "Height", "unit": "cm" }
+    },
+    "recalculate": "Recalculate",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "guide": {
+    "constitution": {
+      "title": "Body Type Reference",
+      "intro": "A reference to help identify the basic body type.",
+      "light": {
+        "title": "Light build",
+        "desc": "Slim, fine-boned. Fast metabolism. Finds it hard to gain weight."
+      },
+      "medium": {
+        "title": "Medium build",
+        "desc": "Athletic, sturdy build. Well-defined muscles. Weight adjusts easily."
+      },
+      "heavy": {
+        "title": "Heavy build",
+        "desc": "Solid, heavy build. Slow metabolism. Tends to put on weight."
+      }
+    },
+    "bedi": {
+      "title": "Understanding BEDI",
+      "intro": "The deviation (Δ) shows the current state of your balance.",
+      "current": "Now",
+      "body": {
+        "khii_excess": "Khii is dominant. Warm meals and a restful routine are needed.",
+        "balanced": "Khii, Shar and Badgan are in balance. Keep your current routine.",
+        "shar_badgan_excess": "Shar/Badgan is dominant. Light meals and cooling exercise."
+      }
+    },
+    "intro": {
+      "title": "The Three Constitutions",
+      "text": "Your body is a combination of the three constitutions. The assessment determines their proportions.",
+      "H": {
+        "label": "Khii (Wind)",
+        "body": "Wind + ether. Flexible, quick, thoughtful."
+      },
+      "S": {
+        "label": "Shar (Fire)",
+        "body": "Fire + water. Sharp mind, a leader, decisive."
+      },
+      "B": {
+        "label": "Badgan (Earth)",
+        "body": "Earth + water. Patient, steady, caring nature."
+      }
+    },
+    "info": {
+      "title": "Why Is This Needed?",
+      "intro": "This information is used to calculate the BEDI index accurately.",
+      "heightWeight": {
+        "label": "Height & weight",
+        "body": "Weight and height enter the BEDI formula directly."
+      },
+      "age": {
+        "label": "Age",
+        "body": "The age coefficient affects the biological baseline."
+      },
+      "sex": {
+        "label": "Sex",
+        "body": "Biological sex sets the physiological baseline."
+      }
+    },
+    "questions": {
+      "hint": "Answer from your innate nature — how you have always been, not how you are today.",
+      "H": {
+        "label": "Khii (H) answer",
+        "body": "Indicates light, flexible, changeable traits."
+      },
+      "S": {
+        "label": "Shar (S) answer",
+        "body": "Indicates sharp, warm, decisive traits."
+      },
+      "B": {
+        "label": "Badgan (B) answer",
+        "body": "Indicates steady, heavy, calm traits."
+      }
+    },
+    "kt": {
+      "title": "Kt Coefficient",
+      "intro": "Kt is the baseline of your constitutional balance and is used in the BEDI calculation.",
+      "low": {
+        "label": "Kt < 1.0 · Khii dominant",
+        "body": "Khii predominates. People with a light, flexible build."
+      },
+      "balanced": {
+        "label": "Kt ≈ 1.0 · Balanced",
+        "body": "Khii, Shar and Badgan are in balance. Close to spring and autumn."
+      },
+      "high": {
+        "label": "Kt > 1.0 · Shar/Badgan",
+        "body": "Shar/Badgan predominates. A heavy, steady build."
+      }
+    }
+  },
+  "radar": {
+    "ariaLabel": "Constitution balance chart: {status}, Khii {h}, Shar {s}, Badgan {b}",
+    "axis": {
+      "H": "Khii",
+      "S": "Shar",
+      "B": "Badgan"
+    },
+    "legendBase": "Base",
+    "legendCurrent": "Current"
+  }
+}

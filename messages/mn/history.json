@@ -1,0 +1,41 @@
+{
+  "eyebrow": "BEDI протокол · Хандлага",
+  "title": "BEDI Түүх",
+  "subtitle": "Хазайлтын динамик хандлага",
+  "profilesLabel": "Профайл сонгох",
+  "exportCsv": "CSV татах",
+  "emptyTitle": "Тооцооллын түүх байхгүй байна",
+  "emptyBody": "Эхлээд BEDI тооцоолол хийнэ үү.",
+  "stats": {
+    "total": "Нийт хэмжилт",
+    "totalUnit": "удаа",
+    "latestDeviation": "Сүүлийн хазайлт",
+    "latestBedi": "Сүүлийн BEDI",
+    "indexUnit": "индекс",
+    "trend": "Хандлага",
+    "trendUp": "нэмэгдсэн",
+    "trendDown": "буурсан",
+    "trendFlat": "өөрчлөлтгүй"
+  },
+  "chart": {
+    "title": "Хазайлт (Δ) хандлага",
+    "subtitle": "Цагийн хэмжилтийн динамик",
+    "legendSharBadgan": "Шар/Бадган",
+    "legendKhii": "Хий",
+    "series": "Хазайлт (Δ)",
+    "tooltipDeviation": "хазайлт (Δ)"
+  },
+  "list": {
+    "title": "Дэлгэрэнгүй бүртгэл",
+    "count": "{count} хэмжилт хадгалагдсан",
+    "weight": "Жин",
+    "weightValue": "{weight} кг"
+  },
+  "csv": {
+    "date": "Огноо",
+    "deviation": "Хазайлт",
+    "weight": "Жин",
+    "season": "Улирал",
+    "status": "Төлөв"
+  }
+}

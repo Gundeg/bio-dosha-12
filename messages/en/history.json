@@ -1,0 +1,41 @@
+{
+  "eyebrow": "BEDI protocol · Trend",
+  "title": "BEDI history",
+  "subtitle": "How your deviation changes over time",
+  "profilesLabel": "Choose a profile",
+  "exportCsv": "Download CSV",
+  "emptyTitle": "No calculation history yet",
+  "emptyBody": "Run a BEDI calculation first.",
+  "stats": {
+    "total": "Total measurements",
+    "totalUnit": "records",
+    "latestDeviation": "Latest deviation",
+    "latestBedi": "Latest BEDI",
+    "indexUnit": "index",
+    "trend": "Trend",
+    "trendUp": "increased",
+    "trendDown": "decreased",
+    "trendFlat": "unchanged"
+  },
+  "chart": {
+    "title": "Deviation (Δ) trend",
+    "subtitle": "Your measurements over time",
+    "legendSharBadgan": "Shar/Badgan",
+    "legendKhii": "Khii",
+    "series": "Deviation (Δ)",
+    "tooltipDeviation": "deviation (Δ)"
+  },
+  "list": {
+    "title": "Detailed records",
+    "count": "{count, plural, one {# measurement} other {# measurements}} saved",
+    "weight": "Weight",
+    "weightValue": "{weight} kg"
+  },
+  "csv": {
+    "date": "Date",
+    "deviation": "Deviation",
+    "weight": "Weight",
+    "season": "Season",
+    "status": "Status"
+  }
+}

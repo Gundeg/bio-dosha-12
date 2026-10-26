@@ -1,0 +1,30 @@
+{
+  "status": {
+    "khii_excess": "Хий арвидсан",
+    "balanced": "Тэнцвэртэй",
+    "shar_badgan_excess": "Шар/Бадган арвидсан"
+  },
+  "season": {
+    "WINTER": "Өвөл",
+    "SPRING": "Хавар",
+    "SUMMER": "Зун",
+    "AUTUMN": "Намар"
+  },
+  "sex": {
+    "MALE": "Эрэгтэй",
+    "FEMALE": "Эмэгтэй"
+  },
+  "relationship": {
+    "self": "Өөрийнхөө",
+    "spouse": "Эхнэр/Нөхөр",
+    "child": "Хүүхэд",
+    "parent": "Эцэг эх",
+    "other": "Бусад",
+    "patient": "Өвчтөн"
+  },
+  "dosha3": {
+    "H": "Хий",
+    "S": "Шар",
+    "B": "Бадган"
+  }
+}

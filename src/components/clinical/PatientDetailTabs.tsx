@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IntakeForm, type IntakeFormProfile, type IntakeFormInitial } from "./IntakeForm";
 import { TreatmentLog, type TreatmentCounts } from "./TreatmentLog";
@@ -37,6 +38,7 @@ export function PatientDetailTabs({
   defaultWeightKg,
   doctorName,
 }: PatientDetailTabsProps) {
+  const t = useTranslations("clinical.tabs");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -95,9 +97,9 @@ export function PatientDetailTabs({
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <TabsList>
-          <TabsTrigger value="intake">Үзлэгийн карт</TabsTrigger>
-          <TabsTrigger value="treatments">Эмчилгээ</TabsTrigger>
-          <TabsTrigger value="history">Түүх</TabsTrigger>
+          <TabsTrigger value="intake">{t("intake")}</TabsTrigger>
+          <TabsTrigger value="treatments">{t("treatments")}</TabsTrigger>
+          <TabsTrigger value="history">{t("history")}</TabsTrigger>
         </TabsList>
 
         {tab === "intake" && (
@@ -113,7 +115,7 @@ export function PatientDetailTabs({
               size="sm"
               onClick={() => updateQuery({ tab: "intake", new: "1", intake: null })}
             >
-              + Шинэ үзлэг
+              <span aria-hidden="true">+</span> {t("newIntake")}
             </Button>
           </div>
         )}
@@ -139,7 +141,7 @@ export function PatientDetailTabs({
           />
         ) : (
           <div className="rounded-lg border border-dashed border-input p-10 text-center text-sm text-muted-foreground">
-            Эмчилгээний хуваарь оруулахын тулд эхлээд үзлэгийн карт хадгалаарай.
+            {t("saveIntakeFirst")}
           </div>
         )}
       </TabsContent>

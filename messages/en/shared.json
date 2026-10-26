@@ -1,0 +1,30 @@
+{
+  "status": {
+    "khii_excess": "Khii excess",
+    "balanced": "Balanced",
+    "shar_badgan_excess": "Shar/Badgan excess"
+  },
+  "season": {
+    "WINTER": "Winter",
+    "SPRING": "Spring",
+    "SUMMER": "Summer",
+    "AUTUMN": "Autumn"
+  },
+  "sex": {
+    "MALE": "Male",
+    "FEMALE": "Female"
+  },
+  "relationship": {
+    "self": "Myself",
+    "spouse": "Spouse",
+    "child": "Child",
+    "parent": "Parent",
+    "other": "Other",
+    "patient": "Patient"
+  },
+  "dosha3": {
+    "H": "Khii",
+    "S": "Shar",
+    "B": "Badgan"
+  }
+}

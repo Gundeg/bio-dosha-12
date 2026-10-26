@@ -1,0 +1,29 @@
+{
+  "title": "Өвчтөнүүд",
+  "total": "Нийт {count} өвчтөн",
+  "add": "Өвчтөн нэмэх",
+  "searchLabel": "Өвчтөнийг нэрээр хайх",
+  "searchPlaceholder": "Нэрээр хайх...",
+  "loading": "Ачааллаж байна...",
+  "loadError": "Мэдээлэл ачаалахад алдаа гарлаа.",
+  "ageSex": "{age} нас • {sex}",
+  "constitution": "Махбод:",
+  "notAssessed": "Үнэлгээ хийгдээгүй",
+  "latestDelta": "Сүүлийн Δ:",
+  "openCard": "Үзлэгийн карт",
+  "calculate": "Тооцоолох",
+  "empty": "Өвчтөн олдсонгүй.",
+  "addDialog": {
+    "title": "Шинэ өвчтөн нэмэх",
+    "name": "Нэр",
+    "namePlaceholder": "Өвчтөний нэр",
+    "birthDate": "Төрсөн огноо",
+    "sex": "Хүйс",
+    "height": "Өндөр (см)",
+    "cancel": "Болих",
+    "submit": "Нэмэх",
+    "submitting": "Нэмж байна...",
+    "success": "Өвчтөн нэмэгдлээ!",
+    "error": "Нэмэх явцад алдаа гарлаа."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "tablistLabel": "Recommendation type",
+  "tabs": {
+    "remedy": "Remedies",
+    "lifestyle": "Lifestyle",
+    "avoid": "Avoid",
+    "risk": "Risks"
+  },
+  "itemCount": "{count, plural, one {# item} other {# items}}",
+  "empty": "No information",
+  "safetyCheck": "Safety check",
+  "ageNote": "Age advice"
+}

@@ -15,16 +15,16 @@ export const GLOSSARY: GlossaryEntry[] = [
   {
     key: "makhbod",
     emoji: "🧬",
-    term: { mn: "Махбод", en: "Constitution (Dosha)" },
+    term: { mn: "Махбод", en: "Constitution" },
     short: {
       mn: "Таны төрөлхийн биеийн төрөл. Хий, Шар, Бадган гурван хүчний харьцаагаар тодорхойлогдоно.",
-      en: "Your inborn body type, defined by the balance of the three forces: Khii, Shar, Badgan.",
+      en: "Your inborn body type, defined by the balance of the three forces: Khii (Wind), Shar (Fire) and Badgan (Earth).",
     },
   },
   {
     key: "khii",
     emoji: "🌬️",
-    term: { mn: "Хий", en: "Khii (Wind / Vata)" },
+    term: { mn: "Хий", en: "Khii (Wind)" },
     short: {
       mn: "Хөдөлгөөний хүч — хөнгөн, хүйтэн, хуурай чанартай. Илүүдвэл түгшүүр, нойргүйдэл, хуурайшилт илэрдэг.",
       en: "The force of movement — light, cold, dry. In excess: anxiety, poor sleep, dryness.",
@@ -33,7 +33,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   {
     key: "shar",
     emoji: "🔥",
-    term: { mn: "Шар", en: "Shar (Fire / Pitta)" },
+    term: { mn: "Шар", en: "Shar (Fire)" },
     short: {
       mn: "Илч, хувиргалтын хүч — халуун, хурц чанартай. Илүүдвэл уур уцаар, үрэвсэл, халуу оргих байдал илэрдэг.",
       en: "The force of heat and transformation — hot, sharp. In excess: irritability, inflammation, heat.",
@@ -42,7 +42,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   {
     key: "badgan",
     emoji: "🏔️",
-    term: { mn: "Бадган", en: "Badgan (Earth-Water / Kapha)" },
+    term: { mn: "Бадган", en: "Badgan (Earth)" },
     short: {
       mn: "Тогтвор, бүтцийн хүч — хүнд, тослог, хүйтэн чанартай. Илүүдвэл жин нэмэгдэх, залхуурал, бөглөрөл илэрдэг.",
       en: "The force of stability and structure — heavy, oily, cold. In excess: weight gain, sluggishness, congestion.",
@@ -71,8 +71,8 @@ export const GLOSSARY: GlossaryEntry[] = [
     emoji: "⚖️",
     term: { mn: "Хазайлт (Δ)", en: "Deviation (Δ)" },
     short: {
-      mn: "Байх ёстой хэвийн жингээс хэр зөрсөнийг харуулна. 0 = яг тэнцвэр; −0.29-с бага бол Хий, +0.31-с их бол Шар/Бадган арвидсан.",
-      en: "How far you are from your expected normal weight. 0 = perfectly balanced; below −0.29 = Wind excess, above +0.31 = Fire/Earth excess.",
+      mn: "BEDI индекс 0 цэгээс хэр зөрсөнийг харуулна (Δ = BEDI − 1). 0 = яг тэнцвэр; −0.3-аас бага бол Хий, +0.3-аас их бол Шар/Бадган арвидсан.",
+      en: "How far your BEDI index is from the zero point (Δ = BEDI − 1). 0 = perfectly balanced; below −0.3 = Khii excess, above +0.3 = Shar/Badgan excess.",
     },
   },
   {
@@ -87,10 +87,10 @@ export const GLOSSARY: GlossaryEntry[] = [
   {
     key: "yorondog",
     emoji: "🌿",
-    term: { mn: "Ерөндөг", en: "Remedy" },
+    term: { mn: "Ерөндөг", en: "Remedies" },
     short: {
       mn: "Тэнцвэрийг сэргээх хоол хүнс, дэглэмийн зөвлөмж — жишээ нь Хийд бурам, шар тос; Шарт мөсөн чихэр.",
-      en: "Food and lifestyle recommendations that restore balance — e.g. crude sugar and ghee for Wind, rock sugar for Fire.",
+      en: "Food and lifestyle recommendations that restore balance — e.g. crude sugar and ghee for Khii, rock sugar for Shar.",
     },
   },
   {

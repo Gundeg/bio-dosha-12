@@ -4,41 +4,74 @@ import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
+/**
+ * Page routing from session claims. This is a convenience layer: every API
+ * route and server page re-checks permissions against the database
+ * (src/lib/authz.ts), so a stale cookie can never reveal data.
+ */
+
+const PUBLIC_EXACT = new Set(["/", "/login", "/register", "/privacy", "/forgot", "/about"]);
+const PUBLIC_PREFIXES = ["/invite/", "/reset/", "/api/auth", "/api/register", "/api/public"];
+
+// Pages a signed-in user may open before finishing the required 2-step setup.
+const MFA_SETUP_ALLOWED = ["/mfa-setup", "/privacy", "/about", "/invite/", "/reset/"];
+
+/** The path plus query string, so a redirect can bring the person back. */
+function returnPath(url: URL): string {
+  return url.pathname + url.search;
+}
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_EXACT.has(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
-  const role = req.auth?.user?.role;
-
-  const publicPrefixes = ["/login", "/register", "/privacy", "/api/auth", "/api/register"];
-  const isPublic = pathname === "/" || publicPrefixes.some((r) => pathname.startsWith(r));
-  // API routes authenticate in their own handlers and return 401 JSON. Redirecting
-  // them to the HTML login page breaks apiFetch (it would parse HTML as JSON), so
-  // let them fall through and answer with their own status codes.
+  const user = req.auth?.user;
+  const isLoggedIn = !!user?.id;
   const isApi = pathname.startsWith("/api");
 
-  if (!isLoggedIn && !isPublic && !isApi) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  // API routes answer with their own 401/403 JSON (apiFetch cannot parse an HTML redirect).
+  if (isApi) return NextResponse.next();
+
+  if (!isLoggedIn) {
+    if (isPublicPath(pathname)) return NextResponse.next();
+    const login = new URL("/login", req.url);
+    if (pathname !== "/") login.searchParams.set("next", returnPath(req.nextUrl));
+    return NextResponse.redirect(login);
   }
 
-  // Нэвтэрсэн хэрэглэгч нүүр хуудсанд — үүрэгт нь тохирсон самбар руу
-  if (isLoggedIn && (pathname === "/" || pathname === "/login" || pathname === "/register")) {
-    const home =
-      role === "PRACTITIONER" ? "/patients" : role === "ADMIN" ? "/admin" : "/dashboard";
+  const role = user.role;
+  const isStaff = role === "ADMIN" || role === "SUPERADMIN";
+  const org = user.org;
+  const isClinical =
+    !!org && org.orgStatus === "ACTIVE" && (org.role === "OWNER" || org.role === "PRACTITIONER");
+
+  // Staff and organization members must finish 2-step setup first.
+  if (user.mfaRequired && !user.mfaEnabled) {
+    if (!MFA_SETUP_ALLOWED.some((p) => pathname === p || pathname.startsWith(p))) {
+      const setup = new URL("/mfa-setup", req.url);
+      if (pathname !== "/") setup.searchParams.set("next", returnPath(req.nextUrl));
+      return NextResponse.redirect(setup);
+    }
+    return NextResponse.next();
+  }
+  if (pathname === "/mfa-setup" && user.mfaEnabled) {
+    return NextResponse.redirect(new URL("/settings?tab=security", req.url));
+  }
+
+  // Signed-in visitors of the landing and auth pages go to their workspace.
+  if (pathname === "/" || pathname === "/login" || pathname === "/register" || pathname === "/forgot") {
+    const home = isStaff ? "/admin" : isClinical ? "/patients" : org ? "/org" : "/dashboard";
     return NextResponse.redirect(new URL(home, req.url));
   }
 
-  // Practitioner-only routes
-  if (pathname.startsWith("/patients") || pathname.startsWith("/reports")) {
-    if (role !== "PRACTITIONER") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
+  if (pathname.startsWith("/admin") && !isStaff) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  // Admin-only routes
-  if (pathname.startsWith("/admin")) {
-    if (role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
+  if ((pathname.startsWith("/patients") || pathname.startsWith("/reports")) && !isClinical) {
+    return NextResponse.redirect(new URL(org ? "/org" : "/dashboard", req.url));
   }
 
   return NextResponse.next();

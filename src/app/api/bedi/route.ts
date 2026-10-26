@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateBEDI, calcAge } from "@/lib/bediEngine";
 import { DoshaKey } from "@/lib/ktMapping";
 import { bediCreateSchema, bediQuerySchema } from "@/lib/apiSchemas";
 import { getRemedies } from "@/lib/remedyEngine";
+import { actorOf, loadAccessibleProfile, requireAuth } from "@/lib/authz";
+import { HttpError, handle, notFound, readJson } from "@/lib/http";
+import { audit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
-export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const POST = handle(async (req: NextRequest) => {
+  const ctx = await requireAuth();
+  const { profileId, weightKg, season, notes } = bediCreateSchema.parse(await readJson(req));
 
-  const body = await req.json().catch(() => null);
-  const parsed = bediCreateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
-  }
-  const { profileId, weightKg, season, notes } = parsed.data;
+  const access = await loadAccessibleProfile(ctx, profileId);
+  if (!access) throw notFound("Профайл олдсонгүй.");
+  const { profile } = access;
+  if (!profile.ktScore) throw new HttpError(400, "assessment_required", "Эхлээд махбодын үнэлгээг хийнэ үү.");
 
-  const profile = await prisma.profile.findFirst({
-    where: { id: profileId, userId: session.user.id },
-  });
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-  if (!profile.ktScore) return NextResponse.json({ error: "Complete assessment first" }, { status: 400 });
-
+  // The BEDI formula itself lives in src/lib/bediEngine.ts and is owner-controlled.
   const age = calcAge(profile.birthDate);
   const result = calculateBEDI({
     weightKg,
@@ -66,31 +61,31 @@ export async function POST(req: NextRequest) {
     include: { recommendation: true },
   });
 
+  if (access.organizationId) {
+    await audit({
+      action: "record.created",
+      actor: actorOf(ctx),
+      organizationId: access.organizationId,
+      targetType: "profile",
+      targetId: profileId,
+      headers: req.headers,
+    });
+  }
   return NextResponse.json({ record, result, remedies });
-}
+});
 
-export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const parsed = bediQuerySchema.safeParse({
+export const GET = handle(async (req: NextRequest) => {
+  const ctx = await requireAuth();
+  const { profileId } = bediQuerySchema.parse({
     profileId: new URL(req.url).searchParams.get("profileId"),
   });
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
-  }
-  const { profileId } = parsed.data;
-
-  const profile = await prisma.profile.findFirst({
-    where: { id: profileId, userId: session.user.id },
-  });
-  if (!profile) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const access = await loadAccessibleProfile(ctx, profileId);
+  if (!access) throw notFound();
 
   const records = await prisma.bEDIRecord.findMany({
     where: { profileId },
     orderBy: { date: "desc" },
     include: { recommendation: true },
   });
-
   return NextResponse.json(records);
-}
+});

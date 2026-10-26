@@ -28,14 +28,22 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  // Browsers ignore it on http://localhost; on the live site it pins HTTPS.
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
 ];
+
+// API answers contain personal and health data: never store them in caches.
+const apiHeaders = [{ key: "Cache-Control", value: "private, no-store" }];
 
 const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      { source: "/api/:path*", headers: apiHeaders },
+    ];
   },
 };
 

@@ -1,66 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { profileUpdateSchema } from "@/lib/apiSchemas";
+import { actorOf, loadAccessibleProfile, requireAuth } from "@/lib/authz";
+import { forbidden, handle, notFound, readJson } from "@/lib/http";
+import { audit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+type Params = { params: Promise<{ id: string }> };
 
+/** Own profile, or a patient profile of an organization where the caller works clinically. */
+export const GET = handle(async (req: NextRequest, { params }: Params) => {
+  const ctx = await requireAuth();
   const { id } = await params;
-  const profile = await prisma.profile.findFirst({
-    where: { id, userId: session.user.id },
-    include: {
-      bediRecords: {
-        orderBy: { date: "desc" },
-        include: { recommendation: true },
-      },
-    },
-  });
+  const access = await loadAccessibleProfile(ctx, id);
+  if (!access) throw notFound();
 
-  if (!profile) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(profile);
-}
-
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { id } = await params;
-  const body = await req.json().catch(() => null);
-  const parsed = profileUpdateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
-  }
-
-  const existing = await prisma.profile.findFirst({
-    where: { id, userId: session.user.id },
-  });
-  if (!existing) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  const profile = await prisma.profile.update({
+  const profile = await prisma.profile.findUnique({
     where: { id },
-    data: parsed.data,
+    include: { bediRecords: { orderBy: { date: "desc" }, include: { recommendation: true } } },
   });
 
-  return NextResponse.json(profile);
-}
-
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { id } = await params;
-  const profile = await prisma.profile.findFirst({ where: { id, userId: session.user.id } });
-  if (!profile) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (profile.relationship === "patient") {
-    return NextResponse.json({ error: "Use the patients API to remove patients" }, { status: 403 });
+  if (access.organizationId) {
+    await audit({
+      action: "patient.viewed",
+      actor: actorOf(ctx),
+      organizationId: access.organizationId,
+      targetType: "profile",
+      targetId: id,
+      headers: req.headers,
+    });
   }
+  return NextResponse.json(profile);
+});
 
+export const PATCH = handle(async (req: NextRequest, { params }: Params) => {
+  const ctx = await requireAuth();
+  const { id } = await params;
+  const data = profileUpdateSchema.parse(await readJson(req));
+  const access = await loadAccessibleProfile(ctx, id);
+  if (!access) throw notFound();
+
+  const profile = await prisma.profile.update({ where: { id }, data });
+
+  if (access.organizationId) {
+    await audit({
+      action: "patient.updated",
+      actor: actorOf(ctx),
+      organizationId: access.organizationId,
+      targetType: "profile",
+      targetId: id,
+      meta: { fields: Object.keys(data).join(",") },
+      headers: req.headers,
+    });
+  }
+  return NextResponse.json(profile);
+});
+
+/** Deletes one of the caller's own family profiles. Patients are removed through /api/patients. */
+export const DELETE = handle(async (_req: NextRequest, { params }: Params) => {
+  const ctx = await requireAuth();
+  const { id } = await params;
+  const profile = await prisma.profile.findFirst({ where: { id, userId: ctx.userId } });
+  if (!profile) throw notFound();
+  if (profile.relationship === "patient" || profile.organizationId) {
+    throw forbidden("Өвчтөнийг өвчтөний хуудаснаас устгана.");
+  }
   await prisma.profile.delete({ where: { id } });
   return NextResponse.json({ ok: true });
-}
+});

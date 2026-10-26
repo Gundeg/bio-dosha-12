@@ -6,16 +6,20 @@
 export class ApiError extends Error {
   readonly status: number;
   readonly fieldErrors?: Record<string, string[]>;
+  /** Machine-readable reason from the API, e.g. "plan_limit" or "mfa_setup_required". */
+  readonly code?: string;
 
   constructor(
     status: number,
     message: string,
-    fieldErrors?: Record<string, string[]>
+    fieldErrors?: Record<string, string[]>,
+    code?: string
   ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.fieldErrors = fieldErrors;
+    this.code = code;
   }
 }
 
@@ -35,7 +39,8 @@ export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     const { message, fieldErrors } = describeError(data, res.status);
-    throw new ApiError(res.status, message, fieldErrors);
+    const code = typeof (data as { code?: unknown } | null)?.code === "string" ? (data as { code: string }).code : undefined;
+    throw new ApiError(res.status, message, fieldErrors, code);
   }
   return data as T;
 }

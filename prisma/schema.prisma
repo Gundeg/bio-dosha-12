@@ -7,10 +7,16 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Platform role. Clinical access never comes from this field: it comes from an
+/// active membership in a verified organization (see OrganizationMember).
 enum Role {
   INDIVIDUAL
+  /// Legacy value from before organizations existed. No longer assigned.
   PRACTITIONER
+  /// Platform staff: runs the control center, never sees health records.
   ADMIN
+  /// Platform owner: everything ADMIN can do plus staff, plans, audit and system.
+  SUPERADMIN
 }
 
 enum Sex {
@@ -25,21 +31,82 @@ enum Season {
   AUTUMN
 }
 
+enum OrgStatus {
+  /// Registered, waiting for platform verification. No clinical features.
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum OrgMemberRole {
+  /// Runs the organization and has clinical access.
+  OWNER
+  /// Manages members and settings; no clinical access.
+  ADMIN
+  /// Clinical access to the organization's patients.
+  PRACTITIONER
+}
+
+enum MemberStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum AuthTokenType {
+  INVITE
+  RESET
+}
+
+enum PlanAudience {
+  INDIVIDUAL
+  ORGANIZATION
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
 model User {
-  id                      String           @id @default(cuid())
-  email                   String           @unique
+  id                      String               @id @default(cuid())
+  email                   String               @unique
   password                String
-  role                    Role             @default(INDIVIDUAL)
+  role                    Role                 @default(INDIVIDUAL)
   name                    String
+  /// Deprecated: practitioner access now comes from organization membership.
   practitionerRequestedAt DateTime?
+  /// Deprecated: practitioner access now comes from organization membership.
   practitionerApprovedAt  DateTime?
   /// When the user accepted the privacy notice at registration.
   privacyAcceptedAt       DateTime?
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
+  /// Set when an administrator blocks the account; blocks sign-in and API access.
+  disabledAt              DateTime?
+  disabledReason          String?
+  /// Bumped to sign the user out everywhere (password change, disable, reset).
+  sessionVersion          Int                  @default(0)
+  lastLoginAt             DateTime?
+  passwordChangedAt       DateTime?
+  /// Authenticator secret, encrypted at rest. Set during setup, active once totpEnabledAt is set.
+  totpSecret              String?
+  totpEnabledAt           DateTime?
+  /// Last accepted 30-second step, so the same code cannot be replayed.
+  totpLastStep            Int?
+  /// SHA-256 hashes of one-time recovery codes.
+  recoveryCodeHashes      String[]             @default([])
+  /// Preferred interface language ("mn" | "en").
+  locale                  String?
+  /// Organization whose clinical workspace the user is currently working in.
+  activeOrganizationId    String?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
   profiles                Profile[]
-  patients                Patient[]        @relation("PractitionerPatients")
-  intakes                 ClinicalIntake[] @relation("PractitionerIntakes")
+  patients                Patient[]            @relation("PractitionerPatients")
+  intakes                 ClinicalIntake[]     @relation("PractitionerIntakes")
+  memberships             OrganizationMember[]
+  subscription            Subscription?
+  authTokens              AuthToken[]          @relation("TokenUser")
 }
 
 /// Fixed-window counters for login and registration throttling.
@@ -49,10 +116,60 @@ model RateLimit {
   windowStart DateTime @default(now())
 }
 
+/// A medical organization: clinic, hospital or private practice.
+model Organization {
+  id                 String               @id @default(cuid())
+  name               String
+  /// CLINIC | HOSPITAL | PRIVATE_PRACTICE | OTHER
+  type               String               @default("CLINIC")
+  /// State / company registration number of the organization (not a personal ID).
+  registrationNumber String?
+  phone              String?
+  email              String?
+  address            String?
+  city               String?
+  status             OrgStatus            @default(PENDING)
+  verifiedAt         DateTime?
+  verifiedById       String?
+  suspendedAt        DateTime?
+  suspendedReason    String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  members            OrganizationMember[]
+  profiles           Profile[]
+  patients           Patient[]
+  intakes            ClinicalIntake[]
+  subscription       Subscription?
+  invites            AuthToken[]
+
+  @@index([status])
+}
+
+model OrganizationMember {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrgMemberRole
+  status         MemberStatus  @default(ACTIVE)
+  /// Job title shown to colleagues, e.g. "Тб оточ".
+  title          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+/// A person whose body balance is tracked. Owned either by a user (self and
+/// family) or by an organization (patients). Exactly one owner is set.
 model Profile {
   id             String           @id @default(cuid())
-  userId         String
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name           String
   lastName       String?
   birthDate      DateTime
@@ -61,8 +178,11 @@ model Profile {
   doshaType      String?
   ktScore        Float?
   relationship   String           @default("self")
+  /// Encrypted at rest.
   registerNumber String?
+  /// Encrypted at rest.
   phone          String?
+  /// Encrypted at rest.
   address        String?
   occupation     String?
   createdAt      DateTime         @default(now())
@@ -70,6 +190,9 @@ model Profile {
   bediRecords    BEDIRecord[]
   asPatient      Patient[]        @relation("PatientProfile")
   intakes        ClinicalIntake[]
+
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model BEDIRecord {
@@ -82,8 +205,11 @@ model BEDIRecord {
   bedi           Float
   deviation      Float
   status         String
+  /// Encrypted at rest.
   notes          String?
   recommendation Recommendation?
+
+  @@index([profileId, date])
 }
 
 model Recommendation {
@@ -99,23 +225,33 @@ model Recommendation {
   validationAction  String?
 }
 
+/// Links a patient profile to the organization that treats them.
 model Patient {
-  id             String   @id @default(cuid())
-  practitionerId String
-  practitioner   User     @relation("PractitionerPatients", fields: [practitionerId], references: [id], onDelete: Cascade)
+  id             String        @id @default(cuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// The practitioner who registered the patient. Kept as history; access is organization-wide.
+  practitionerId String?
+  practitioner   User?         @relation("PractitionerPatients", fields: [practitionerId], references: [id], onDelete: SetNull)
   profileId      String
-  profile        Profile  @relation("PatientProfile", fields: [profileId], references: [id], onDelete: Cascade)
+  profile        Profile       @relation("PatientProfile", fields: [profileId], references: [id], onDelete: Cascade)
+  /// Encrypted at rest.
   clinicalNotes  String?
-  addedAt        DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  addedAt        DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId])
 }
 
 model ClinicalIntake {
   id             String        @id @default(cuid())
   profileId      String
-  profile        Profile       @relation(fields: [profileId], references: [id], onDelete: Restrict)
-  practitionerId String
-  practitioner   User          @relation("PractitionerIntakes", fields: [practitionerId], references: [id], onDelete: Restrict)
+  profile        Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Author of the intake. Kept as history when the account is removed.
+  practitionerId String?
+  practitioner   User?         @relation("PractitionerIntakes", fields: [practitionerId], references: [id], onDelete: SetNull)
 
   admissionDate  DateTime
   dischargeDate  DateTime?
@@ -123,6 +259,7 @@ model ClinicalIntake {
   season         Season
   weightKg       Float
   heightCm       Float
+  // All free-text clinical fields below are encrypted at rest.
   tongue         String?
   pulseSummary   String?
   pulseTable     Json?
@@ -152,6 +289,7 @@ model ClinicalIntake {
 
   @@index([profileId, admissionDate])
   @@index([practitionerId])
+  @@index([organizationId])
 }
 
 model TreatmentLog {
@@ -189,4 +327,100 @@ model TreatmentLog {
   exerciseTherapy Int @default(0)
 
   updatedAt DateTime @updatedAt
+}
+
+/// One-time links: invitations (platform staff, organization members, owners)
+/// and password resets. Only a SHA-256 hash of the token is stored.
+model AuthToken {
+  id             String         @id @default(cuid())
+  type           AuthTokenType
+  tokenHash      String         @unique
+  email          String
+  userId         String?
+  user           User?          @relation("TokenUser", fields: [userId], references: [id], onDelete: Cascade)
+  /// Platform role granted on acceptance (staff invitations).
+  platformRole   Role?
+  organizationId String?
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Organization role granted on acceptance (member invitations).
+  orgRole        OrgMemberRole?
+  createdById    String?
+  expiresAt      DateTime
+  usedAt         DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime       @default(now())
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+/// Append-only security log. Never stores health data: only ids and short
+/// non-clinical facts. Kept when the actor's account is deleted.
+model AuditLog {
+  id             String   @id @default(cuid())
+  at             DateTime @default(now())
+  actorId        String?
+  actorEmail     String?
+  actorRole      String?
+  organizationId String?
+  action         String
+  targetType     String?
+  targetId       String?
+  ip             String?
+  userAgent      String?
+  meta           Json?
+
+  @@index([at])
+  @@index([actorId, at])
+  @@index([organizationId, at])
+  @@index([action, at])
+}
+
+/// A subscription tier. Prices are informational until payments are connected.
+model Plan {
+  id              String         @id @default(cuid())
+  code            String         @unique
+  audience        PlanAudience
+  nameMn          String
+  nameEn          String
+  descriptionMn   String?
+  descriptionEn   String?
+  /// Monthly price in MNT; null means free or "contact us".
+  priceMonthlyMnt Int?
+  /// { maxProfiles?, maxPractitioners?, maxPatients? (null = unlimited), pdfReports? }
+  limits          Json           @default("{}")
+  /// The plan everyone of this audience gets when they have no subscription.
+  isDefault       Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  sortOrder       Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  subscriptions   Subscription[]
+}
+
+/// The plan an individual or an organization is on. Assigned manually by the
+/// platform for now; provider fields are reserved for the payment integration.
+model Subscription {
+  id                     String             @id @default(cuid())
+  planId                 String
+  plan                   Plan               @relation(fields: [planId], references: [id])
+  userId                 String?            @unique
+  user                   User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId         String?            @unique
+  organization           Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  status                 SubscriptionStatus @default(ACTIVE)
+  startedAt              DateTime           @default(now())
+  currentPeriodEnd       DateTime?
+  trialEndsAt            DateTime?
+  canceledAt             DateTime?
+  /// Payment provider, e.g. "qpay" or "stripe". Null = assigned manually.
+  provider               String?
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  assignedById           String?
+  note                   String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  @@index([planId])
 }

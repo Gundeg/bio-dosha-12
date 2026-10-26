@@ -47,9 +47,5 @@
     "sharBadganTitle": "Shar/Badgan",
     "sharBadganBody": "Shar (Fire) or Badgan (Earth) is in excess. A diet plan and cooling exercise are needed.",
     "ktNote": "The Kt coefficient is determined once, by the 12-question assessment."
-  },
-  "practitionerBanner": {
-    "approved": "Your practitioner access is approved. Sign out and sign in again to turn on the practitioner menu.",
-    "pending": "Your practitioner request is waiting for admin approval. You'll be told here once it's approved — meanwhile every personal feature is available."
   }
 }

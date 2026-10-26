@@ -35,7 +35,7 @@ export function LocaleToggle({ className = "" }: { className?: string }) {
           type="button"
           aria-pressed={locale === value}
           onClick={() => setLocale(value)}
-          className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+          className={`min-h-9 min-w-10 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
             locale === value
               ? "bg-primary text-on-primary"
               : "text-on-surface-variant hover:text-on-surface"

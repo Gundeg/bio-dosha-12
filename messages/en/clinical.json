@@ -12,7 +12,10 @@
     "active": "Active",
     "view": "View",
     "pdf": "PDF",
-    "pdfLabel": "PDF of the {date} intake (opens in a new tab)"
+    "pdfLabel": "PDF of the {date} intake (opens in a new tab)",
+    "recordedBy": "Recorded by {name}",
+    "pdfUnavailableTitle": "Intake PDFs are not in your plan",
+    "pdfUnavailable": "Your organization's current plan does not include exporting intake cards as PDF. The organization's owner can contact the system administrator to upgrade the plan."
   },
   "intake": {
     "basicInfo": "Basic information",
@@ -21,7 +24,7 @@
     "age": "Age",
     "ageValue": "{age} years",
     "sex": "Sex",
-    "birthYear": "Date of birth",
+    "birthDate": "Date of birth",
     "registerNumber": "National registration number",
     "phone": "Phone",
     "address": "Address",
@@ -158,5 +161,32 @@
     "deleting": "Deleting...",
     "success": "All of the patient's records were deleted.",
     "error": "Could not delete the patient."
+  },
+  "access": {
+    "org_pending": {
+      "title": "Your organization is waiting for verification",
+      "body": "Patient records open after the platform team has checked and verified your organization. Meanwhile, the organization's owner or managers can complete its profile and invite colleagues.",
+      "action": "View status"
+    },
+    "org_suspended": {
+      "title": "Your organization's access is suspended",
+      "body": "Patient records stay closed while the organization is suspended. See the reason on the organization page and contact the system administrator to resolve it.",
+      "action": "Open organization page"
+    },
+    "no_organization": {
+      "title": "You are not a member of a medical organization",
+      "body": "Patient records are kept by clinics and other medical organizations. Ask your clinic's owner or manager for an invitation, or register your own organization.",
+      "action": "How organizations join"
+    },
+    "not_clinical": {
+      "title": "Your role does not include patient records",
+      "body": "Managers look after the organization's members and settings; patient records are kept by owners and practitioners. If you need this access, ask your organization's owner.",
+      "action": "Open organization page"
+    },
+    "mfa_setup_required": {
+      "title": "Turn on 2-step sign-in",
+      "body": "To protect patient information, every member of a medical organization uses 2-step sign-in. Setting it up takes a few minutes.",
+      "action": "Set up 2-step sign-in"
+    }
   }
 }

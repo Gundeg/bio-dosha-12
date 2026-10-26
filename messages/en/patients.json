@@ -5,14 +5,22 @@
   "searchLabel": "Search patients by name",
   "searchPlaceholder": "Search by name...",
   "loading": "Loading...",
-  "loadError": "Failed to load data.",
+  "retry": "Try again",
   "ageSex": "Age {age} • {sex}",
   "constitution": "Constitution:",
   "notAssessed": "Not assessed yet",
   "latestDelta": "Latest Δ:",
   "openCard": "Intake card",
   "calculate": "Calculate",
-  "empty": "No patients found.",
+  "registeredBy": "Registered by {name}",
+  "backToList": "Back to patients",
+  "emptyTitle": "No patients yet",
+  "emptyBody": "Add your first patient to start an intake card and calculate their balance. Patients you register are visible to every practitioner in your organization.",
+  "noMatch": "No patients match your search.",
+  "planLimit": {
+    "title": "Your organization has reached its patient limit",
+    "hint": "See the current plan and usage on the <link>Organization</link> page. The organization's owner can request an upgrade."
+  },
   "addDialog": {
     "title": "Add a new patient",
     "name": "Name",
@@ -24,6 +32,12 @@
     "submit": "Add",
     "submitting": "Adding...",
     "success": "Patient added!",
-    "error": "Could not add the patient."
+    "moreDetails": "More details (optional)",
+    "moreDetailsHint": "Register number, phone and address are stored encrypted.",
+    "lastName": "Last name",
+    "registerNumber": "National register number",
+    "phone": "Phone",
+    "address": "Address",
+    "occupation": "Occupation"
   }
 }

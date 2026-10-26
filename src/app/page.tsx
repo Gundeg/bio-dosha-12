@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ButtonLink } from "@/components/ui/button-link";
+import { EmergencyNote } from "@/components/shell/EmergencyNote";
 import type { DoshaKey } from "@/lib/ktMapping";
 
 const DOSHA_TYPES: { key: DoshaKey; kt: string; color: string; dot: string }[] = [
@@ -84,7 +85,13 @@ export default async function LandingPage() {
               <span className="text-[10px] text-slate-600 hidden sm:block">{t("header.brandSubtitle")}</span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/about"
+              className="hidden rounded-md px-2 py-1.5 text-sm font-medium text-slate-700 hover:text-blue-700 hover:underline focus-visible:outline-2 focus-visible:outline-blue-600 sm:inline-block"
+            >
+              {t("header.about")}
+            </Link>
             <ButtonLink variant="outline" href="/login" size="sm">{t("header.login")}</ButtonLink>
             <ButtonLink href="/register" size="sm">{t("header.register")}</ButtonLink>
           </div>
@@ -115,6 +122,15 @@ export default async function LandingPage() {
               </ButtonLink>
               <ButtonLink size="lg" variant="outline" href="/login">{t("hero.ctaLogin")}</ButtonLink>
             </div>
+            <p className="mt-5 text-sm text-slate-600">
+              {t.rich("hero.clinicLine", {
+                link: (chunks) => (
+                  <Link href="/register" className="font-semibold text-blue-700 hover:underline">
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
           </div>
         </section>
 
@@ -213,9 +229,26 @@ export default async function LandingPage() {
                     </li>
                   ))}
                 </ul>
+                {id === "practitioner" && (
+                  <div className="space-y-2 border-t border-violet-100 pt-4">
+                    <p className="text-xs leading-relaxed text-slate-600">{t("audience.practitioner.note")}</p>
+                    <ButtonLink href="/register?type=organization" variant="outline" className="h-10 px-3">
+                      {t("audience.practitioner.cta")} <span aria-hidden="true">→</span>
+                    </ButtonLink>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+          <p className="mt-8 text-center text-sm text-slate-600">
+            {t.rich("audience.aboutLine", {
+              link: (chunks) => (
+                <Link href="/about" className="font-semibold text-blue-700 hover:underline">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
         </section>
 
         {/* CTA */}
@@ -233,8 +266,13 @@ export default async function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-slate-100 bg-white px-4 py-8 text-center text-sm text-slate-600 space-y-3">
         <p className="mx-auto max-w-2xl text-xs leading-relaxed text-slate-600">{tLegal("disclaimer")}</p>
+        <EmergencyNote className="justify-center text-slate-600" />
         <p>
           {t("footer.credit")}{" "}
+          <Link href="/about" className="font-medium text-blue-700 hover:underline">
+            {t("header.about")}
+          </Link>
+          {" · "}
           <Link href="/privacy" className="font-medium text-blue-700 hover:underline">
             {tLegal("privacyLink")}
           </Link>

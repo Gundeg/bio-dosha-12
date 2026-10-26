@@ -26,6 +26,13 @@ export const NAMESPACES = [
   "reports",
   "admin",
   "clinical",
+  // Platform: organizations, accounts, control center
+  "errors",
+  "kit",
+  "authFlows",
+  "settings",
+  "org",
+  "about",
 ] as const;
 
 export async function loadMessages(locale: Locale) {

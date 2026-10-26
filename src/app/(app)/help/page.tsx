@@ -15,7 +15,21 @@ const STEPS = [
   { id: "s3", icon: "🌿" },
 ] as const;
 
-const FAQ = ["q1", "q2", "q3", "q4", "q5", "q6", "q7"] as const;
+/** Each entry is reachable as /help#faq-<id> (e.g. #faq-organizations). */
+const FAQ = [
+  "q1",
+  "q2",
+  "q3",
+  "q4",
+  "q5",
+  "q6",
+  "q7",
+  "organizations",
+  "invitations",
+  "mfa",
+  "mfaLost",
+  "plans",
+] as const;
 
 export default async function HelpPage() {
   const t = await getTranslations("help");
@@ -89,7 +103,8 @@ export default async function HelpPage() {
           {FAQ.map((id) => (
             <details
               key={id}
-              className="group rounded-xl border border-outline-variant/20 bg-surface-container-lowest px-4 py-3"
+              id={`faq-${id}`}
+              className="group scroll-mt-24 rounded-xl border border-outline-variant/20 bg-surface-container-lowest px-4 py-3"
             >
               <summary className="cursor-pointer list-none font-medium text-sm flex items-center justify-between gap-2">
                 {t(`faq.${id}.q`)}
@@ -126,13 +141,14 @@ export default async function HelpPage() {
 
       {/* Disclaimer + холбоо барих */}
       <footer className="space-y-3 pb-6">
+        {/* The emergency number sits in the app footer right below. */}
         <p className="rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-900">
           <span aria-hidden="true">⚕️</span> {t("disclaimer")}
         </p>
         <p className="text-xs text-muted-foreground">
           {t.rich("contact", {
             link: (chunks) => (
-              <Link href="/dashboard" className="text-primary hover:underline">
+              <Link href="/about" className="text-primary hover:underline">
                 {chunks}
               </Link>
             ),

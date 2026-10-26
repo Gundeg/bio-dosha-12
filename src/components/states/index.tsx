@@ -96,7 +96,7 @@ export function ErrorState({
       </span>
       <p className="max-w-sm text-sm text-foreground">{message || t("loadError")}</p>
       {onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry}>
+        <Button variant="outline" className="h-10 px-4" onClick={onRetry}>
           {t("retry")}
         </Button>
       )}

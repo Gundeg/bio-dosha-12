@@ -30,7 +30,7 @@
     },
     "q3": {
       "q": "What does “Balanced” mean?",
-      "a": "It means your weight is within the normal range for your constitution and height. The closer your deviation is to 0, the better."
+      "a": "It means your current weight is within the balance range for your age, sex, height, constitution and the season. The closer your deviation is to 0, the better your balance. This is an assessment of body balance, not a full health check."
     },
     "q4": {
       "q": "Why are my results different in winter and summer?",
@@ -42,11 +42,31 @@
     },
     "q6": {
       "q": "What is different for children?",
-      "a": "Honey is strictly forbidden for children under 13 — the system filters it out automatically and gives only age-appropriate recommendations."
+      "a": "Following traditional medicine guidance, honey is not given to children under 13 — the system filters it out automatically and gives only age-appropriate recommendations. Talk to a doctor before changing a child's diet."
     },
     "q7": {
-      "q": "How do I get practitioner (Tb Otoch) access?",
-      "a": "When you register, choose the “Practitioner” (Tb Otoch) account type and a request is sent to the admin. After the admin approves it, sign in again and the practitioner menu (Patients, Reports) opens."
+      "q": "How do the practitioner pages (Patients, Reports) open?",
+      "a": "Patient records open through a medical organization. Ask your clinic's owner or manager for an invitation, or register your own organization. Once the organization is verified and you have turned on 2-step sign-in, Patients and Reports appear in the menu. An organization's managers run its members and settings but do not see patient records."
+    },
+    "organizations": {
+      "q": "How does a clinic join?",
+      "a": "When you create an account, choose the organization type and enter your clinic's details. If you already have an account, you can register the organization from the Organization page. A new organization first shows as “Waiting for verification”; meanwhile you can complete its profile and invite colleagues. Patient records open after platform staff have checked and verified it. Every member of an organization uses 2-step sign-in."
+    },
+    "invitations": {
+      "q": "How do I invite colleagues?",
+      "a": "The organization's owner or a manager creates an invitation on the Organization page with the colleague's email and role (practitioner, manager or owner). The invitation link is shown only once and expires after a while. The invited person opens the link and either creates an account or signs in with the invited email to accept. Only owners can make someone an owner."
+    },
+    "mfa": {
+      "q": "What is 2-step sign-in?",
+      "a": "Besides your password, you sign in with a 6-digit code from a phone app that changes every 30 seconds. It is required for platform staff and every member of a medical organization, and optional for individuals. You can use Google Authenticator, Microsoft Authenticator, 2FAS, Authy or a similar app. During setup, 10 recovery codes are shown only once — print them or keep them somewhere safe. If you are running low, create new ones in Settings on the Security tab."
+    },
+    "mfaLost": {
+      "q": "What if I lost or changed my phone?",
+      "a": "At sign-in, enter one of your recovery codes (format XXXX-XXXX-XXXX) instead of the app code — each code works once. Individuals can then turn 2-step sign-in off in Settings on the Security tab and set it up again on the new phone. Organization members and platform staff, and anyone without recovery codes left, should tell their organization's owner or manager and contact the system administrator. After confirming who you are, the administrator resets 2-step sign-in and you set it up again on the new phone."
+    },
+    "plans": {
+      "q": "What are plans?",
+      "a": "A personal account comes with a free plan that holds a set number of profiles (yours and your family members'); a family plan holds more. A medical organization's plan sets the number of practitioners and patients and whether PDF reports are included. When you reach a limit, the app tells you at that moment. For now plans are assigned by the system administrator, so contact them to upgrade."
     }
   },
   "methodology": {
@@ -55,7 +75,7 @@
     "citation": "V. Tumurbaatar, “Determining individual body variation from the relationship of age, height and weight”, Tumurbaatar Otoch clinic."
   },
   "disclaimer": "This system does not replace a doctor's examination or diagnosis. Consult a qualified practitioner before following any recommendation. If a serious health problem appears, seek medical care.",
-  "contact": "Send questions and feedback from the <link>dashboard</link>, or ask your registered practitioner.",
+  "contact": "Read more about the method on the <link>About</link> page. For account or sign-in problems, contact your organization's owner or manager, or the system administrator.",
   "dialog": {
     "trigger": "How can I tell?",
     "hint": "Tap an answer to see that state",

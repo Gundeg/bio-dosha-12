@@ -1,27 +1,987 @@
 {
-  "eyebrow": "Admin",
-  "title": "Practitioner access requests",
-  "summary": "{pending, plural, one {# pending request} other {# pending requests}} · {practitioners, plural, one {# practitioner} other {# practitioners}} in total",
-  "practitionersHeading": "Users with practitioner access",
-  "requests": {
-    "error": "Something went wrong. Please try again.",
-    "networkError": "Network error. Please try again.",
-    "approved": "Practitioner access granted. The doctor menu appears once the user refreshes the page.",
-    "rejected": "Request rejected.",
-    "empty": "No pending requests. New requests will appear here.",
-    "requestedAt": "Requested: {date}",
-    "approve": "Approve",
-    "reject": "Reject"
+  "meta": {
+    "section": "Control center"
   },
-  "access": {
-    "revoked": "Practitioner access revoked for {name}.",
-    "error": "Something went wrong. Please try again.",
-    "empty": "No users have practitioner access.",
-    "approvedAt": "Approved: {date}",
-    "revoke": "Revoke access",
-    "confirmTitle": "Revoke practitioner access?",
-    "confirmBody": "{name} will lose access to their patients' records within a minute. Patient records are not deleted. The request returns to the “Pending” list, so it can be approved again.",
-    "cancel": "Cancel",
-    "revoking": "Revoking..."
+  "layout": {
+    "title": "Platform control center",
+    "navLabel": "Control center sections",
+    "privacyTitle": "Privacy by design",
+    "privacy": "Staff see accounts, organizations and counts — never health records."
+  },
+  "nav": {
+    "overview": "Overview",
+    "organizations": "Organizations",
+    "users": "Users",
+    "plans": "Plans",
+    "invites": "Invitations",
+    "audit": "Audit log",
+    "system": "System"
+  },
+  "roles": {
+    "INDIVIDUAL": "User",
+    "PRACTITIONER": "User (legacy)",
+    "ADMIN": "Platform admin",
+    "SUPERADMIN": "Superadmin"
+  },
+  "orgRoles": {
+    "OWNER": "Owner",
+    "ADMIN": "Manager",
+    "PRACTITIONER": "Practitioner"
+  },
+  "orgTypes": {
+    "CLINIC": "Clinic",
+    "HOSPITAL": "Hospital",
+    "PRIVATE_PRACTICE": "Private practice",
+    "OTHER": "Other"
+  },
+  "audiences": {
+    "INDIVIDUAL": "Individuals",
+    "ORGANIZATION": "Organizations"
+  },
+  "statuses": {
+    "org": {
+      "PENDING": "Pending verification",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended"
+    },
+    "member": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
+    },
+    "account": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "invite": {
+      "pending": "Pending",
+      "used": "Accepted",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    },
+    "mfa": {
+      "on": "2-step on",
+      "off": "2-step off"
+    }
+  },
+  "planSource": {
+    "subscription": "Assigned plan",
+    "default": "Default plan",
+    "fallback": "Built-in fallback"
+  },
+  "targetTypes": {
+    "user": "Account",
+    "profile": "Profile",
+    "organization": "Organization",
+    "member": "Member",
+    "invite": "Invitation",
+    "plan": "Plan",
+    "patient": "Patient",
+    "intake": "Intake",
+    "audit": "Audit log"
+  },
+  "actions": {
+    "auth": {
+      "login": {
+        "success": "Signed in",
+        "failure": "Failed sign-in",
+        "blocked": "Sign-in blocked (too many attempts)"
+      },
+      "mfa": {
+        "enabled": "Turned on 2-step sign-in",
+        "disabled": "Turned off 2-step sign-in",
+        "recovery_used": "Used a recovery code",
+        "recovery_regenerated": "Created new recovery codes"
+      },
+      "password": {
+        "changed": "Changed password",
+        "reset": "Reset password with a link"
+      },
+      "signout_all": "Signed out everywhere",
+      "register": "Signed up",
+      "invite": {
+        "accepted": "Accepted an invitation"
+      }
+    },
+    "account": {
+      "updated": "Updated account details",
+      "exported": "Exported personal data",
+      "deleted": "Deleted own account"
+    },
+    "admin": {
+      "user": {
+        "disabled": "Disabled an account",
+        "enabled": "Enabled an account",
+        "role_changed": "Changed a platform role",
+        "signed_out": "Signed an account out everywhere",
+        "mfa_reset": "Reset 2-step sign-in",
+        "reset_link": "Created a password reset link",
+        "deleted": "Deleted an account permanently",
+        "plan_changed": "Changed a personal plan"
+      },
+      "org": {
+        "created": "Created an organization",
+        "verified": "Verified an organization",
+        "suspended": "Suspended an organization",
+        "reactivated": "Reactivated an organization",
+        "updated": "Edited an organization profile",
+        "plan_changed": "Changed an organization plan",
+        "deleted": "Deleted an organization permanently"
+      },
+      "plan": {
+        "created": "Created a plan",
+        "updated": "Edited a plan"
+      },
+      "invite": {
+        "created": "Created an invitation link",
+        "revoked": "Revoked an invitation"
+      },
+      "audit": {
+        "exported": "Exported the audit log"
+      }
+    },
+    "org": {
+      "updated": "Updated the organization profile",
+      "member": {
+        "invited": "Invited a member",
+        "role_changed": "Changed a member's role",
+        "disabled": "Disabled a member",
+        "enabled": "Enabled a member",
+        "removed": "Removed a member"
+      },
+      "invite": {
+        "revoked": "Revoked a member invitation"
+      }
+    },
+    "patient": {
+      "created": "Registered a patient",
+      "viewed": "Opened a patient record",
+      "updated": "Updated a patient",
+      "deleted": "Deleted a patient",
+      "listed": "Opened the patient list"
+    },
+    "intake": {
+      "created": "Recorded an intake",
+      "updated": "Edited an intake",
+      "pdf_exported": "Exported an intake as PDF"
+    },
+    "record": {
+      "created": "Saved a BEDI calculation"
+    }
+  },
+  "activity": {
+    "system": "System"
+  },
+  "common": {
+    "you": "You",
+    "done": "Done",
+    "saveChanges": "Save changes",
+    "included": "Included",
+    "notIncluded": "Not included",
+    "openAudit": "Open in audit log",
+    "refreshFailed": "Couldn't refresh the data. What you see may be out of date.",
+    "notFoundBody": "It may have been deleted, or the link is wrong.",
+    "backToOverview": "Back to overview",
+    "dangerZone": "Danger zone"
+  },
+  "link": {
+    "emailSent": "We also emailed this link to {email}.",
+    "emailNotSent": "Email delivery isn't set up, so nothing was sent. Copy the link and send it to {email} yourself, for example by text message or chat.",
+    "validUntil": "Valid until {date}.",
+    "emailedOnly": "The link was emailed to {email}.",
+    "emailedOnlyHint": "It works once, until {date}. It goes only to that inbox — staff don't see the link.",
+    "emailedOnlyHintNoDate": "It works once. It goes only to that inbox — staff don't see the link.",
+    "notDeliveredTitle": "The email couldn't be sent",
+    "notDeliveredBody": "Nothing reached {email}. Try again in a few minutes, or ask the superadmin to create a link.",
+    "adminEmailOffTitle": "Email delivery is off",
+    "adminEmailOff": "Only the superadmin can create invitation and password-reset links while email delivery is off."
+  },
+  "limits": {
+    "maxProfiles": "Profiles",
+    "maxPractitioners": "Practitioners",
+    "maxPatients": "Patients",
+    "pdfReports": "PDF reports",
+    "usedOf": "{used} of {limit}",
+    "full": "Limit reached",
+    "near": "Almost full",
+    "pdfIncluded": "PDF reports",
+    "pdfNotIncluded": "No PDF reports",
+    "countOf": {
+      "maxProfiles": "{count, plural, one {{value} profile} other {{value} profiles}}",
+      "maxPractitioners": "{count, plural, one {{value} practitioner} other {{value} practitioners}}",
+      "maxPatients": "{count, plural, one {{value} patient} other {{value} patients}}"
+    },
+    "unlimitedOf": {
+      "maxProfiles": "Unlimited profiles",
+      "maxPractitioners": "Unlimited practitioners",
+      "maxPatients": "Unlimited patients"
+    }
+  },
+  "overview": {
+    "eyebrow": "Control center",
+    "title": "Overview",
+    "description": "The platform at a glance: accounts, organizations waiting for you, security signals and activity.",
+    "totalsTitle": "Platform totals",
+    "stats": {
+      "users": "Accounts",
+      "usersHint": "{count, plural, one {Including # platform staff member} other {Including # platform staff}}",
+      "activeOrgs": "Active organizations",
+      "activeOrgsHint": "Verified and working",
+      "pending": "Pending verification",
+      "pendingHint": "Review and verify them",
+      "pendingNone": "Nothing waiting",
+      "suspended": "Suspended organizations",
+      "suspendedHint": "Patient records are blocked",
+      "practitioners": "Practitioners",
+      "practitionersHint": "Active owners and practitioners",
+      "patients": "Patients",
+      "countOnly": "Count only — no records shown",
+      "profiles": "Personal profiles",
+      "profilesHint": "Individuals and their families",
+      "calculations": "Calculations, 30 days"
+    },
+    "attention": {
+      "title": "Needs your attention",
+      "description": "Organizations waiting for verification, oldest first.",
+      "viewAll": "View all {count}",
+      "registered": "registered",
+      "noOwner": "No owner has joined yet",
+      "review": "Review",
+      "emptyTitle": "No organizations are waiting",
+      "emptyBody": "New sign-ups from clinics appear here for verification."
+    },
+    "security": {
+      "title": "Security",
+      "issues": "{count, plural, one {# signal to check} other {# signals to check}}",
+      "allClear": "No warning signs right now.",
+      "check": "Check",
+      "ok": "OK",
+      "staffWithoutMfa": "Staff without 2-step sign-in",
+      "staffWithoutMfaHint": "Asked to set it up at the next sign-in",
+      "membersWithoutMfa": "Members without 2-step sign-in",
+      "membersWithoutMfaHint": "No patient access until they set it up",
+      "failedLogins24h": "Failed sign-ins, 24 h",
+      "failedLogins24hHint": "Wrong password or code",
+      "blockedLogins24h": "Blocked sign-ins, 24 h",
+      "blockedLogins24hHint": "Too many attempts in a row",
+      "disabledUsers": "Disabled accounts",
+      "disabledUsersHint": "Can't sign in until enabled"
+    },
+    "chart": {
+      "title": "Last 30 days",
+      "description": "New accounts and BEDI calculations per day.",
+      "signups": "New accounts",
+      "calculations": "Calculations",
+      "date": "Date",
+      "summary": "Last 30 days: {signups, plural, one {# new account} other {# new accounts}} and {calculations, plural, one {# calculation} other {# calculations}}.",
+      "busiest": "Busiest day for calculations: {date} ({count}).",
+      "tableCaption": "New accounts and calculations per day, last 30 days"
+    },
+    "plans": {
+      "title": "Plans",
+      "description": "How many accounts have each plan.",
+      "manage": "Open plans",
+      "empty": "No plans yet."
+    },
+    "activity": {
+      "title": "Recent activity",
+      "description": "The latest entries of the audit log.",
+      "openAudit": "Open audit log",
+      "empty": "Nothing recorded yet."
+    }
+  },
+  "orgs": {
+    "eyebrow": "Control center",
+    "title": "Organizations",
+    "description": "Clinics and practices on the platform. Verify new ones, support existing ones and assign plans. Patients are shown as counts only.",
+    "add": "Add organization",
+    "filters": {
+      "label": "Filter by status",
+      "all": "All"
+    },
+    "searchLabel": "Search organizations",
+    "searchPlaceholder": "Name, email, city, registration no., owner…",
+    "caption": "Organizations",
+    "columns": {
+      "name": "Organization",
+      "type": "Type",
+      "city": "City",
+      "owner": "Owner",
+      "members": "Members",
+      "patients": "Patients",
+      "plan": "Plan",
+      "status": "Status",
+      "registered": "Registered"
+    },
+    "noOwner": "No owner yet",
+    "resultCount": "{count, plural, =0 {No organizations found} one {# organization found} other {# organizations found}}",
+    "empty": "No organizations yet",
+    "emptyHint": "Organizations appear here when a clinic signs up, or when you add one.",
+    "emptyFiltered": "No organizations match",
+    "emptyFilteredHint": "Try another status or a shorter search."
+  },
+  "orgForm": {
+    "title": "Add an organization",
+    "description": "Use this when a clinic has signed a contract with you. We create the organization and give its owner a one-time invitation link.",
+    "sectionOrganization": "Organization",
+    "sectionOwner": "Owner and start",
+    "name": "Organization name",
+    "type": "Type",
+    "registrationNumber": "Registration number",
+    "registrationNumberHint": "The organization's state registration number, not a personal ID.",
+    "phone": "Phone",
+    "email": "Organization email",
+    "city": "City or aimag",
+    "address": "Address",
+    "ownerEmail": "Owner's email",
+    "ownerEmailHint": "The owner receives the invitation. They run the organization and have patient access.",
+    "startAs": "Start as",
+    "startActive": "Active (verified)",
+    "startActiveHint": "You have already checked the organization, for example through a signed contract.",
+    "startPending": "Pending verification",
+    "startPendingHint": "Patient records stay closed until someone verifies it.",
+    "plan": "Plan",
+    "planHint": "You can change it later on the organization's page.",
+    "submit": "Create and invite owner",
+    "created": "{name} was created.",
+    "successTitle": "Organization created",
+    "successBody": "{name} is ready. Send the owner their invitation link.",
+    "ownerLink": "Owner's invitation link",
+    "successStep1": "The owner opens the link and creates their account, or signs in with one they already have.",
+    "successStep2": "The link works once, for 7 days, and is shown only now.",
+    "successStep3": "If it gets lost, create a new link on the organization's page under Invitations.",
+    "openOrganization": "Open organization",
+    "errors": {
+      "name": "Enter at least 2 characters.",
+      "ownerEmail": "Enter the owner's email address.",
+      "email": "Enter a valid email address or leave it empty.",
+      "generic": "Please check this field."
+    }
+  },
+  "org": {
+    "back": "Organizations",
+    "titleFallback": "Organization",
+    "notFound": "Organization not found",
+    "registeredOn": "Registered on {date}",
+    "pendingCallout": {
+      "title": "Waiting for verification",
+      "body": "Members can complete the profile and invite colleagues, but patient records stay closed until you verify the organization."
+    },
+    "suspendedCallout": {
+      "title": "Suspended on {date}",
+      "reason": "Reason shown to members: {reason}",
+      "body": "Patient records and organization management are blocked. Nothing is deleted."
+    },
+    "verify": {
+      "action": "Verify organization",
+      "title": "Verify {name}?",
+      "description": "Verification confirms that this is a real medical organization.",
+      "unlocks": "Once verified, its owners and practitioners (with 2-step sign-in) can register patients and record intakes.",
+      "checklist": "Before you verify",
+      "checkRegistry": "I checked registration number {number} in the state registry.",
+      "checkRegistryMissing": "There is no registration number on file — I confirmed the organization's legal registration another way.",
+      "checkPhone": "I called the organization at {phone} and spoke with someone there.",
+      "checkPhoneMissing": "There is no phone on file — I contacted the organization through an official channel.",
+      "checkOwner": "I confirmed the owner's identity: {name} ({email}).",
+      "checkOwnerMissing": "I confirmed who will own and run this organization.",
+      "confirm": "Verify organization",
+      "done": "{name} is verified."
+    },
+    "suspend": {
+      "action": "Suspend",
+      "title": "Suspend {name}?",
+      "description": "Patient records and organization management are blocked right away, until you reactivate it. Members see the reason you write below. Nothing is deleted.",
+      "reasonLabel": "Reason (shown to members)",
+      "reasonPlaceholder": "For example: The contract has ended. Please contact us.",
+      "confirm": "Suspend organization",
+      "done": "{name} is suspended."
+    },
+    "reactivate": {
+      "action": "Reactivate",
+      "title": "Reactivate {name}?",
+      "description": "Members get access back right away, including patient records for practitioners with 2-step sign-in.",
+      "descriptionUnverified": "Members get access back right away. The organization was never verified, so reactivating it also marks it as verified.",
+      "confirm": "Reactivate",
+      "done": "{name} is active again."
+    },
+    "profile": {
+      "title": "Profile",
+      "edit": "Edit",
+      "registered": "Registered",
+      "verified": "Verified",
+      "verifiedBy": "by {name} ({email})",
+      "notVerified": "Not verified yet"
+    },
+    "edit": {
+      "title": "Edit organization profile",
+      "description": "Correct the details the organization gave us. Members see the changes right away.",
+      "changed": "{count, plural, one {# field changed.} other {# fields changed.}}",
+      "noChanges": "No changes yet.",
+      "clearHint": "Empty an optional field to remove it.",
+      "saved": "Organization profile saved."
+    },
+    "plan": {
+      "title": "Plan and usage",
+      "change": "Change plan",
+      "validUntil": "Valid until {date}",
+      "note": "Note: {note}",
+      "intakes": "Intakes recorded",
+      "countsOnly": "Counts only. Staff never see the records themselves."
+    },
+    "members": {
+      "title": "Members",
+      "summary": "{count, plural, =0 {No members} one {# member} other {# members}} · {clinical} with patient access",
+      "empty": "No members yet. The owner joins by accepting the invitation below.",
+      "disabledHere": "Disabled in organization",
+      "accountDisabled": "Account disabled",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "mfa": "2-step sign-in",
+        "lastLogin": "Last sign-in"
+      }
+    },
+    "invites": {
+      "title": "Invitations",
+      "description": "Invitations to join this organization.",
+      "empty": "No invitations.",
+      "columns": {
+        "email": "Email",
+        "role": "Role",
+        "state": "State",
+        "expires": "Expires",
+        "created": "Created",
+        "actions": "Actions"
+      }
+    },
+    "activity": {
+      "title": "Activity",
+      "description": "Recent audit log entries for this organization.",
+      "empty": "No activity recorded yet."
+    },
+    "delete": {
+      "action": "Delete organization permanently",
+      "summary": "Deletes the organization with {patients, plural, one {# patient} other {# patients}} and {intakes, plural, one {# intake} other {# intakes}}. This can't be undone.",
+      "title": "Delete {name} permanently?",
+      "description": "This deletes the organization, its {members, plural, one {# membership} other {# memberships}}, all {patients, plural, one {# patient} other {# patients}} with their clinical records ({intakes, plural, one {# intake} other {# intakes}}), its invitations and its plan. Members keep their personal accounts.",
+      "irreversible": "Deleted records can't be restored. If the organization still needs its records, ask its owner to save them first.",
+      "confirm": "Delete permanently",
+      "done": "{name} was deleted."
+    }
+  },
+  "planAssign": {
+    "title": "Change plan: {name}",
+    "description": "Payments aren't connected yet, so record how the plan was agreed in the note.",
+    "choose": "Plan",
+    "useDefault": "Default plan",
+    "useDefaultNamed": "Default plan ({name})",
+    "useDefaultHint": "Removes the assigned plan. The platform's default plan applies, also when the default changes later.",
+    "note": "Note",
+    "noteHint": "For example: Contract No. 12, paid by bank transfer.",
+    "periodEnd": "Valid until (optional)",
+    "periodEndHint": "For your records. Access doesn't stop automatically on this date.",
+    "save": "Save plan",
+    "saved": "Plan assigned.",
+    "removed": "Assigned plan removed. The default plan applies."
+  },
+  "plans": {
+    "eyebrow": "Control center",
+    "title": "Plans",
+    "description": "Tiers for individuals and organizations, with their limits.",
+    "new": "New plan",
+    "edit": "Edit",
+    "default": "Default",
+    "active": "Active",
+    "inactive": "Inactive",
+    "perMonth": "/ month",
+    "freeOrAgreement": "Free / by agreement",
+    "assignedCount": "{count, plural, =0 {Not assigned} one {Assigned to #} other {Assigned to #}}",
+    "plusDefaultUsers": "+ everyone without an assigned plan",
+    "howTitle": "How plans work",
+    "how1": "Payments are not connected yet: prices are for information only.",
+    "how2": "Plans are assigned on an organization's or a user's page.",
+    "how3": "The default plan is what everyone without an assigned plan gets.",
+    "how4": "Plans are never deleted. Deactivate a plan to stop new assignments; existing ones keep working.",
+    "readOnly": "Only the superadmin can create or edit plans. You can assign plans on organization and user pages.",
+    "individualsHint": "Personal accounts: limits on own and family profiles.",
+    "organizationsHint": "Clinics and practices: limits on practitioners and patients.",
+    "emptyGroup": "No plans for this audience",
+    "emptyGroupHint": "Create one with “New plan”."
+  },
+  "planForm": {
+    "createTitle": "New plan",
+    "createDescription": "Plans can't be deleted later, only deactivated. Check the code before you create it.",
+    "editTitle": "Edit {name}",
+    "editDescription": "Code {code} · {audience}. Changes apply right away to everyone on this plan.",
+    "code": "Code",
+    "codeHint": "Capital letters, digits and _ (for example ORG_PLUS). It can't be changed later.",
+    "audience": "For",
+    "audienceIndividualHint": "Personal accounts and their family profiles.",
+    "audienceOrganizationHint": "Clinics, hospitals and private practices.",
+    "sectionNames": "Names and descriptions",
+    "nameMn": "Name in Mongolian",
+    "nameEn": "Name in English",
+    "descriptionMn": "Description in Mongolian",
+    "descriptionEn": "Description in English",
+    "sectionPrice": "Price and order",
+    "price": "Monthly price, ₮",
+    "priceHint": "Whole tugriks. Leave empty for free or by agreement.",
+    "sortOrder": "Sort order",
+    "sortOrderHint": "Smaller numbers are listed first.",
+    "sectionLimits": "Limits for {audience}",
+    "limitsHint": "Limits apply right away. Accounts already over a new limit keep their data but can't add more.",
+    "pdfReports": "PDF reports",
+    "pdfReportsHint": "Practitioners can export intakes as PDF.",
+    "sectionAvailability": "Availability",
+    "makeDefault": "Make this the default plan ({audience})",
+    "makeDefaultHint": "Everyone without an assigned plan moves to this plan. The current default plan stops being the default.",
+    "isDefaultNote": "This is the default plan ({audience}). To change the default, make another plan the default.",
+    "active": "Active",
+    "activeHint": "Inactive plans can't be newly assigned; existing assignments keep working.",
+    "activeDefaultHint": "The default plan is always active.",
+    "changed": "{count, plural, one {# change.} other {# changes.}}",
+    "noChanges": "No changes yet.",
+    "createSubmit": "Create plan",
+    "saved": "{name} saved.",
+    "created": "Plan {code} created.",
+    "errors": {
+      "code": "Use 2–50 capital letters, digits or _.",
+      "name": "Enter a name.",
+      "price": "Enter a whole number of tugriks, or leave it empty.",
+      "limit": "Enter a whole number, or tick Unlimited.",
+      "sortOrder": "Enter a whole number from 0 to 10,000."
+    }
+  },
+  "inviteActions": {
+    "renew": "New link",
+    "revoke": "Revoke",
+    "renewTitle": "Create a new invitation link?",
+    "renewBody": "A new link for {email} replaces the old one, which stops working. The new link works for 7 days.",
+    "renewConfirm": "Create new link",
+    "renewed": "New invitation link created.",
+    "renewBodyEmailed": "We email a new link to {email}. It replaces the old one, which stops working, and works for 7 days. You won't see the link yourself.",
+    "renewConfirmEmailed": "Email new link",
+    "renewedEmailed": "New invitation link emailed to {email}.",
+    "emailedTitle": "Invitation emailed",
+    "revokeTitle": "Revoke this invitation?",
+    "revokeBody": "The link sent to {email} stops working right away. You can create a new link later.",
+    "revokeConfirm": "Revoke invitation",
+    "revoked": "Invitation for {email} revoked.",
+    "linkTitle": "Invitation link ready",
+    "linkBody": "Send this link to the person. They open it to create their account, or to join with the account they already have.",
+    "linkLabel": "Invitation link"
+  },
+  "invites": {
+    "eyebrow": "Control center",
+    "title": "Invitations",
+    "description": "Invitations to platform staff and to organizations, across the platform.",
+    "inviteStaff": "Invite platform admin",
+    "howLinksWork": "Invitation links are shown only once, when they are created. If someone lost theirs, create a new link — the old one stops working.",
+    "howLinksWorkEmailed": "New invitation links are emailed straight to the person. For security, only the superadmin sees the links themselves. Creating a new link stops the old one.",
+    "filters": {
+      "kindLabel": "Filter by kind",
+      "stateLabel": "Filter by state",
+      "allStates": "Any state",
+      "kind": {
+        "all": "All",
+        "staff": "Staff",
+        "organization": "Organizations"
+      }
+    },
+    "kind": {
+      "staff": "Staff",
+      "organization": "Organization"
+    },
+    "caption": "Invitations",
+    "columns": {
+      "email": "Email",
+      "kind": "Kind",
+      "role": "Role",
+      "organization": "Organization",
+      "state": "State",
+      "createdBy": "Created by",
+      "created": "Created",
+      "expires": "Expires",
+      "actions": "Actions"
+    },
+    "acceptedOn": "Accepted {date}",
+    "superadminOnly": "Superadmin only",
+    "resultCount": "{count, plural, =0 {No invitations found} one {# invitation found} other {# invitations found}}",
+    "empty": "No invitations here",
+    "emptyHint": "Invitations appear when organizations invite members or a new organization is added.",
+    "emptyHintSuperadmin": "Invite a platform admin, or add an organization to invite its owner."
+  },
+  "staffInvite": {
+    "title": "Invite a platform admin",
+    "description": "Platform admins help run the control center. Invite only people you trust: they can act on every organization and account.",
+    "email": "Email",
+    "emailHint": "The invitation works for 7 days. They must turn on 2-step sign-in before they can use the control center.",
+    "emailError": "Enter a valid email address.",
+    "submit": "Create invitation",
+    "created": "Invitation for {email} created."
+  },
+  "users": {
+    "eyebrow": "Control center",
+    "title": "Users",
+    "description": "Every account on the platform: individuals, organization members and staff. Account data only — no health records.",
+    "filters": {
+      "typeLabel": "Filter by account type",
+      "statusLabel": "Filter by status",
+      "type": {
+        "all": "All",
+        "individual": "Individuals",
+        "member": "Organization members",
+        "staff": "Staff"
+      },
+      "status": {
+        "all": "Any status",
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "mfaLabel": "Filter by 2-step sign-in",
+      "mfa": {
+        "all": "All",
+        "off": "Without 2-step sign-in"
+      }
+    },
+    "searchLabel": "Search users",
+    "searchPlaceholder": "Name or email…",
+    "caption": "Users",
+    "columns": {
+      "name": "Name",
+      "role": "Platform role",
+      "organizations": "Organizations",
+      "mfa": "2-step sign-in",
+      "lastLogin": "Last sign-in",
+      "created": "Created",
+      "status": "Status"
+    },
+    "resultCount": "{count, plural, =0 {No users found} one {# user found} other {# users found}}",
+    "empty": "No accounts yet",
+    "emptyHint": "Accounts appear here as people sign up or accept invitations.",
+    "emptyFiltered": "No users match",
+    "emptyFilteredHint": "Try other filters or a shorter search."
+  },
+  "user": {
+    "back": "Users",
+    "eyebrow": "Account",
+    "titleFallback": "Account",
+    "notFound": "Account not found",
+    "disabledCallout": {
+      "title": "Disabled on {date}",
+      "reason": "Reason: {reason}"
+    },
+    "blocked": {
+      "selfTitle": "This is your account",
+      "selfBody": "Manage your own account in Settings: password, 2-step sign-in and sessions.",
+      "openSettings": "Open Settings",
+      "superadminTitle": "The superadmin account is protected",
+      "superadminBody": "Nobody can change or delete the superadmin account from the control center. Its owner manages it in Settings.",
+      "staffTitle": "Staff accounts are managed by the superadmin",
+      "staffBody": "Only the superadmin can reset, disable or change another staff member's account."
+    },
+    "account": {
+      "title": "Account",
+      "created": "Created",
+      "lastLogin": "Last sign-in",
+      "passwordChanged": "Password changed",
+      "privacyAccepted": "Privacy notice accepted",
+      "notRecorded": "Not recorded",
+      "language": "Language",
+      "localeMn": "Mongolian",
+      "localeEn": "English",
+      "localeDefault": "Not chosen (Mongolian)",
+      "mfa": "2-step sign-in",
+      "mfaOn": "On",
+      "mfaOffRequired": "Off — required, asked at the next sign-in",
+      "mfaOffOptional": "Off (optional for individuals)",
+      "recoveryCodes": "Recovery codes",
+      "recoveryCodesLeft": "{count, plural, =0 {None left} one {# left} other {# left}}",
+      "role": "Platform role"
+    },
+    "orgs": {
+      "title": "Organizations",
+      "description": "Where this person is a member.",
+      "empty": "Not a member of any organization.",
+      "joined": "joined {date}"
+    },
+    "plan": {
+      "title": "Personal plan and usage",
+      "change": "Change personal plan",
+      "calculations": "BEDI calculations saved",
+      "countsOnly": "Counts only. Staff never see the profiles or results themselves."
+    },
+    "activity": {
+      "title": "Activity",
+      "description": "Recent audit log entries by or about this account.",
+      "empty": "No activity recorded yet."
+    },
+    "actions": {
+      "title": "Account actions",
+      "description": "Each action asks for confirmation and is written to the audit log."
+    },
+    "reset": {
+      "action": "Password reset link",
+      "summary": "A one-time link to choose a new password, valid for 2 hours.",
+      "button": "Create link",
+      "title": "Create a password reset link for {name}?",
+      "description": "The link lets the person choose a new password. It works once, for 2 hours, and older reset links stop working. If email is set up, it is also sent to {email}.",
+      "verifyIdentity": "Before you share the link, confirm it's really them — call them or meet in person. Anyone with the link can take over the account.",
+      "confirm": "Create link",
+      "done": "Reset link created.",
+      "linkTitle": "Password reset link",
+      "linkBody": "Share it with {name} through a trusted channel, after confirming their identity.",
+      "linkLabel": "Reset link",
+      "summaryEmailed": "Emails a one-time link to choose a new password, valid for 2 hours.",
+      "buttonEmailed": "Email link",
+      "descriptionEmailed": "We email a one-time link to {email} so the person can choose a new password. It works once, for 2 hours, and older reset links stop working. You won't see the link yourself.",
+      "emailOnlyNote": "The link goes only to the account's email address. If the person can no longer open that mailbox, ask the superadmin.",
+      "confirmEmailed": "Email reset link",
+      "doneEmailed": "Reset link emailed to {email}.",
+      "emailedTitle": "Reset link emailed"
+    },
+    "signout": {
+      "action": "Sign out everywhere",
+      "summary": "Ends every session on all devices. The password stays the same.",
+      "button": "Sign out",
+      "title": "Sign {name} out everywhere?",
+      "description": "Every session ends within a minute, on all devices. Use this when a device was lost or the account may be at risk. The password doesn't change.",
+      "confirm": "Sign out everywhere",
+      "done": "{name} was signed out everywhere."
+    },
+    "mfa": {
+      "action": "Reset 2-step sign-in",
+      "summary": "For someone who lost their phone and their recovery codes.",
+      "button": "Reset",
+      "title": "Reset 2-step sign-in for {name}?",
+      "description": "This removes their authenticator app and recovery codes and signs them out everywhere. At the next sign-in they set up 2-step sign-in again.",
+      "warningTitle": "Account takeovers often start like this",
+      "warningBody": "Only continue after confirming the person's identity by phone or in person — never based on an email or chat message alone.",
+      "check": "I confirmed this person's identity by phone or in person.",
+      "confirm": "Reset 2-step sign-in",
+      "done": "2-step sign-in reset for {name}."
+    },
+    "disable": {
+      "action": "Disable account",
+      "summary": "Signs the person out and blocks sign-in until you enable the account again.",
+      "button": "Disable",
+      "title": "Disable the account of {name}?",
+      "description": "They are signed out everywhere and can't sign in until you enable the account. Profiles, records and organization memberships stay as they are.",
+      "reasonLabel": "Reason (kept with the account and in the audit log)",
+      "reasonPlaceholder": "For example: Requested by the clinic owner.",
+      "confirm": "Disable account",
+      "done": "Account of {name} disabled."
+    },
+    "enable": {
+      "action": "Enable account",
+      "summary": "Lets the person sign in again.",
+      "button": "Enable",
+      "title": "Enable the account of {name}?",
+      "description": "They can sign in again with their current password.",
+      "confirm": "Enable account",
+      "done": "Account of {name} enabled."
+    },
+    "role": {
+      "promoteAction": "Make platform admin",
+      "promoteSummary": "Gives access to the control center — never to health records.",
+      "promoteButton": "Make admin",
+      "promoteTitle": "Make {name} a platform admin?",
+      "promoteDescription": "They are signed out now and must turn on 2-step sign-in at the next sign-in. Their own profiles and organization memberships stay.",
+      "promoteConfirm": "Make platform admin",
+      "promoted": "{name} is now a platform admin.",
+      "demoteAction": "Remove platform admin rights",
+      "demoteSummary": "Back to a regular user account.",
+      "demoteButton": "Remove rights",
+      "demoteTitle": "Remove platform admin rights from {name}?",
+      "demoteDescription": "They lose access to the control center right away and are signed out. Their personal account and organization memberships stay.",
+      "demoteConfirm": "Remove rights",
+      "demoted": "{name} is no longer a platform admin.",
+      "canTitle": "A platform admin can",
+      "can1": "Verify, suspend and support organizations",
+      "can2": "Help people with their accounts: reset links, signing out, resetting 2-step sign-in",
+      "can3": "Assign plans and manage invitations",
+      "cannotTitle": "A platform admin cannot",
+      "cannot1": "Open patient records, intakes or BEDI results",
+      "cannot2": "Change other staff or plans, or delete anything permanently",
+      "cannot3": "Use the control center without 2-step sign-in"
+    },
+    "delete": {
+      "action": "Delete account permanently",
+      "title": "Delete the account of {name} permanently?",
+      "description": "The account, its personal and family profiles and their BEDI history are deleted. Clinic records stay with their organizations. This can't be undone.",
+      "blockedTitle": "Can't delete yet",
+      "blockedBody": "This person is the only owner of these organizations, which still have other members. Another member must become an owner first:",
+      "soleTitle": "These organizations will be deleted too",
+      "soleBody": "This person is their only member, so the organizations and all their patient records are deleted with the account:",
+      "soleItem": "{name} — {count, plural, one {{value} patient} other {{value} patients}}",
+      "clean": "Personal profiles and BEDI history are deleted with the account. Clinic records stay with their organizations.",
+      "alsoOrganizations": "Also delete these organizations and their patient records",
+      "alsoOrganizationsHint": "Required. Without it the account can't be deleted.",
+      "confirm": "Delete permanently",
+      "done": "Account {email} deleted."
+    }
+  },
+  "audit": {
+    "eyebrow": "Control center",
+    "title": "Audit log",
+    "description": "Who did what, when and from where. Use it to look into sign-in problems and changes.",
+    "exportCsv": "Export CSV",
+    "noHealthData": "The audit log never contains health data: only ids, roles, counts and reasons typed by staff. The export uses the filters below (up to 10,000 rows).",
+    "onlySuperadminTitle": "Only the superadmin can open the audit log",
+    "onlySuperadminBody": "Ask the superadmin if you need to look into a security event.",
+    "filters": {
+      "title": "Filters",
+      "clear": "Clear filters",
+      "action": "Action",
+      "allActions": "All actions",
+      "allInGroup": "All: {group}",
+      "actor": "Done by (email)",
+      "actorPlaceholder": "Part of an email…",
+      "target": "Record ID",
+      "targetPlaceholder": "Exact ID",
+      "from": "From",
+      "to": "To",
+      "rangeInvalid": "The end date is before the start date.",
+      "organization": "Organization",
+      "removeOrganization": "Remove the organization filter"
+    },
+    "groups": {
+      "auth": "Sign-in and security",
+      "account": "Accounts",
+      "admin": "Control center",
+      "org": "Organizations",
+      "clinical": "Clinical records (ids only)",
+      "other": "Other"
+    },
+    "columns": {
+      "time": "Time",
+      "action": "Action",
+      "actor": "Done by",
+      "target": "Record",
+      "ip": "IP address",
+      "details": "Details"
+    },
+    "filterByTarget": "Show all events for record {id}",
+    "results": {
+      "title": "Events",
+      "count": "{count, plural, =0 {No events} one {# event} other {# events}}"
+    },
+    "empty": "Nothing recorded yet",
+    "emptyFiltered": "No events match these filters",
+    "emptyFilteredHint": "Widen the date range or clear a filter."
+  },
+  "system": {
+    "eyebrow": "Control center",
+    "title": "System",
+    "description": "Configuration and health checks. Secret values are never shown.",
+    "recheck": "Check again",
+    "onlySuperadminTitle": "Only the superadmin can open system checks",
+    "onlySuperadminBody": "System settings are managed by the platform owner.",
+    "state": {
+      "ok": "OK",
+      "warning": "Check",
+      "danger": "Action needed",
+      "info": "Info"
+    },
+    "summary": {
+      "okTitle": "All checks passed",
+      "okBody": "Configuration and data protection look healthy.",
+      "issuesTitle": "{count, plural, one {# item needs attention} other {# items need attention}}",
+      "issuesBody": "Follow the steps next to each item below."
+    },
+    "config": {
+      "title": "Configuration",
+      "description": "Environment variables set in Netlify."
+    },
+    "encryption": {
+      "title": "Encryption key",
+      "ok": "Set and valid. Sensitive fields are encrypted at rest.",
+      "missing": "ENCRYPTION_KEY is not set. Encrypted fields (clinical notes, intake details, 2-step secrets) can't be read or saved.",
+      "invalid": "ENCRYPTION_KEY is set but invalid: it must be 32 random bytes, base64-encoded.",
+      "fix": "Set ENCRYPTION_KEY in Netlify → Site configuration → Environment variables, then deploy again. To create a key:",
+      "keepCopy": "Keep a copy of the key in the password manager. Losing it means losing the encrypted data."
+    },
+    "authSecret": {
+      "title": "Sign-in secret",
+      "ok": "AUTH_SECRET is set.",
+      "missing": "AUTH_SECRET is missing. Set a long random value in the Netlify environment variables. Changing it later signs everyone out."
+    },
+    "appUrl": {
+      "title": "App address",
+      "ok": "Links in invitations and emails use",
+      "missing": "APP_URL is not set, so links use the address of the current request. Set APP_URL to the public address, for example https://your-domain."
+    },
+    "email": {
+      "title": "Email delivery",
+      "ok": "Emails are sent from",
+      "off": "Not set up. Invitation and reset links are shown on screen once, and staff send them by hand.",
+      "howToEnable": "To turn it on, set in Netlify:"
+    },
+    "database": {
+      "title": "Database",
+      "ok": "Connected, answered in {ms} ms.",
+      "slow": "That's slow: check the database provider's status.",
+      "down": "Can't reach the database. Check DATABASE_URL and the provider's status."
+    },
+    "security": {
+      "title": "Data protection",
+      "description": "Encryption coverage, staff sign-in and the records kept."
+    },
+    "plaintext": {
+      "title": "Unencrypted sensitive values",
+      "unknown": "Can't check until the encryption key is valid.",
+      "ok": "All sensitive fields are encrypted.",
+      "found": "{count, plural, one {{value} value is} other {{value} values are}} still stored without encryption (saved before encryption was switched on). Encrypt them with:",
+      "details": "Show per field",
+      "field": "Field",
+      "count": "Unencrypted"
+    },
+    "staffMfa": {
+      "title": "Staff 2-step sign-in",
+      "ok": "Every staff account uses 2-step sign-in.",
+      "missing": "{count, plural, one {# staff account hasn't} other {# staff accounts haven't}} turned on 2-step sign-in yet. They are asked to set it up at the next sign-in.",
+      "link": "See staff accounts"
+    },
+    "invites": {
+      "title": "Pending invitations",
+      "body": "{count, plural, =0 {No invitations are waiting.} one {# invitation is waiting to be accepted.} other {# invitations are waiting to be accepted.}}",
+      "link": "Open invitations"
+    },
+    "audit": {
+      "title": "Audit log",
+      "body": "{count, plural, one {{value} entry kept.} other {{value} entries kept.}}",
+      "link": "Open audit log"
+    },
+    "migrations": {
+      "title": "Database migrations",
+      "description": "Schema changes applied to the database.",
+      "latest": "Latest applied",
+      "none": "No migrations recorded.",
+      "broken": "{name} failed or was rolled back and hasn't been applied since. Check the deploy log before changing data.",
+      "showAll": "Show all ({count})",
+      "name": "Migration",
+      "applied": "Applied",
+      "status": "Status",
+      "done": "Applied",
+      "rolledBack": "Rolled back",
+      "unfinished": "Not finished"
+    },
+    "formula": {
+      "title": "BEDI formula (locked)",
+      "description": "The values the calculator uses, shown for reference. They can't be edited here.",
+      "locked": "Changes require the owner's written approval.",
+      "expression": "Formula",
+      "thresholds": "Status thresholds",
+      "precision": "{count, plural, one {Results are rounded to # decimal place.} other {Results are rounded to # decimal places.}}",
+      "seasons": "Season coefficients (Ks)"
+    },
+    "runtime": {
+      "title": "Runtime",
+      "node": "Node.js",
+      "commit": "Commit",
+      "context": "Deploy context",
+      "region": "Region"
+    }
   }
 }

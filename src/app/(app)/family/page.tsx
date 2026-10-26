@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiFetch, ApiError } from "@/lib/api";
 import { ErrorState, PageLoading } from "@/components/states";
+import { Callout } from "@/components/kit/layout";
+import { useApiQuery, useErrorMessage } from "@/components/kit/hooks";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge } from "@/lib/bediEngine";
 import { toast } from "sonner";
@@ -23,6 +25,12 @@ interface Profile {
   doshaType: string | null;
   ktScore: number | null;
   bediRecords: Array<{ deviation: number; status: string; date: string }>;
+}
+
+/** The personal plan and how much of it is used (GET /api/me). */
+interface PlanUsage {
+  plan: { nameMn: string; nameEn: string; limits: { maxProfiles?: number | null } };
+  usage: { profiles: number };
 }
 
 /** Relationships a new member can have (labels: shared.relationship.<value>). */
@@ -73,6 +81,14 @@ export default function FamilyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const locale = useLocale();
+  const errorMessage = useErrorMessage();
+  // The plan's profile limit, so people learn about it before filling in the form.
+  const me = useApiQuery<PlanUsage>("/api/me");
+  const [limitError, setLimitError] = useState<string | null>(null);
+  const profileLimit = me.data?.plan.limits.maxProfiles ?? null;
+  const planName = me.data ? (locale === "mn" ? me.data.plan.nameMn : me.data.plan.nameEn) : "";
+  const atProfileLimit = profileLimit !== null && (me.data?.usage.profiles ?? 0) >= profileLimit;
 
   const loadProfiles = useCallback(async () => {
     setLoadError(null);
@@ -89,9 +105,15 @@ export default function FamilyPage() {
 
   useEffect(() => { loadProfiles(); }, [loadProfiles]);
 
+  function openAdd() {
+    setLimitError(null);
+    setShowAdd(true);
+  }
+
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setLimitError(null);
     try {
       await apiFetch("/api/profiles", {
         method: "POST",
@@ -106,9 +128,15 @@ export default function FamilyPage() {
       toast.success(t("toast.added"));
       setShowAdd(false);
       setForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "spouse" });
+      me.reload();
       await loadProfiles();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("toast.addError"));
+      if (err instanceof ApiError && err.code === "plan_limit") {
+        // Shown in the dialog with what to do next (see below).
+        setLimitError(errorMessage(err));
+      } else {
+        toast.error(err instanceof ApiError ? err.message : t("toast.addError"));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -121,6 +149,7 @@ export default function FamilyPage() {
       await apiFetch(`/api/profiles/${deleteTarget.id}`, { method: "DELETE" });
       toast.success(t("toast.deleted"));
       setDeleteTarget(null);
+      me.reload();
       await loadProfiles();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : t("toast.deleteError"));
@@ -149,11 +178,17 @@ export default function FamilyPage() {
             {t("subtitle", { count: profiles.length })}
           </p>
         </div>
-        <Button onClick={() => setShowAdd(true)} className="shrink-0">
+        <Button onClick={openAdd} className="shrink-0">
           <span className="material-symbols-outlined text-[18px] mr-1.5" aria-hidden="true">person_add</span>
           {t("addMember")}
         </Button>
       </div>
+
+      {atProfileLimit && (
+        <Callout tone="info" icon="group" title={t("planLimit.reachedTitle")}>
+          {t("planLimit.reachedBody", { plan: planName, limit: profileLimit })}
+        </Callout>
+      )}
 
       {/* ── Profile grid ── */}
       {loadError !== null ? (
@@ -257,7 +292,7 @@ export default function FamilyPage() {
         {/* Add card shortcut */}
         <button
           type="button"
-          onClick={() => setShowAdd(true)}
+          onClick={openAdd}
           className="border-2 border-dashed border-outline-variant/40 rounded-3xl flex flex-col items-center justify-center py-14 gap-3 text-on-surface-variant hover:border-primary/40 hover:text-primary hover:bg-primary/3 transition-all duration-200 group"
         >
           <span className="material-symbols-outlined text-[32px] transition-transform motion-safe:group-hover:scale-110" aria-hidden="true">add_circle</span>
@@ -267,7 +302,13 @@ export default function FamilyPage() {
       )}
 
       {/* ── Add member dialog ── */}
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+      <Dialog
+        open={showAdd}
+        onOpenChange={(open) => {
+          setShowAdd(open);
+          if (!open) setLimitError(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-headline">{t("addDialog.title")}</DialogTitle>
@@ -337,6 +378,12 @@ export default function FamilyPage() {
                 ))}
               </select>
             </div>
+            {limitError && (
+              <Callout tone="warning" title={t("planLimit.errorTitle")}>
+                <p>{limitError}</p>
+                <p className="mt-1">{t("planLimit.errorHint")}</p>
+              </Callout>
+            )}
             <div className="flex gap-2 pt-2">
               <Button type="button" variant="outline" className="flex-1" onClick={() => setShowAdd(false)}>
                 {t("addDialog.cancel")}

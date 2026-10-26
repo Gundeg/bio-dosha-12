@@ -2,12 +2,15 @@
 
 import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api";
+import { APP_TIME_ZONE, formatDate } from "@/lib/formatDate";
+import { useErrorMessage } from "@/components/kit/hooks";
 import { calcAge } from "@/lib/bediEngine";
 import {
   CONDITION_OPTIONS,
@@ -96,8 +99,17 @@ interface FormState {
   recommendations: string;
 }
 
+/**
+ * Today in the clinic's calendar (Ulaanbaatar). The UTC date would still be
+ * yesterday between midnight and 08:00 local time.
+ */
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 function detectSeason(): Season {
@@ -126,6 +138,8 @@ export function IntakeForm({
 }: IntakeFormProps) {
   const t = useTranslations("clinical.intake");
   const ts = useTranslations("shared");
+  const locale = useLocale();
+  const errorMessage = useErrorMessage();
   const uid = useId();
   const fid = (name: string) => `${uid}-${name}`;
   const router = useRouter();
@@ -214,22 +228,19 @@ export function IntakeForm({
         ? `/api/patients/${patientId}/intakes/${initial!.id}`
         : `/api/patients/${patientId}/intakes`;
       const method = isEdit ? "PATCH" : "POST";
-      const res = await fetch(url, {
+      const saved = await apiFetch<{ id?: string }>(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildPayload(isEdit)),
       });
-      if (!res.ok) throw new Error(await res.text());
-
-      const saved = await res.json();
       toast.success(isEdit ? t("updated") : t("saved"));
       router.refresh();
 
       if (!isEdit && saved?.id) {
         router.push(`/patients/${patientId}?tab=intake&intake=${saved.id}`);
       }
-    } catch {
-      toast.error(t("saveError"));
+    } catch (err) {
+      // e.g. "the organization is suspended" or "check the values" instead of a bare failure.
+      toast.error(t("saveError"), { description: errorMessage(err) });
     } finally {
       setSubmitting(false);
     }
@@ -250,7 +261,7 @@ export function IntakeForm({
   const textareaClass = "w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pb-24">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle>{t("basicInfo")}</CardTitle>
@@ -262,8 +273,8 @@ export function IntakeForm({
           <ReadOnlyField id={fid("sex")} label={t("sex")} value={ts(`sex.${profile.sex}`)} />
           <ReadOnlyField
             id={fid("birthDate")}
-            label={t("birthYear")}
-            value={profile.birthDate.slice(0, 10)}
+            label={t("birthDate")}
+            value={formatDate(profile.birthDate, locale)}
           />
           <ReadOnlyField
             id={fid("registerNumber")}
@@ -509,8 +520,9 @@ export function IntakeForm({
         </CardContent>
       </Card>
 
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 z-30 bg-surface-container-low border-t border-outline-variant/20 px-6 py-3 flex items-center justify-end gap-2 backdrop-blur">
-        <Button type="submit" disabled={submitting}>
+      {/* Sticks to the bottom while the form scrolls; on phones it stays above the bottom menu. */}
+      <div className="sticky bottom-24 md:bottom-4 z-30 flex items-center justify-end gap-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low/95 px-4 py-3 shadow-ambient backdrop-blur">
+        <Button type="submit" size="lg" className="px-4" disabled={submitting}>
           {submitting ? t("saving") : isEdit ? t("update") : t("saveNew")}
         </Button>
       </div>

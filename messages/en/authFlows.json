@@ -1,0 +1,344 @@
+{
+  "shell": {
+    "home": "Bio-Dosha-12 home page",
+    "trustTitle": "Your health information is protected",
+    "trust": {
+      "encrypted": {
+        "title": "Encrypted records",
+        "body": "Health records are stored encrypted. Even platform staff cannot open them."
+      },
+      "mfa": {
+        "title": "2-step sign-in",
+        "body": "A code from your phone keeps your account safe, even if someone learns your password."
+      },
+      "verified": {
+        "title": "Verified organizations",
+        "body": "Clinics are checked by the platform before they can work with patient records."
+      }
+    },
+    "panelFootnote": "Bio-Dosha-12 supports prevention and self-monitoring. It does not replace a doctor's examination.",
+    "mobileTrust": "Your health information is encrypted and protected.",
+    "footerLabel": "More information",
+    "privacy": "Privacy",
+    "about": "About",
+    "optional": "(optional)",
+    "newTab": "(opens in a new tab)",
+    "emailPlaceholder": "name@example.com",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "backToLogin": "Back to sign in",
+    "goHome": "Go to the home page",
+    "stepOf": "Step {current} of {total}",
+    "errors": {
+      "emailRequired": "Enter your email address.",
+      "emailInvalid": "Enter a valid email address, for example name@example.com.",
+      "unavailable": "We couldn't reach the server. Check your internet connection and try again.",
+      "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "password": {
+    "show": "Show password",
+    "capsLock": "Caps Lock is on.",
+    "rule": "At least {min} characters. A short phrase of a few words is easy to remember and hard to guess.",
+    "strengthLabel": "Strength:",
+    "strength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "required": "Enter a password.",
+    "tooShort": "Use at least {min} characters.",
+    "tooLong": "This password is too long. Please choose a shorter one.",
+    "confirmLabel": "Repeat the password",
+    "confirmRequired": "Enter the password again.",
+    "mismatch": "The two passwords do not match."
+  },
+  "notices": {
+    "password_reset": "Your password has been updated. Sign in with your new password.",
+    "password_changed": "Your password was changed and you were signed out on every device. Please sign in again.",
+    "signed_out": "You were signed out on every device.",
+    "account_created": "Your account has been created. Please sign in to continue."
+  },
+  "login": {
+    "metaTitle": "Sign in",
+    "title": "Sign in",
+    "subtitle": "Welcome. Sign in to continue to your account.",
+    "email": "Email",
+    "password": "Password",
+    "forgot": "Forgot password?",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "noAccount": "Don't have an account yet?",
+    "createAccount": "Create an account",
+    "errors": {
+      "passwordRequired": "Enter your password.",
+      "credentials": "The email or password is incorrect. Please check them and try again.",
+      "rateLimited": "Too many attempts. For your security, signing in is paused for 15 minutes. Please try again later, or reset your password.",
+      "disabled": "This account has been disabled. Please contact your organization or the system administrator.",
+      "codeIncomplete": "Enter all 6 digits of the code.",
+      "codeInvalid": "The code is incorrect or has expired. Enter the code your app shows right now.",
+      "recoveryIncomplete": "Enter the whole recovery code (XXXX-XXXX-XXXX).",
+      "recoveryInvalid": "This recovery code is incorrect or has already been used."
+    },
+    "mfa": {
+      "title": "2-step sign-in",
+      "subtitle": "Enter the 6-digit code from your authenticator app.",
+      "recoverySubtitle": "Enter one of the recovery codes you saved when you turned on 2-step sign-in.",
+      "account": "Signing in as <b>{email}</b>",
+      "codeLabel": "Verification code",
+      "codeHint": "Open your authenticator app and find Bio-Dosha-12. The code changes every 30 seconds.",
+      "recoveryLabel": "Recovery code",
+      "recoveryPlaceholder": "XXXX-XXXX-XXXX",
+      "recoveryHint": "Each recovery code works only once.",
+      "submit": "Verify and sign in",
+      "submitting": "Checking…",
+      "useRecovery": "Use a recovery code instead",
+      "useApp": "Use the code from my app instead",
+      "back": "Back",
+      "lostAccess": "Lost your phone and your recovery codes? Contact the system administrator. After confirming who you are, they can reset 2-step sign-in for you."
+    }
+  },
+  "register": {
+    "metaTitle": "Create an account",
+    "title": "Create your account",
+    "subtitle": "First, choose who the account is for.",
+    "typeLegend": "Account type",
+    "types": {
+      "individual": {
+        "title": "Personal",
+        "desc": "Track your own and your family's balance."
+      },
+      "organization": {
+        "title": "Medical organization",
+        "desc": "For clinics, hospitals and private practices. Patient records open after the platform verifies your organization."
+      }
+    },
+    "inviteHint": "Working at a clinic that already uses Bio-Dosha-12? Ask its owner or manager for an invitation instead.",
+    "orgSection": "Your organization",
+    "orgName": "Organization name",
+    "orgType": "Type of organization",
+    "orgTypes": {
+      "CLINIC": "Clinic",
+      "HOSPITAL": "Hospital",
+      "PRIVATE_PRACTICE": "Private practice",
+      "OTHER": "Other"
+    },
+    "registrationNumber": "Registration number",
+    "phone": "Phone",
+    "orgEmail": "Organization email",
+    "city": "City / aimag",
+    "address": "Address",
+    "accountSection": "Your account",
+    "accountSectionOrg": "Your own account",
+    "accountSectionOrgHint": "You will be the organization's owner. Use your own name and email; colleagues get their own accounts when you invite them.",
+    "name": "Full name",
+    "email": "Email",
+    "emailHint": "You will sign in with this email.",
+    "password": "Password",
+    "consent": "I have read the <link>Privacy Notice</link> and agree that my health information is stored and processed by Bio-Dosha-12.",
+    "consentOrg": "I have read the <link>Privacy Notice</link> and agree that the health information my organization and I enter is stored and processed by Bio-Dosha-12.",
+    "next": {
+      "title": "What happens next",
+      "review": "We review your organization, usually within one business day.",
+      "prepare": "Meanwhile, set up 2-step sign-in and invite your colleagues.",
+      "open": "After verification, patient records open."
+    },
+    "submit": "Create account",
+    "submitting": "Creating your account…",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "welcome": "Welcome to Bio-Dosha-12!",
+    "errors": {
+      "nameRequired": "Enter your full name.",
+      "emailTaken": "An account with this email already exists. <login>Sign in</login> or <forgot>reset your password</forgot>.",
+      "consentRequired": "Please accept the Privacy Notice to continue.",
+      "orgNameRequired": "Enter the organization's name (at least 2 characters).",
+      "orgEmailInvalid": "Enter a valid email address, or leave this field empty.",
+      "orgInvalid": "Please check the organization details.",
+      "fixAbove": "Please check the fields marked above."
+    }
+  },
+  "forgot": {
+    "metaTitle": "Forgot password",
+    "title": "Reset your password",
+    "subtitle": "Enter the email you sign in with, and we'll send you a link to set a new password.",
+    "email": "Email",
+    "submit": "Send reset link",
+    "submitting": "Sending…",
+    "remembered": "Remembered your password?",
+    "sent": {
+      "title": "Check your email",
+      "body": "If an account exists for <b>{email}</b>, we have sent it a link to set a new password.",
+      "expiry": "The link works for 2 hours.",
+      "spam": "Not there in a few minutes? Check your spam or junk folder.",
+      "again": "Use a different email"
+    },
+    "disabled": {
+      "title": "Ask for a reset link",
+      "body": "Password reset by email isn't available yet. The system administrator can create a reset link for you; if you work at a medical organization, its owner or manager can help you arrange it.",
+      "steps": {
+        "contact": "Contact your organization's owner or manager, or the system administrator, and tell them the email you sign in with.",
+        "link": "You will receive a one-time link. It works for 2 hours.",
+        "set": "Open the link and choose a new password."
+      }
+    }
+  },
+  "reset": {
+    "metaTitle": "Set a new password",
+    "title": "Set a new password",
+    "account": "For the account <b>{email}</b>",
+    "expires": "This link works until {time}.",
+    "newPassword": "New password",
+    "confirmPassword": "Repeat the new password",
+    "signOutNote": "After the change you will be signed out on every device. Then sign in with your new password.",
+    "submit": "Save new password",
+    "submitting": "Saving…",
+    "invalid": {
+      "title": "This link no longer works",
+      "body": "It may have expired (links work for 2 hours), already been used, or been replaced by a newer link. Please request a new one.",
+      "action": "Request a new link"
+    }
+  },
+  "invite": {
+    "metaTitle": "Invitation",
+    "title": "You're invited",
+    "orgLead": "<b>{organization}</b> invited you to work with them on Bio-Dosha-12.",
+    "staffLead": "You are invited to join the Bio-Dosha-12 platform team.",
+    "roleLabel": "Your role",
+    "forEmail": "This invitation is for {email}.",
+    "mfa": "To protect health records, this role requires 2-step sign-in. You will set it up right after accepting: it takes about 2 minutes and needs an authenticator app on your phone.",
+    "expires": "Valid until {date}.",
+    "pending": "{organization} is waiting for verification by the platform. Patient records open after it is verified; until then you can set up your account and sign-in.",
+    "suspended": "Access for {organization} is currently suspended by the platform. Patient records stay closed until access is restored.",
+    "accepted": "Invitation accepted. Welcome!",
+    "newAccount": {
+      "title": "Create your account",
+      "email": "Email",
+      "emailHint": "The invitation was sent to this email. You will sign in with it.",
+      "otherSession": "You are signed in as {current}. Accepting will create a new account for {email} and sign you in to it.",
+      "consent": "I have read the <link>Privacy Notice</link> and agree that my information is stored and processed by Bio-Dosha-12.",
+      "submit": "Accept and create account",
+      "submitting": "Creating your account…"
+    },
+    "existing": {
+      "signedIn": "You are signed in as <b>{email}</b>.",
+      "accept": "Accept invitation",
+      "accepting": "Accepting…",
+      "otherTitle": "This invitation is for a different account",
+      "otherBody": "You are signed in as {current}, but this invitation was sent to {email}. Sign out, then sign in with {email} to accept it.",
+      "signOut": "Sign out and continue",
+      "signingOut": "Signing out…",
+      "signedOutBody": "An account with <b>{email}</b> already exists. Sign in with it to accept the invitation.",
+      "signIn": "Sign in to accept",
+      "forgot": "Forgot your password?"
+    },
+    "errors": {
+      "planLimit": "{organization} has reached the number of practitioners its plan allows. Please contact the organization's owner or manager; once a place is free, open this link again.",
+      "loginRequired": "An account with {email} already exists. Sign in with it, then accept the invitation."
+    },
+    "invalid": {
+      "title": "This invitation no longer works",
+      "body": "It may have expired (invitations work for 7 days), already been accepted, or been withdrawn. Please ask the person who invited you to send a new invitation.",
+      "signIn": "Go to sign in"
+    }
+  },
+  "roles": {
+    "owner": {
+      "name": "Owner",
+      "desc": "Runs the organization and works with patients."
+    },
+    "manager": {
+      "name": "Manager",
+      "desc": "Manages members and settings. Has no access to patient records."
+    },
+    "practitioner": {
+      "name": "Practitioner",
+      "desc": "Sees and records the organization's patients."
+    },
+    "platformAdmin": {
+      "name": "Platform admin",
+      "desc": "Runs the control center: organizations, accounts and invitations. Cannot see health records."
+    },
+    "platformOwner": {
+      "name": "Platform owner (superadmin)",
+      "desc": "Everything a platform admin does, plus staff, plans and the audit log. Cannot see health records."
+    }
+  },
+  "mfa": {
+    "metaTitle": "Set up 2-step sign-in",
+    "eyebrow": "2-step sign-in",
+    "progressLabel": "Setup progress",
+    "stepDone": "completed",
+    "steps": {
+      "install": "Install app",
+      "scan": "Scan",
+      "confirm": "Confirm",
+      "save": "Save codes"
+    },
+    "required": "Your role requires 2-step sign-in. It protects patient and health records.",
+    "stopHint": "Want to stop for now?",
+    "signOut": "Sign out",
+    "notNow": "Not now",
+    "done": "2-step sign-in is now on.",
+    "install": {
+      "title": "Protect your account with 2-step sign-in",
+      "why": "Each time you sign in, you will enter your password and a 6-digit code from an app on your phone. Even if someone learns your password, they cannot sign in without your phone.",
+      "appsTitle": "Install one of these free apps on your phone:",
+      "appsHint": "Find it in the App Store (iPhone) or Google Play (Android).",
+      "continue": "I have the app — continue",
+      "preparing": "Preparing…"
+    },
+    "scan": {
+      "title": "Scan the QR code",
+      "body": "Open the app, tap “+” or “Add account”, choose to scan a QR code, and point your phone's camera at this code.",
+      "qrAlt": "QR code for adding Bio-Dosha-12 to your authenticator app",
+      "manualTitle": "Can't scan the code?",
+      "manualBody": "In the app, choose “Enter a setup key”. Use your email as the account name, choose “Time-based” if asked, and type this key:",
+      "keyLabel": "Setup key",
+      "copy": "Copy key",
+      "copied": "Copied",
+      "copyFailed": "Couldn't copy. Please type the key instead.",
+      "continue": "Next: enter the code",
+      "back": "Back"
+    },
+    "confirm": {
+      "title": "Enter the code from the app",
+      "body": "Your app now shows Bio-Dosha-12 with a 6-digit code that changes every 30 seconds. Enter the code shown now.",
+      "codeLabel": "6-digit code",
+      "submit": "Confirm",
+      "submitting": "Checking…",
+      "invalid": "That code didn't work. Make sure the date and time on your phone are set automatically (in your phone's settings), then enter the code shown now.",
+      "restart": "The setup was interrupted. Please start again. If Bio-Dosha-12 is already in your app, delete that entry first.",
+      "back": "Back to the QR code"
+    },
+    "save": {
+      "title": "Save your recovery codes",
+      "body": "If you lose your phone, you can sign in with one of these codes instead of the app code.",
+      "warning": "These codes are shown only once, and each code works only once. Save them now: print them, download them or write them down, and keep them somewhere safe.",
+      "listLabel": "Recovery codes",
+      "copyAll": "Copy all",
+      "copied": "Copied",
+      "copiedNote": "The codes were copied. Paste them somewhere safe, such as a password manager.",
+      "copyFailed": "Couldn't copy. Please download or print the codes instead.",
+      "download": "Download .txt",
+      "print": "Print",
+      "ack": "I saved my recovery codes in a safe place",
+      "ackRequired": "Please confirm that you saved your recovery codes.",
+      "finish": "Finish",
+      "finishing": "Finishing…"
+    },
+    "file": {
+      "title": "Bio-Dosha-12 — recovery codes",
+      "account": "Account: {email}",
+      "created": "Created: {date}",
+      "note": "Each code works only once. Keep these codes private and in a safe place."
+    },
+    "session": {
+      "title": "Please sign in again",
+      "body": "Your session has ended. Sign in again to continue setting up 2-step sign-in.",
+      "signIn": "Sign in",
+      "signingIn": "Opening sign-in…"
+    }
+  }
+}

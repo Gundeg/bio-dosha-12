@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { EmergencyNote } from "@/components/shell/EmergencyNote";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("legal.privacy");
   return { title: `${t("title")} | Bio-Dosha-12` };
 }
 
-const SECTIONS = ["collect", "use", "access", "delete", "security"] as const;
+const SECTIONS = ["collect", "use", "access", "organizations", "security", "delete"] as const;
 
 export default async function PrivacyPage() {
   const t = await getTranslations("legal");
@@ -26,14 +27,20 @@ export default async function PrivacyPage() {
           </section>
         ))}
 
-        <section className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <section className="mt-6 space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <h2 className="text-base font-semibold text-slate-800">{t("privacy.medicalTitle")}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-700">{t("disclaimer")}</p>
+          <p className="text-sm leading-relaxed text-slate-700">{t("disclaimer")}</p>
+          <EmergencyNote className="text-slate-700" />
         </section>
 
-        <Link href="/" className="mt-8 inline-block text-sm font-semibold text-blue-600 hover:underline">
-          {t("privacy.back")}
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+          <Link href="/" className="inline-block text-sm font-semibold text-blue-600 hover:underline">
+            {t("privacy.back")}
+          </Link>
+          <Link href="/about" className="inline-block text-sm font-semibold text-blue-600 hover:underline">
+            {t("privacy.aboutLink")}
+          </Link>
+        </div>
       </article>
     </main>
   );

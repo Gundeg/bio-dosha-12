@@ -1,14 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@/lib/formatDate";
 import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { apiFetch, ApiError } from "@/lib/api";
-import { ErrorState } from "@/components/states";
+import { EmptyState, ErrorState, PageLoading } from "@/components/states";
+import { PageHeader } from "@/components/kit/layout";
+import { useApiQuery, useErrorMessage } from "@/components/kit/hooks";
+import { ClinicalAccessState, isClinicalAccessCode } from "@/components/clinical/ClinicalAccessState";
+import { EmergencyNote } from "@/components/shell/EmergencyNote";
+import { useShell } from "@/components/shell/ShellProvider";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge, BEDIStatus } from "@/lib/bediEngine";
 import { getRemedies } from "@/lib/remedyEngine";
@@ -38,6 +43,7 @@ interface BediRecord {
 interface PatientProfile {
   id: string;
   name: string;
+  lastName?: string | null;
   birthDate: string;
   sex: "MALE" | "FEMALE";
   heightCm: number;
@@ -58,69 +64,46 @@ const STATUS_TEXT: Record<string, string> = {
   shar_badgan_excess: "text-red-700",
 };
 
+function displayName(profile: Pick<PatientProfile, "name" | "lastName">): string {
+  return `${profile.lastName ?? ""} ${profile.name}`.trim();
+}
+
 function ReportContent() {
   const t = useTranslations("reports");
   const ts = useTranslations("shared");
   const td = useTranslations("dosha");
+  const tLegal = useTranslations("legal");
   const locale = useLocale();
+  const errorMessage = useErrorMessage();
   const tr = (text: string) => translateRemedy(text, locale);
   const searchParams = useSearchParams();
-  const patientProfileId = searchParams.get("patient");
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [selectedId, setSelectedId] = useState(patientProfileId ?? "");
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { activeMembership } = useShell();
+  const orgName = activeMembership?.organizationName;
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const data = await apiFetch<Patient[]>("/api/patients");
-      const list = Array.isArray(data) ? data : [];
-      setPatients(list);
-      if (!patientProfileId && list.length > 0) setSelectedId(list[0].profile.id);
-    } catch (err) {
-      setLoadError(
-        err instanceof ApiError ? err.message : t("loadError")
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [patientProfileId, t]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const list = useApiQuery<Patient[]>("/api/patients");
+  const patients = Array.isArray(list.data) ? list.data : null;
+  // ?patient=<profile id> preselects a patient; otherwise the newest one.
+  const [picked, setPicked] = useState<string | null>(() => searchParams.get("patient"));
+  const selectedId = picked ?? patients?.[0]?.profile.id ?? null;
 
   // The patient list carries only the latest record, so load the full history
   // (with each record's stored recommendation) for the selected patient.
-  const [detail, setDetail] = useState<PatientProfile | null>(null);
-  // Bumped by "retry" so a failed history load is fetched again, not silently skipped.
-  const [detailKey, setDetailKey] = useState(0);
-  useEffect(() => {
-    if (!selectedId) return;
-    let cancelled = false;
-    apiFetch<PatientProfile>(`/api/profiles/${selectedId}`)
-      .then((data) => {
-        if (!cancelled) setDetail(data);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setLoadError(err instanceof ApiError ? err.message : t("detailLoadError"));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedId, detailKey, t]);
+  const detail = useApiQuery<PatientProfile>(selectedId ? `/api/profiles/${selectedId}` : null);
 
-  const retry = useCallback(() => {
-    load();
-    setDetailKey((k) => k + 1);
-  }, [load]);
+  const accessCode = list.error?.code ?? detail.error?.code;
+  if (isClinicalAccessCode(accessCode)) {
+    return (
+      <div className="space-y-6">
+        <PageHeader eyebrow={orgName} title={t("title")} />
+        <ClinicalAccessState code={accessCode} organizationName={orgName} />
+      </div>
+    );
+  }
 
-  const patient = patients.find((p) => p.profile.id === selectedId);
-  const profile = detail?.id === selectedId ? detail : patient?.profile;
+  const patient = patients?.find((p) => p.profile.id === selectedId);
+  // Until the full history arrives, the list entry (latest record only) fills the screen.
+  const fullyLoaded = !!selectedId && detail.data?.id === selectedId;
+  const profile = fullyLoaded ? detail.data : patient?.profile;
   const age = profile ? calcAge(profile.birthDate) : 0;
   const latest = profile?.bediRecords?.[0];
   const doshaKey =
@@ -153,233 +136,253 @@ function ReportContent() {
     window.print();
   }
 
-  if (loading) return <div className="text-center py-12 text-muted-foreground">{t("loading")}</div>;
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between print:hidden">
-        <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
-        </div>
-        <Button onClick={handlePrint} disabled={!profile}>{t("print")}</Button>
-      </div>
+      <PageHeader
+        className="print:hidden"
+        eyebrow={orgName}
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          // Print only the complete report (history and stored recommendation included).
+          <Button size="lg" className="px-3" onClick={handlePrint} disabled={!fullyLoaded}>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">print</span>
+            {t("print")}
+          </Button>
+        }
+      />
 
-      {loadError ? (
-        <ErrorState message={loadError} onRetry={retry} />
+      {!patients ? (
+        list.error ? (
+          <ErrorState message={errorMessage(list.error)} onRetry={list.reload} />
+        ) : (
+          <PageLoading label={t("loading")} />
+        )
+      ) : patients.length === 0 ? (
+        <EmptyState
+          icon={<span className="material-symbols-outlined text-[40px] text-primary">summarize</span>}
+          title={t("emptyTitle")}
+          body={t("emptyBody")}
+          action={
+            <ButtonLink href="/patients" size="lg" className="px-3">
+              {t("toPatients")}
+            </ButtonLink>
+          }
+        />
       ) : (
         <>
-      {patients.length > 0 && (
-        <div role="group" aria-label={t("patientPicker")} className="flex gap-2 flex-wrap print:hidden">
-          {patients.map((p) => (
-            <button
-              key={p.profile.id}
-              type="button"
-              aria-pressed={selectedId === p.profile.id}
-              onClick={() => setSelectedId(p.profile.id)}
-              className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                selectedId === p.profile.id
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              {p.profile.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {!profile ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            {t("selectPatient")}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4 max-w-3xl mx-auto print:max-w-none">
-          {/* Report header */}
-          <div className="border-b-2 border-slate-800 pb-4 text-center">
-            <h2 className="text-2xl font-bold">{t("reportTitle")}</h2>
-            <p className="text-sm text-muted-foreground">{t("reportSubtitle")}</p>
-            <p className="text-sm mt-1">{reportDate}</p>
+          <div role="group" aria-label={t("patientPicker")} className="flex flex-wrap gap-2 print:hidden">
+            {patients.map((p) => (
+              <button
+                key={p.profile.id}
+                type="button"
+                aria-pressed={selectedId === p.profile.id}
+                onClick={() => setPicked(p.profile.id)}
+                className={`min-h-10 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  selectedId === p.profile.id
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-outline-variant/50 hover:border-outline-variant"
+                }`}
+              >
+                {displayName(p.profile)}
+              </button>
+            ))}
           </div>
 
-          {/* Patient info */}
-          <Card>
-            <CardHeader><CardTitle>{t("patientInfo")}</CardTitle></CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-muted-foreground">{t("name")} </span><span className="font-semibold">{profile.name}</span></div>
-                <div><span className="text-muted-foreground">{t("age")} </span><span>{age}</span></div>
-                <div><span className="text-muted-foreground">{t("sex")} </span><span>{ts(`sex.${profile.sex}`)}</span></div>
-                <div><span className="text-muted-foreground">{t("height")} </span><span>{t("heightValue", { value: profile.heightCm })}</span></div>
-                <div><span className="text-muted-foreground">{t("constitution")} </span><span className="font-semibold">{doshaKey ? td(`${doshaKey}.label`) : "—"}</span></div>
-                <div><span className="text-muted-foreground">{t("ktCoefficient")} </span><span>{profile.ktScore ?? "—"}</span></div>
+          {detail.error ? (
+            <ErrorState message={errorMessage(detail.error)} onRetry={detail.reload} />
+          ) : !profile ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">{t("selectPatient")}</CardContent>
+            </Card>
+          ) : (
+            <div className="mx-auto max-w-3xl space-y-4 print:max-w-none">
+              {/* Report header */}
+              <div className="border-b-2 border-slate-800 pb-4 text-center">
+                {orgName && <p className="text-sm font-semibold text-on-surface">{orgName}</p>}
+                <h2 className="text-2xl font-bold">{t("reportTitle")}</h2>
+                <p className="text-sm text-muted-foreground">{t("reportSubtitle")}</p>
+                <p className="mt-1 text-sm">{reportDate}</p>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Latest BEDI */}
-          {latest && (
-            <Card>
-              <CardHeader><CardTitle>{t("latestBedi")}</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="border rounded-lg p-4">
-                    <p className="text-xs text-muted-foreground">{t("bediIndex")}</p>
-                    <p className="text-3xl font-bold">{latest.bedi.toFixed(2)}</p>
+              {/* Patient info */}
+              <Card>
+                <CardHeader><CardTitle>{t("patientInfo")}</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div><span className="text-muted-foreground">{t("name")} </span><span className="font-semibold">{displayName(profile)}</span></div>
+                    <div><span className="text-muted-foreground">{t("age")} </span><span>{age}</span></div>
+                    <div><span className="text-muted-foreground">{t("sex")} </span><span>{ts(`sex.${profile.sex}`)}</span></div>
+                    <div><span className="text-muted-foreground">{t("height")} </span><span>{t("heightValue", { value: profile.heightCm })}</span></div>
+                    <div><span className="text-muted-foreground">{t("constitution")} </span><span className="font-semibold">{doshaKey ? td(`${doshaKey}.label`) : "—"}</span></div>
+                    <div><span className="text-muted-foreground">{t("ktCoefficient")} </span><span>{profile.ktScore ?? "—"}</span></div>
                   </div>
-                  <div className="border rounded-lg p-4">
-                    <p className="text-xs text-muted-foreground">{t("deviation")}</p>
-                    <p className={`text-3xl font-bold ${STATUS_TEXT[latest.status] ?? ""}`}>
-                      {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="border rounded-lg p-4">
-                    <p className="text-xs text-muted-foreground">{t("status")}</p>
-                    <Badge variant={latest.status === "balanced" ? "default" : "destructive"} className="mt-2">
-                      {ts(`status.${latest.status}`)}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="mt-3 text-sm text-muted-foreground flex gap-4">
-                  <span>{t("date", { date: formatDate(latest.date, locale) })}</span>
-                  <span>{t("weight", { value: latest.weightKg })}</span>
-                  <span>{t("season", { season: ts(`season.${latest.season}`) })}</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
 
-          {/* Dosha details */}
-          {doshaKey && (
-            <Card>
-              <CardHeader><CardTitle>{t("constitutionTraits")}</CardTitle></CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-sm">{td(`${doshaKey}.description`)}</p>
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground">{t("qualities")}</p>
-                  <p className="text-sm">{(td.raw(`${doshaKey}.qualities`) as string[]).join(", ")}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground">{t("riskFactors")}</p>
-                  <p className="text-sm">{(td.raw(`${doshaKey}.risks`) as string[]).join(", ")}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              {/* Latest BEDI */}
+              {latest && (
+                <Card>
+                  <CardHeader><CardTitle>{t("latestBedi")}</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="rounded-lg border border-outline-variant/40 p-4">
+                        <p className="text-xs text-muted-foreground">{t("bediIndex")}</p>
+                        <p className="text-3xl font-bold">{latest.bedi.toFixed(2)}</p>
+                      </div>
+                      <div className="rounded-lg border border-outline-variant/40 p-4">
+                        <p className="text-xs text-muted-foreground">{t("deviation")}</p>
+                        <p className={`text-3xl font-bold ${STATUS_TEXT[latest.status] ?? ""}`}>
+                          {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-outline-variant/40 p-4">
+                        <p className="text-xs text-muted-foreground">{t("status")}</p>
+                        <Badge variant={latest.status === "balanced" ? "default" : "destructive"} className="mt-2">
+                          {ts(`status.${latest.status}`)}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                      <span>{t("date", { date: formatDate(latest.date, locale) })}</span>
+                      <span>{t("weight", { value: latest.weightKg })}</span>
+                      <span>{t("season", { season: ts(`season.${latest.season}`) })}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-          {/* Remedies */}
-          {remedies && (
-            <Card>
-              <CardHeader><CardTitle>{t("recommendations")}</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                {remedies.validationStatus && remedies.validationStatus !== "OK" && (
-                  <div
-                    role="alert"
-                    className={`rounded-lg border p-3 text-sm ${
-                      remedies.validationStatus === "CONTRAINDICATED"
-                        ? "border-red-300 bg-red-50 text-red-900"
-                        : "border-amber-300 bg-amber-50 text-amber-900"
-                    }`}
-                  >
-                    <p className="font-semibold">
-                      <span aria-hidden="true">{remedies.validationStatus === "CONTRAINDICATED" ? "⛔" : "⚠️"}</span>{" "}
-                      {remedies.validationStatus === "CONTRAINDICATED" ? t("contraindicated") : t("caution")}
-                    </p>
-                    {remedies.validationAction && <p>{tr(remedies.validationAction)}</p>}
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm font-semibold text-green-700 mb-1">{t("remedies")}</p>
-                  <ul className="text-sm space-y-1">
-                    {remedies.remedies.map((r, i) => <li key={i}><span aria-hidden="true">• </span>{tr(r)}</li>)}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-red-700 mb-1">{t("avoidFoods")}</p>
-                  <ul className="text-sm space-y-1">
-                    {remedies.avoidFoods.map((f, i) => <li key={i}><span aria-hidden="true">• </span>{tr(f)}</li>)}
-                  </ul>
-                </div>
-                {remedies.lifestyle.length > 0 && (
+              {/* Dosha details */}
+              {doshaKey && (
+                <Card>
+                  <CardHeader><CardTitle>{t("constitutionTraits")}</CardTitle></CardHeader>
+                  <CardContent className="space-y-2">
+                    <p className="text-sm">{td(`${doshaKey}.description`)}</p>
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground">{t("qualities")}</p>
+                      <p className="text-sm">{(td.raw(`${doshaKey}.qualities`) as string[]).join(", ")}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground">{t("riskFactors")}</p>
+                      <p className="text-sm">{(td.raw(`${doshaKey}.risks`) as string[]).join(", ")}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Remedies */}
+              {remedies && (
+                <Card>
+                  <CardHeader><CardTitle>{t("recommendations")}</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    {remedies.validationStatus && remedies.validationStatus !== "OK" && (
+                      <div
+                        role="alert"
+                        className={`rounded-lg border p-3 text-sm ${
+                          remedies.validationStatus === "CONTRAINDICATED"
+                            ? "border-red-300 bg-red-50 text-red-900"
+                            : "border-amber-300 bg-amber-50 text-amber-900"
+                        }`}
+                      >
+                        <p className="font-semibold">
+                          <span aria-hidden="true">{remedies.validationStatus === "CONTRAINDICATED" ? "⛔" : "⚠️"}</span>{" "}
+                          {remedies.validationStatus === "CONTRAINDICATED" ? t("contraindicated") : t("caution")}
+                        </p>
+                        {remedies.validationAction && <p>{tr(remedies.validationAction)}</p>}
+                      </div>
+                    )}
+                    <div>
+                      <p className="mb-1 text-sm font-semibold text-green-700">{t("remedies")}</p>
+                      <ul className="space-y-1 text-sm">
+                        {remedies.remedies.map((r, i) => <li key={i}><span aria-hidden="true">• </span>{tr(r)}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="mb-1 text-sm font-semibold text-red-700">{t("avoidFoods")}</p>
+                      <ul className="space-y-1 text-sm">
+                        {remedies.avoidFoods.map((f, i) => <li key={i}><span aria-hidden="true">• </span>{tr(f)}</li>)}
+                      </ul>
+                    </div>
+                    {remedies.lifestyle.length > 0 && (
+                      <div>
+                        <p className="mb-1 text-sm font-semibold text-slate-700">{t("lifestyle")}</p>
+                        <ul className="space-y-1 text-sm">
+                          {remedies.lifestyle.map((l, i) => <li key={i}><span aria-hidden="true">• </span>{tr(l)}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {remedies.riskFactors.length > 0 && (
+                      <div>
+                        <p className="mb-1 text-sm font-semibold text-slate-700">{t("riskFactors")}</p>
+                        <p className="text-sm">{remedies.riskFactors.map(tr).join(", ")}</p>
+                      </div>
+                    )}
+                    {remedies.ageNote && (
+                      <div className="border-t border-outline-variant/40 pt-3">
+                        <p className="text-xs italic text-muted-foreground">{tr(remedies.ageNote)}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* BEDI history table */}
+              {profile.bediRecords.length > 1 && (
+                <Card>
+                  <CardHeader><CardTitle>{t("trend")}</CardTitle></CardHeader>
+                  <CardContent className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-outline-variant/40 text-xs text-muted-foreground">
+                          <th scope="col" className="py-2 text-left">{t("table.date")}</th>
+                          <th scope="col" className="py-2 text-right">{t("table.bedi")}</th>
+                          <th scope="col" className="py-2 text-right">{t("table.delta")}</th>
+                          <th scope="col" className="py-2 text-right">{t("table.status")}</th>
+                          <th scope="col" className="py-2 text-right">{t("table.weight")}</th>
+                          <th scope="col" className="py-2 text-right">{t("table.season")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {profile.bediRecords.slice(0, 10).map((r) => (
+                          <tr key={r.id} className="border-b border-outline-variant/30 last:border-0">
+                            <td className="py-2">{formatDate(r.date, locale)}</td>
+                            <td className="text-right">{r.bedi.toFixed(2)}</td>
+                            <td className={`text-right font-medium ${STATUS_TEXT[r.status] ?? ""}`}>
+                              {r.deviation >= 0 ? "+" : ""}{r.deviation.toFixed(2)}
+                            </td>
+                            <td className={`text-right text-xs ${STATUS_TEXT[r.status] ?? ""}`}>{ts(`status.${r.status}`)}</td>
+                            <td className="text-right">{t("weightValue", { value: r.weightKg })}</td>
+                            <td className="text-right">{ts(`season.${r.season}`)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Signature, disclaimer and emergency note (printed with the report) */}
+              <div className="mt-8 border-t border-outline-variant/60 pt-6">
+                <div className="grid grid-cols-2 gap-8">
                   <div>
-                    <p className="text-sm font-semibold text-slate-700 mb-1">{t("lifestyle")}</p>
-                    <ul className="text-sm space-y-1">
-                      {remedies.lifestyle.map((l, i) => <li key={i}><span aria-hidden="true">• </span>{tr(l)}</li>)}
-                    </ul>
+                    <p className="text-sm text-muted-foreground">{t("signature")}</p>
+                    <div className="mb-1 mt-8 border-b border-slate-400" />
+                    <p className="text-xs text-muted-foreground">{t("nameStamp")}</p>
                   </div>
-                )}
-                {remedies.riskFactors.length > 0 && (
                   <div>
-                    <p className="text-sm font-semibold text-slate-700 mb-1">{t("riskFactors")}</p>
-                    <p className="text-sm">{remedies.riskFactors.map(tr).join(", ")}</p>
+                    <p className="text-sm text-muted-foreground">{t("signatureDate")}</p>
+                    <div className="mb-1 mt-8 border-b border-slate-400" />
+                    <p className="text-xs text-muted-foreground">{reportDate}</p>
                   </div>
-                )}
-                {remedies.ageNote && (
-                  <div className="border-t pt-3">
-                    <p className="text-xs text-muted-foreground italic">{tr(remedies.ageNote)}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* BEDI history table */}
-          {profile.bediRecords.length > 1 && (
-            <Card>
-              <CardHeader><CardTitle>{t("trend")}</CardTitle></CardHeader>
-              <CardContent>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-muted-foreground text-xs">
-                      <th scope="col" className="text-left py-2">{t("table.date")}</th>
-                      <th scope="col" className="text-right py-2">{t("table.bedi")}</th>
-                      <th scope="col" className="text-right py-2">{t("table.delta")}</th>
-                      <th scope="col" className="text-right py-2">{t("table.status")}</th>
-                      <th scope="col" className="text-right py-2">{t("table.weight")}</th>
-                      <th scope="col" className="text-right py-2">{t("table.season")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {profile.bediRecords.slice(0, 10).map((r) => (
-                      <tr key={r.id} className="border-b last:border-0">
-                        <td className="py-2">{formatDate(r.date, locale)}</td>
-                        <td className="text-right">{r.bedi.toFixed(2)}</td>
-                        <td className={`text-right font-medium ${STATUS_TEXT[r.status] ?? ""}`}>
-                          {r.deviation >= 0 ? "+" : ""}{r.deviation.toFixed(2)}
-                        </td>
-                        <td className={`text-right text-xs ${STATUS_TEXT[r.status] ?? ""}`}>{ts(`status.${r.status}`)}</td>
-                        <td className="text-right">{t("weightValue", { value: r.weightKg })}</td>
-                        <td className="text-right">{ts(`season.${r.season}`)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Signature */}
-          <div className="border-t pt-6 mt-8">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <p className="text-sm text-muted-foreground">{t("signature")}</p>
-                <div className="border-b border-slate-400 mt-8 mb-1" />
-                <p className="text-xs text-muted-foreground">{t("nameStamp")}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t("signatureDate")}</p>
-                <div className="border-b border-slate-400 mt-8 mb-1" />
-                <p className="text-xs text-muted-foreground">{reportDate}</p>
+                </div>
+                <div className="mt-6 space-y-2 rounded-lg border border-amber-300/60 bg-amber-50 p-3 text-amber-950 print:bg-transparent">
+                  <p className="text-xs leading-relaxed">{tLegal("disclaimer")}</p>
+                  <EmergencyNote />
+                </div>
+                <p className="mt-4 text-center text-xs text-muted-foreground">{t("footer")}</p>
               </div>
             </div>
-            <p className="text-xs text-center text-muted-foreground mt-6">
-              {t("footer")}
-            </p>
-          </div>
-        </div>
-      )}
+          )}
         </>
       )}
     </div>
@@ -388,9 +391,11 @@ function ReportContent() {
 
 export default function ReportsPage() {
   const t = useTranslations("reports");
+  const { access } = useShell();
   return (
-    <Suspense fallback={<div className="text-center py-12 text-muted-foreground">{t("loading")}</div>}>
-      <ReportContent />
+    <Suspense fallback={<PageLoading label={t("loading")} />}>
+      {/* Another organization has other patients: start fresh when the active one changes. */}
+      <ReportContent key={access.org?.id ?? "none"} />
     </Suspense>
   );
 }

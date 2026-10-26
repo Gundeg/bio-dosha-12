@@ -1,7 +1,25 @@
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 
 const HELP = QUESTION_HELP[6];
+
+/** Ширээ, таваг, багаж, ходоодны дотоод палитра (материал тул тогтмол). */
+const PLATE = "#eef1f5";
+const PLATE_SH = "#dbe0e8";
+const STEEL = "#cfd6df";
+const STEEL_SH = "#b3bcc8";
+const CLOCK = "#f4f1ea";
+const TABLE = "#caa877";
+const ORGAN = "#e8a9a0";
+const ORGAN_SH = "#d38a80";
 
 const CSS = phaseCss(
   "q6",
@@ -19,9 +37,10 @@ const CSS = phaseCss(
 const STOMACH_D =
   "M176 36 L176 44 C176 47 175.4 50 174.2 52.6 C170 44 165 41.5 160 42 C153 42.8 148.8 48.5 148 56 C146.8 69 148.5 83 155 93 C162 103 175 108 185.5 104.5 C194.5 101.5 201 96 204.5 89 C211 91 215.5 96.5 214 101.5 C213 105.8 208 106.3 206.5 102 C205.5 98 203 93 199.5 88.5 C194.5 81 190 73 188.3 65 C186.7 58 186 50 186 44 L186 36";
 
-function Stomach({ c }: { c: string }) {
+/** Ходоод — бүх фазд ижил, бэхлэг ягаан эрхтэн (эзлэхүүнт градиент). */
+function Stomach() {
   return (
-    <path d={STOMACH_D} stroke={c} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d={STOMACH_D} fill="url(#q6-organ)" stroke={INK} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
   );
 }
 
@@ -35,34 +54,53 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      <SkinDefs p="q6" />
+      <defs>
+        <linearGradient id="q6-organ" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f0bab2" />
+          <stop offset="0.6" stopColor={ORGAN} />
+          <stop offset="1" stopColor={ORGAN_SH} />
+        </linearGradient>
+      </defs>
+
       {/* тавган доорх зөөлөн сүүдэр — ширээний ирмэг дээр */}
-      <ellipse cx={82} cy={122} rx={33} ry={2.2} fill="currentColor" opacity={0.07} />
+      <ellipse cx={82} cy={122} rx={33} ry={2.2} fill={INK} opacity={0.06} />
 
       {/* Суурь: ханын цаг 12:00, ширээний ирмэг дээр хоосон таваг + сэрээ, хутга */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        {/* ханын цаг — үдийн 12 */}
-        <circle cx={82} cy={27} r={15} />
-        <path d="M82 14 v4 M82 36 v4 M69 27 h4 M91 27 h4" strokeWidth={2} opacity={0.5} />
-        <path d="M82 27 L84.5 19.5" strokeWidth={2.2} />
-        <path className="q6-min q6-anim" d="M82 27 V16.5" strokeWidth={2.2} />
-        {/* ширээний ирмэг */}
-        <path d="M12 122 H148" />
-        {/* хоосон таваг: хүрээ + ёроол */}
-        <circle cx={82} cy={91} r={31} />
-        <circle cx={82} cy={91} r={19} strokeWidth={2} opacity={0.55} />
-        {/* сэрээ — 4 шүдтэй */}
-        <path d="M28 64 V78 C28 84 31 87 36 87 C41 87 44 84 44 78 V64" />
-        <path d="M33.3 64 V76 M38.7 64 V76" strokeWidth={2} opacity={0.55} />
-        <path d="M36 87 V119" />
-        {/* хутга — ир + бариул */}
-        <path d="M121 63 C130 65 134.5 73 134.5 82 L134.5 90 L121 90 Z" />
-        <path d="M128 90 V119" />
+      {/* ширээний ирмэг */}
+      <path d="M12 122 H148" stroke={TABLE} strokeWidth={3} strokeLinecap="round" />
+
+      {/* ханын цаг — үдийн 12 */}
+      <circle cx={82} cy={27} r={15} fill={CLOCK} stroke={INK} strokeWidth={2.5} />
+      <circle cx={82} cy={27} r={13.5} fill="none" stroke="#e6ddc9" strokeWidth={2} opacity={0.6} />
+      <path d="M82 14 v4 M82 36 v4 M69 27 h4 M91 27 h4" stroke={INK} strokeWidth={2} opacity={0.55} />
+      <path d="M82 27 L84.5 19.5" stroke={INK} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <path className="q6-min q6-anim" d="M82 27 V16.5" stroke={INK} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={82} cy={27} r={1.8} fill={INK} />
+
+      {/* сэрээ — 4 шүдтэй */}
+      <g stroke={INK} strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M28 64 V78 C28 84 31 87 36 87 C41 87 44 84 44 78 V64 Z" fill={STEEL} />
+        <path d="M33 87 L39 87 L39 117 C39 119 38 120 36 120 C34 120 33 119 33 117 Z" fill={STEEL} />
       </g>
-      <circle cx={82} cy={27} r={1.6} fill="currentColor" />
+      <path d="M33.3 64 V76 M38.7 64 V76" stroke={INK} strokeWidth={1.6} opacity={0.55} strokeLinecap="round" />
+      <path d="M30 68 V80" stroke={STEEL_SH} strokeWidth={2} opacity={0.5} strokeLinecap="round" />
+
+      {/* хутга — ир + бариул */}
+      <g stroke={INK} strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M121 63 C130 65 134.5 73 134.5 82 L134.5 90 L121 90 Z" fill={STEEL} />
+        <path d="M125 90 L131 90 L131 117 C131 119 130 120 128 120 C126 120 125 119 125 117 Z" fill={STEEL} />
+      </g>
+      <path d="M124 68 C130 70 132.5 76 132.5 82" stroke={STEEL_SH} strokeWidth={1.8} opacity={0.5} fill="none" strokeLinecap="round" />
+
+      {/* хоосон таваг: хүрээ + гүн ёроол */}
+      <circle cx={82} cy={91} r={31} fill={PLATE} stroke={INK} strokeWidth={2.5} />
+      <circle cx={82} cy={91} r={19} fill={PLATE_SH} stroke={INK} strokeWidth={2} />
+      <path d="M67 79 A19 19 0 0 1 93 75" stroke="#ffffff" strokeWidth={2.5} strokeLinecap="round" opacity={0.55} fill="none" />
 
       {/* Х: жижиг дөл тогтворгүй анивчина + "?" */}
       <g className="q6-ph q6-ph-h">
-        <Stomach c={ACCENT.H} />
+        <Stomach />
         <g className="q6-flick q6-anim">
           <path
             d="M176 71 c5 7 8 11 7 17 a9.5 9.5 0 0 1 -19 1 c-1 -7 3.5 -10 6.5 -14 c1 3.5 2.5 5.5 5.5 7.5 c1 -4 0 -7.5 0 -11.5 z"
@@ -82,7 +120,7 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
       {/* Ш: ходоодыг дүүргэсэн том хүчтэй дөл + ууртай оч */}
       <g className="q6-ph q6-ph-s">
         <g className="q6-trem q6-anim">
-          <Stomach c={ACCENT.S} />
+          <Stomach />
         </g>
         <g className="q6-steady q6-anim">
           <path
@@ -105,7 +143,7 @@ export function Q06MealSkip({ variant, className, ariaLabel }: HelpIllustrationP
 
       {/* Б: өчүүхэн цог + "…" — бараг мэдрэгдэхгүй */}
       <g className="q6-ph q6-ph-b">
-        <Stomach c={ACCENT.B} />
+        <Stomach />
         <g className="q6-steady q6-anim">
           <path
             d="M175 82 c3.5 4.5 5.5 7 4.5 11 a6.5 6.5 0 0 1 -12.5 .5 c-.5 -4.5 2 -6.5 4 -9 c.5 2 1.5 3.5 3 4.5 c.5 -2.5 .5 -4.5 1 -7 z"

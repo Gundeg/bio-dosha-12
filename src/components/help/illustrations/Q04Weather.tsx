@@ -1,7 +1,24 @@
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SKIN,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 
 const HELP = QUESTION_HELP[4];
+
+/** Дээлийн дотоод палитра (материал тул theme-ээр эргэлддэггүй). */
+const COAT = "#6f97a8";
+const COAT_SH = "#557a8a";
+const BELT = "#3f5b66";
+const BOOT = "#5f4b39";
+const BOOT_SH = "#463628";
+const HAIR = "#43362b";
 
 const CSS = phaseCss(
   "q4",
@@ -29,22 +46,62 @@ export function Q04Weather({ variant, className, ariaLabel }: HelpIllustrationPr
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
-      {/* Суурь: дээлтэй хүн — толгой, хүзүү, ханцуйтай их бие, хөл */}
-      <ellipse cx={122} cy={124} rx={28} ry={3.5} fill="currentColor" opacity={0.07} />
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx={122} cy={34} r={11} />
-        <path d="M118 45 L117 50 M126 45 L127 50" strokeWidth={2} />
-        {/* дээлийн силуэт: мөр → ханцуй → бугуйвч → суга → хормой */}
-        <path
-          d="M112 50 C106 50.5 100 51.8 94.5 60 L74 90 Q71 94 75 96 L84 98 Q88 99 89 95 L104 72 L99 106 L145 106 L140 72 L155 95 Q156 99 160 98 L169 96 Q173 94 170 90 L149.5 60 C144 51.8 138 50.5 132 50"
-          fill="currentColor"
-          fillOpacity={0.05}
-        />
-        {/* энгэрийн зах + бүс */}
-        <path d="M122 56 V80 M103 84 H141" strokeWidth={2} opacity={0.5} />
-        {/* хөл, ул */}
-        <path d="M112 106 V121 H104 M132 106 V121 H140" />
+      <SkinDefs p="q4" />
+
+      {/* Суурь: дээлтэй хүн — толгой, хүзүү, ханцуйтай их бие, гуталтай хөл */}
+      {/* газрын сүүдэр */}
+      <ellipse cx={122} cy={124} rx={28} ry={3.5} fill={INK} opacity={0.06} />
+
+      {/* хөл + гутал (дээлийн хормойн ард) */}
+      <g stroke={INK} strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M109 103 H116 V116 H109 Z" fill={BOOT_SH} />
+        <path d="M128 103 H135 V116 H128 Z" fill={BOOT_SH} />
+        <path d="M108 114 C104 114 100 116 100 119 C100 121 102 122 105 122 L116 122 C118 122 118 116 116 114 Z" fill={BOOT} />
+        <path d="M136 114 C140 114 144 116 144 119 C144 121 142 122 139 122 L128 122 C126 122 126 116 128 114 Z" fill={BOOT} />
       </g>
+
+      {/* хүзүү (арьс, толгой ба захны ард) */}
+      <path d="M117 43 H127 V52 H117 Z" fill="url(#q4-skin)" stroke={INK} strokeWidth={2.2} strokeLinejoin="round" />
+
+      {/* дээлийн силуэт: мөр → ханцуй → бугуйвч → суга → хормой */}
+      <path
+        d="M112 50 C106 50.5 100 51.8 94.5 60 L74 90 Q71 94 75 96 L84 98 Q88 99 89 95 L104 72 L99 106 L145 106 L140 72 L155 95 Q156 99 160 98 L169 96 Q173 94 170 90 L149.5 60 C144 51.8 138 50.5 132 50 Z"
+        fill={COAT}
+        stroke={INK}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {/* хормойн доод сүүдэр (эзлэхүүн) */}
+      <path d="M101 90 L99 106 L145 106 L143 90 Z" fill={COAT_SH} />
+      {/* цээжний баруун талын гэрэлт товойлт */}
+      <ellipse cx={132} cy={69} rx={6} ry={12} fill="#88aebd" opacity={0.45} />
+      {/* ханцуйны бугуйвч */}
+      <path d="M74 90 Q71 94 75 96 L84 98 Q88 99 89 95 L86 91 Z" fill={COAT_SH} />
+      <path d="M170 90 Q173 94 169 96 L160 98 Q156 99 155 95 L158 91 Z" fill={COAT_SH} />
+      {/* энгэрийн зах (V) */}
+      <path d="M116 51 L122 63 L128 51" stroke={COAT_SH} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M122 63 V82" stroke={COAT_SH} strokeWidth={2.5} strokeLinecap="round" fill="none" />
+      {/* бүс */}
+      <path
+        d="M102 82 L142 82 C143 82 144 83 144 84 L144 87 C144 88 143 89 142 89 L102 89 C101 89 100 88 100 87 L100 84 C100 83 101 82 102 82 Z"
+        fill={BELT}
+        stroke={INK}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+
+      {/* толгой (арьс) + үс */}
+      <circle cx={122} cy={34} r={11} fill="url(#q4-skin)" stroke={INK} strokeWidth={2.5} />
+      <path
+        d="M111 32 C110 22 116 17 122 17 C128 17 134 22 133 32 C130 27 126 25 122 25 C118 25 114 27 111 32 Z"
+        fill={HAIR}
+        stroke={INK}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <path d="M114 40 C117 44 127 44 130 40" stroke={SKIN.shade} strokeWidth={3} strokeLinecap="round" fill="none" opacity={0.6} />
+      <ellipse cx={118} cy={30} rx={2.6} ry={3.4} fill={SKIN.light} opacity={0.7} />
 
       {/* Х: 6 салаат цасан ширхэг + ороолт + чичрэх */}
       <g className="q4-ph q4-ph-h">

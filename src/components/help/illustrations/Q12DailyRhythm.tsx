@@ -1,7 +1,21 @@
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 
 const HELP = QUESTION_HELP[12];
+
+/** Хуанлины жижиг палитр. */
+const PAPER = "#f6f3ec";
+const HEADER = "#cdd8dd";
+const CELL = "#fcf9f2";
+const RING = "#aab3bd";
 
 /** 7 хоногийн нүдний төв цэгүүд (x). */
 const DAY_CX = [52.5, 75, 97.5, 120, 142.5, 165, 187.5];
@@ -51,25 +65,40 @@ export function Q12DailyRhythm({ variant, className, ariaLabel }: HelpIllustrati
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      <SkinDefs p="q12" />
+
       {/* Суурь: ханын хуанли — жааз, 2 үдээсний цагираг, толгойн зурвас, 7 нүд */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <rect x={34} y={26} width={172} height={76} rx={8} />
-        <path d="M34 48 H206" strokeWidth={2.2} />
-        <path d="M71 26 v-7 a6 6 0 0 1 12 0 v7" strokeWidth={2.2} />
-        <path d="M157 26 v-7 a6 6 0 0 1 12 0 v7" strokeWidth={2.2} />
+      {/* хананд тусах зөөлөн сүүдэр */}
+      <rect x={37} y={30} width={172} height={76} rx={8} fill={INK} opacity={0.06} />
+      {/* үдээсний цагираг (цаасны ард) — металл дүүргэлт + INK ирмэг */}
+      <g fill="none" strokeLinecap="round">
+        <path d="M71 27 v-8 a6 6 0 0 1 12 0 v8" stroke={INK} strokeWidth={3.2} />
+        <path d="M157 27 v-8 a6 6 0 0 1 12 0 v8" stroke={INK} strokeWidth={3.2} />
+        <path d="M71 27 v-8 a6 6 0 0 1 12 0 v8" stroke={RING} strokeWidth={1.5} />
+        <path d="M157 27 v-8 a6 6 0 0 1 12 0 v8" stroke={RING} strokeWidth={1.5} />
       </g>
+      {/* цаас */}
+      <rect x={34} y={26} width={172} height={76} rx={8} fill={PAPER} stroke={INK} strokeWidth={2.5} />
+      {/* толгойн өнгөт зурвас */}
+      <path
+        d="M34 34 A8 8 0 0 1 42 26 L198 26 A8 8 0 0 1 206 34 L206 48 L34 48 Z"
+        fill={HEADER}
+      />
+      <path d="M34 48 H206" stroke={INK} strokeWidth={2.2} strokeLinecap="round" />
       <text
         x={120}
         y={41}
         textAnchor="middle"
         fontSize={10.5}
-        fill="currentColor"
-        opacity={0.65}
+        fontWeight={600}
+        fill={INK}
+        opacity={0.72}
         fontFamily="inherit"
       >
         7 хоног
       </text>
-      <g stroke="currentColor" strokeWidth={2} opacity={0.85}>
+      {/* 7 хоногийн нүд */}
+      <g fill={CELL} stroke={INK} strokeWidth={1.8}>
         {DAY_CX.map((c) => (
           <rect key={c} x={c - 10.5} y={60} width={21} height={26} rx={3} />
         ))}

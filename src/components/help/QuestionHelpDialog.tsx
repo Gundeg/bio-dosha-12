@@ -13,13 +13,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { HelpIllustration } from "@/components/help/illustrations";
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
+import { DOSHA_COLOR } from "@/lib/doshaUi";
 import { DominantType, Question } from "@/lib/questionnaireEngine";
 
+/** Панелийн дэвсгэр — махбодын туяа (Х/Ш/Б өнгөний код). */
+const PANEL_BG: Record<DominantType, string> = {
+  H: "bg-primary/8",
+  S: "bg-secondary-container/15",
+  B: "bg-tertiary/10",
+};
+
 /**
- * Асуултын карт дээрх "Хэрхэн тодорхойлох вэ?" товч + сорилын
- * хөдөлгөөнт зурагтай тусламжийн цонх. Хариулт дээр дарвал зураг
- * тухайн төлөвт царцана, "Автомат" товчоор эргэлт үргэлжилнэ.
+ * Асуултын карт дээрх "Хэрхэн тодорхойлох вэ?" товч + сорилын тусламжийн цонх.
+ * Өргөн дэлгэцэнд гурван хариултыг зэрэгцүүлж (3 панел), нарийн дэлгэцэнд нэг
+ * хөдөлгөөнт зураг эргэлдэж, хариулт дээр дарвал царцана.
  */
 export function QuestionHelpButton({ question }: { question: Question }) {
   const t = useTranslations("help.dialog");
@@ -44,69 +51,110 @@ export function QuestionHelpButton({ question }: { question: Question }) {
         <span aria-hidden="true" className="material-symbols-outlined text-[16px]">help</span>
         {t("trigger")}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md max-h-[85dvh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="pr-8">{tHelp(`${qKey}.title`)}</DialogTitle>
           <DialogDescription>{tHelp(`${qKey}.instruction`)}</DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-2xl bg-surface-container-low p-2">
-          <HelpIllustration
-            questionId={question.id}
-            variant={variant}
-            className="w-full h-auto text-on-surface"
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-on-surface-variant">{t("hint")}</p>
-          {variant && (
-            <button
-              type="button"
-              onClick={() => setVariant(undefined)}
-              className="shrink-0 text-xs font-bold text-primary hover:underline"
-            >
-              <span aria-hidden="true">▶</span> {t("auto")}
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-2">
+        {/* Өргөн дэлгэц: 3 хариултыг зэрэгцүүлсэн харьцуулалт */}
+        <div className="hidden sm:grid sm:grid-cols-3 gap-2.5">
           {question.options.map((opt) => {
-            const selected = variant === opt.value;
             const doshaName = tShared(`dosha3.${opt.value}`);
             return (
-              <button
+              <div
                 key={opt.value}
-                type="button"
-                aria-pressed={selected}
-                onClick={() =>
-                  setVariant((v) => (v === opt.value ? undefined : opt.value))
-                }
-                className={`w-full text-left rounded-2xl p-3 transition-all ${DOSHA_BG[opt.value]} ${
-                  selected ? "ring-2 ring-primary/40" : "hover:shadow-ambient"
-                }`}
+                className={`rounded-2xl p-2.5 flex flex-col gap-2 ${PANEL_BG[opt.value]}`}
               >
-                <div className="flex items-start gap-3">
+                <div className="rounded-xl overflow-hidden bg-surface-container-lowest/40">
+                  <HelpIllustration
+                    questionId={question.id}
+                    variant={opt.value}
+                    className="w-full h-auto text-on-surface"
+                  />
+                </div>
+                <div className="flex items-start gap-2">
                   <div
                     aria-hidden="true"
-                    className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
+                    className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-black text-[11px] bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
                   >
                     {doshaName.charAt(0)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-bold text-sm ${DOSHA_COLOR[opt.value]}`}>
+                  <div className="min-w-0">
+                    <p className={`font-bold text-xs leading-tight ${DOSHA_COLOR[opt.value]}`}>
                       <span className="sr-only">{doshaName}: </span>
                       {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
                     </p>
-                    <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                    <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
                       {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
                     </p>
                   </div>
                 </div>
-              </button>
+              </div>
             );
           })}
+        </div>
+
+        {/* Нарийн дэлгэц: нэг эргэлдэх зураг + дарж царцаах мөрүүд */}
+        <div className="sm:hidden space-y-3">
+          <div className="rounded-2xl bg-surface-container-low p-2">
+            <HelpIllustration
+              questionId={question.id}
+              variant={variant}
+              className="w-full h-auto text-on-surface"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-on-surface-variant">{t("hint")}</p>
+            {variant && (
+              <button
+                type="button"
+                onClick={() => setVariant(undefined)}
+                className="shrink-0 text-xs font-bold text-primary hover:underline"
+              >
+                <span aria-hidden="true">▶</span> {t("auto")}
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {question.options.map((opt) => {
+              const selected = variant === opt.value;
+              const doshaName = tShared(`dosha3.${opt.value}`);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() =>
+                    setVariant((v) => (v === opt.value ? undefined : opt.value))
+                  }
+                  className={`w-full text-left rounded-2xl p-3 motion-safe:transition-all ${PANEL_BG[opt.value]} ${
+                    selected ? "ring-2 ring-primary/40" : "hover:shadow-ambient"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      aria-hidden="true"
+                      className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
+                    >
+                      {doshaName.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-bold text-sm ${DOSHA_COLOR[opt.value]}`}>
+                        <span className="sr-only">{doshaName}: </span>
+                        {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
+                      </p>
+                      <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                        {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

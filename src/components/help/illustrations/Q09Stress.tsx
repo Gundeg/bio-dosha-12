@@ -1,7 +1,22 @@
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SKIN,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 
 const HELP = QUESTION_HELP[9];
+
+// Орон нутгийн палитр: үс (дулаан бор), аянга (дулаан шар).
+const HAIR = "#6b4a34";
+const HAIR_SHADE = "#523726";
+const BOLT = "#f6c948";
+const BOLT_SHADE = "#e0a92e";
 
 const CSS = phaseCss(
   "q9",
@@ -29,26 +44,70 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      <SkinDefs p="q9" />
+
       {/* Суурь: том царай (баруун) + аянга — гэнэтийн бэрхшээл (зүүн дээр) */}
-      <g stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-        <circle cx={150} cy={78} r={34} fill="currentColor" fillOpacity={0.05} />
-        {/* үсний ирмэг */}
-        <path d="M124 65 C128 50 138 44 150 44 C162 44 172 50 176 65" />
-        {/* чих — хоёр талдаа тэгш хэмтэй */}
-        <path d="M116.5 71 C110 72 109 82 116 84" />
-        <path d="M183.5 71 C190 72 191 82 184 84" />
-        {/* аянга */}
-        <path
-          className="q9-bolt q9-anim"
-          d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z"
-          fill="currentColor"
-          fillOpacity={0.05}
-        />
+      {/* чих — арьсаар дүүргэсэн */}
+      <g fill="url(#q9-skin2)" stroke={INK} strokeWidth={2.3} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M116.5 71 C110 72 109 82 116 84 C118.5 82 118.5 74 116.5 71 Z" />
+        <path d="M183.5 71 C190 72 191 82 184 84 C181.5 82 181.5 74 183.5 71 Z" />
       </g>
-      <g stroke="currentColor" strokeWidth={2} strokeLinecap="round" opacity={0.5}>
-        {/* үсний ширхэг */}
+
+      {/* нүүр — том, арьсны gradient-ээр эзлэхүүнтэй */}
+      <circle cx={150} cy={78} r={34} fill="url(#q9-skin)" stroke={INK} strokeWidth={2.5} />
+      {/* эрүүний доод сүүдэр */}
+      <path
+        d="M120 92 C128 108 172 108 180 92 C176 105 164 112 150 112 C136 112 124 105 120 92 Z"
+        fill={SKIN.shade}
+        opacity={0.45}
+      />
+      {/* хацрын гэрэл */}
+      <ellipse cx={134} cy={74} rx={7} ry={9.5} fill={SKIN.light} opacity={0.5} />
+      {/* хамар */}
+      <path
+        d="M150 80 C149 84 147.5 87 149 89 C150 90 152 89.5 153 89"
+        fill="none"
+        stroke={SKIN.deep}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        opacity={0.55}
+      />
+      {/* чихний дотор */}
+      <g stroke={INK} strokeWidth={1.4} strokeLinecap="round" fill="none" opacity={0.4}>
+        <path d="M114 75 q1.5 2.5 0 4.5" />
+        <path d="M186 75 q-1.5 2.5 0 4.5" />
+      </g>
+
+      {/* үс — дулаан бор малгай */}
+      <path
+        d="M124 65 C128 50 138 44 150 44 C162 44 172 50 176 65 C179 56 178 43 171 36 C162 29 138 29 129 36 C122 43 121 56 124 65 Z"
+        fill={HAIR}
+        stroke={INK}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+      />
+      {/* үсний ширхэг */}
+      <g stroke={HAIR_SHADE} strokeWidth={2} strokeLinecap="round" fill="none" opacity={0.7}>
         <path d="M138 47.5 q-2 4 -3 8 M150 44 q0 4 0 8 M162 47.5 q2 4 3 8" />
-        {/* аянгын цацраг */}
+      </g>
+
+      {/* аянга — дулаан шар, гэнэтийн бэрхшээл */}
+      <g className="q9-bolt q9-anim">
+        <path
+          d="M66 12 L38 52 L54 52 L44 84 L78 42 L61 42 L72 12 Z"
+          fill={BOLT}
+          stroke={INK}
+          strokeWidth={2.2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        {/* аянгын доод талын сүүдэр */}
+        <path d="M44 84 L78 42 L61 42 Z" fill={BOLT_SHADE} opacity={0.55} />
+        {/* гэрлийн зураас */}
+        <path d="M62 20 L48 42" stroke={SKIN.light} strokeWidth={2} strokeLinecap="round" opacity={0.55} />
+      </g>
+      {/* аянгын цацраг */}
+      <g stroke={BOLT_SHADE} strokeWidth={2.2} strokeLinecap="round" fill="none">
         <path d="M30 26 l-8 -7 M28 58 l-10 3 M78 20 l8 -7" />
       </g>
 
@@ -69,7 +128,7 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
           strokeWidth={2}
           strokeLinejoin="round"
           fill={ACCENT.H}
-          fillOpacity={0.1}
+          fillOpacity={0.25}
         />
         <text className="q9-bob q9-anim" x={193} y={44} fontSize={19} fontWeight={700} fill={ACCENT.H} fontFamily="inherit">
           ?
@@ -105,7 +164,7 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
           strokeWidth={2}
           strokeLinejoin="round"
           fill={ACCENT.S}
-          fillOpacity={0.1}
+          fillOpacity={0.25}
         />
         <path
           d="M196 82 H228 m0 0 l-8 -5 m8 5 l-8 5"
@@ -131,7 +190,7 @@ export function Q09Stress({ variant, className, ariaLabel }: HelpIllustrationPro
             strokeWidth={2}
             strokeLinejoin="round"
             fill={ACCENT.B}
-            fillOpacity={0.1}
+            fillOpacity={0.2}
           />
           <path d="M199 53 q4 7 6 13" stroke={ACCENT.B} strokeWidth={1.8} strokeLinecap="round" opacity={0.6} />
           <path d="M205 70 q1 5 4 8" stroke={ACCENT.B} strokeWidth={2} strokeLinecap="round" />

@@ -23,6 +23,50 @@ export const ACCENT: Record<DominantType, string> = {
 };
 
 /**
+ * Арьс, бэхэн зураасны тогтмол өнгө. Эдгээр нь материал (өнгө өөрчлөгдвөл
+ * гар нь гар байхаа болино) тул theme-ээр эргэлддэггүй — dark горимд
+ * фонын өнгө нь панелийн туяагаар өөрчлөгдөнө, зураасны өнгө тогтмол.
+ */
+export const SKIN = {
+  base: "#f4cda6",
+  shade: "#e0ad81",
+  deep: "#c98f61",
+  light: "#fce4cb",
+  nail: "#f7dcc4",
+} as const;
+
+/** Дүрсийн тогтмол бараан бэхэн зураас (theme-ээр эргэлддэггүй). */
+export const INK = "#3b2a20";
+
+/** Тодотгол өнгийг зөөлрүүлж дүүргэлтэд ашиглах (accent wash). */
+export const ACCENT_SOFT: Record<DominantType, string> = {
+  H: "var(--primary-container, #127c87)",
+  S: "var(--secondary-container, #fe932c)",
+  B: "var(--tertiary-container, #637187)",
+};
+
+/**
+ * Том органик хэлбэрийн (гар, шуу, царай) эзлэхүүнд зориулсан gradient defs.
+ * Бүх id нь `p`-ээр угтвартай тул нэг баримт дотор ижил хэд хэдэн панел
+ * зэрэгцэн орсон ч зөрчилдөхгүй (ижил тодорхойлолт → эхнийхээр шийдэгдэнэ).
+ */
+export function SkinDefs({ p }: { p: string }) {
+  return (
+    <defs>
+      <linearGradient id={`${p}-skin`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor={SKIN.light} />
+        <stop offset="0.55" stopColor={SKIN.base} />
+        <stop offset="1" stopColor={SKIN.shade} />
+      </linearGradient>
+      <linearGradient id={`${p}-skin2`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor={SKIN.base} />
+        <stop offset="1" stopColor={SKIN.shade} />
+      </linearGradient>
+    </defs>
+  );
+}
+
+/**
  * 9 секундын Х→Ш→Б мөчлөгийн CSS. Бүх class/keyframe нэр `p`-ээр
  * угтвартай тул нэг хуудсан дээр хэд хэдэн зураг зэрэг байж болно.
  * Микро хөдөлгөөнтэй элемент бүр `${p}-anim` class авбал
@@ -94,7 +138,7 @@ export function PhaseBadge({ d, label }: { d: DominantType; label: string }) {
       >
         {DOSHA_LETTER[d]}
       </text>
-      <text x={38} y={146} fontSize={10.5} fill="currentColor" opacity={0.75} fontFamily="inherit">
+      <text x={38} y={146} fontSize={10.5} fill={INK} opacity={0.72} fontFamily="inherit">
         {label}
       </text>
     </g>

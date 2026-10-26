@@ -1,7 +1,23 @@
+import {
+  ACCENT,
+  HelpIllustrationProps,
+  INK,
+  IllustrationRoot,
+  PhaseBadge,
+  SKIN,
+  SkinDefs,
+  phaseCss,
+} from "./shared";
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { ACCENT, HelpIllustrationProps, IllustrationRoot, PhaseBadge, phaseCss } from "./shared";
 
 const HELP = QUESTION_HELP[7];
+
+// Орон нутгийн палитр: цамц, өмд, гутал, үс.
+const SHIRT = "#4e9a68";
+const SHIRT_SHADE = "#3c7d52";
+const PANTS = "#3f5170";
+const SHOE = "#3a2c22";
+const HAIR = "#6b4a34";
 
 const CSS = phaseCss(
   "q7",
@@ -31,36 +47,82 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
       className={className}
       ariaLabel={ariaLabel ?? HELP.ariaLabel}
     >
+      <SkinDefs p="q7" />
+
       {/* Суурь: газар ба баруун тийш алхаж буй хүн (хажуугаас) */}
-      <path d="M16 123 H224" stroke="currentColor" strokeWidth={2} opacity={0.4} strokeLinecap="round" />
-      <ellipse cx={143} cy={124} rx={34} ry={3} fill="currentColor" opacity={0.07} />
-      <g
-        className="q7-fig q7-anim"
-        stroke="currentColor"
-        strokeWidth={2.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx={150} cy={43} r={8.5} />
-        {/* их бие — хүзүүнээс урагш бага зэрэг налсан */}
-        <path d="M148.7 51.4 C146.5 64 142.5 77 138 90" />
-        {/* гар: мөрний үеэр савлана (алхааны эсрэг хэмнэлээр) */}
-        <g className="q7-armf q7-anim">
-          <path d="M146 61 L158 71 L172 64" />
-          <circle cx={173.5} cy={63.5} r={2.4} fill="currentColor" stroke="none" />
-        </g>
-        <g className="q7-armb q7-anim">
-          <path d="M146 61 L133 72 L120 66" />
-          <circle cx={118.5} cy={65.5} r={2.4} fill="currentColor" stroke="none" />
-        </g>
-        {/* хөл: ташааны үеэр ээлжлэн савлаж алхана */}
-        <g className="q7-legf q7-anim">
-          <path d="M138 90 L155 104 L166 122" />
-          <path d="M166 122 L176 117" />
-        </g>
+      <path d="M16 123 H224" stroke={INK} strokeWidth={2} opacity={0.16} strokeLinecap="round" />
+      <ellipse cx={143} cy={124} rx={34} ry={3} fill={INK} opacity={0.07} />
+
+      <g className="q7-fig q7-anim">
+        {/* хойд хөл (өмд + гутал) */}
         <g className="q7-legb q7-anim">
-          <path d="M138 90 L130 106 L118 117" />
-          <path d="M118 117 L110 122" />
+          <path d="M138 90 L130 106 L117.5 116.5" stroke={INK} strokeWidth={9} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M138 90 L130 106 L117.5 116.5" stroke={PANTS} strokeWidth={6} fill="none" strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />
+          <path
+            d="M121 114 L109 120 C106 121 107 125.5 110.5 124.5 L123 119.5 C126 118 125 113.5 121 114 Z"
+            fill={SHOE}
+            stroke={INK}
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
+        </g>
+
+        {/* хойд гар (ханцуй + гар) */}
+        <g className="q7-armb q7-anim">
+          <path d="M146 61 L133 72 L121 66.5" stroke={INK} strokeWidth={7.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M146 61 L133 72 L121 66.5" stroke={SHIRT_SHADE} strokeWidth={4.6} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={119} cy={66} r={3.6} fill="url(#q7-skin2)" stroke={INK} strokeWidth={2} />
+        </g>
+
+        {/* хүзүү */}
+        <path d="M149.5 50 L147.5 57" stroke="url(#q7-skin2)" strokeWidth={7} strokeLinecap="round" />
+
+        {/* их бие — цамц */}
+        <path
+          d="M145 53 C151 53 155.5 57 154.5 63.5 L149.5 89 C148.5 93 129.5 93 127.5 89 L134 62.5 C135 56.5 139 53 145 53 Z"
+          fill={SHIRT}
+          stroke={INK}
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+        />
+        <path d="M127.5 89 C129.5 93 148.5 93 149.5 89 L151 79 C143 83 135 83 130 79 Z" fill={SHIRT_SHADE} opacity={0.45} />
+        {/* цамцны цээжний гэрэл */}
+        <path d="M141 58 C144 56.5 147 57 148 61 L145.5 77 C143.5 75.5 141.5 75.5 139.5 77 Z" fill="#63b47e" opacity={0.4} />
+        {/* захны зураас */}
+        <path d="M142.5 55 q3.5 3 7 0.5" stroke={INK} strokeWidth={1.6} strokeLinecap="round" fill="none" opacity={0.5} />
+
+        {/* толгой */}
+        <circle cx={150} cy={43} r={9} fill="url(#q7-skin)" stroke={INK} strokeWidth={2.3} />
+        {/* үс */}
+        <path
+          d="M141 41 C140.5 32 145 27.5 151 27.5 C158 27.5 162 32.5 160.5 40.5 C158.5 37 156 35 152.5 35 C147.5 34.5 143.5 37.5 141 41 Z"
+          fill={HAIR}
+          stroke={INK}
+          strokeWidth={2.2}
+          strokeLinejoin="round"
+        />
+        {/* хамар + нүд */}
+        <path d="M158.5 43 q3 1.5 -0.5 4" stroke={INK} strokeWidth={1.8} strokeLinecap="round" fill="none" />
+        <circle cx={155.5} cy={42.5} r={1.4} fill={INK} />
+
+        {/* урд хөл (өмд + гутал) */}
+        <g className="q7-legf q7-anim">
+          <path d="M138 90 L155 104 L165 121" stroke={INK} strokeWidth={9} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M138 90 L155 104 L165 121" stroke={PANTS} strokeWidth={6} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M162 119 L176 115 C179 115 180 119.5 177 121 L167 124.5 C162 124.5 160 121 162 119 Z"
+            fill={SHOE}
+            stroke={INK}
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
+        </g>
+
+        {/* урд гар (ханцуй + гар) */}
+        <g className="q7-armf q7-anim">
+          <path d="M146 61 L158 71 L170 65" stroke={INK} strokeWidth={7.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M146 61 L158 71 L170 65" stroke={SHIRT} strokeWidth={4.6} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={172} cy={64} r={3.6} fill="url(#q7-skin2)" stroke={INK} strokeWidth={2} />
         </g>
       </g>
 
@@ -69,7 +131,7 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         <g className="q7-lines q7-anim" stroke={ACCENT.H} strokeWidth={2.5} strokeLinecap="round">
           <path d="M56 60 h32 M46 78 h36 M56 96 h30" />
         </g>
-        <g stroke={ACCENT.H} strokeWidth={2.5} fill={ACCENT.H} fillOpacity={0.1}>
+        <g stroke={ACCENT.H} strokeWidth={2.5} fill={ACCENT.H} fillOpacity={0.12}>
           <ellipse cx={193} cy={28} rx={20} ry={12} />
           <ellipse cx={222} cy={49} rx={9} ry={6.5} />
         </g>
@@ -103,7 +165,7 @@ export function Q07Pace({ variant, className, ariaLabel }: HelpIllustrationProps
         <g className="q7-slow q7-anim" stroke={ACCENT.B} strokeWidth={2.5} strokeLinecap="round">
           <path d="M70 84 h16" />
         </g>
-        <ellipse cx={190} cy={32} rx={12} ry={8.5} stroke={ACCENT.B} strokeWidth={2.5} fill={ACCENT.B} fillOpacity={0.1} />
+        <ellipse cx={190} cy={32} rx={12} ry={8.5} stroke={ACCENT.B} strokeWidth={2.5} fill={ACCENT.B} fillOpacity={0.12} />
         <path d="M182 38 L173 47 L188 40 Z" fill={ACCENT.B} />
         <circle cx={190} cy={32} r={2} fill={ACCENT.B} />
         <PhaseBadge d="B" label={HELP.outcomes.B.label} />

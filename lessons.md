@@ -60,3 +60,18 @@
 - **How to apply:** for new UI, start from the kit; when a page needs something the kit
   lacks, add it to the kit and the doc first. Parallel agents get the doc as their brief,
   and the lead reviews their pages in the browser, not only their reports.
+
+## 2026-10-28 — A PR with a migration is merged only after the migration runs
+
+- **Rule:** Whenever I tell the owner to merge a PR, I first list what production needs
+  before that merge: database migrations (`npx prisma migrate deploy`), new environment
+  variables, and one-off scripts, in order, with a link to `docs/deployment-checklist.md`.
+  A merge order alone is never the whole instruction.
+- **Rule:** A PR that adds a migration says so in its first lines ("Run the migration
+  before merging").
+- **Why:** on 2026-10-28 I gave the merge order "#11 → #13" without repeating that the
+  migration and `ENCRYPTION_KEY` had to come first. The owner merged; production ran code
+  that reads new columns against the old schema, and every sign-in failed
+  (`prisma.user.findMany()`: "The column (not available) does not exist").
+- **How to apply:** before any "merge this" message, diff `prisma/migrations` and the
+  environment variables the code reads between `master` and the PR, and put the steps first.

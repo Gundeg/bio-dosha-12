@@ -21,6 +21,8 @@ const optionalKtScoreSchema = z.number().finite().positive().max(2).optional().n
 
 export const profileCreateSchema = z.object({
   name: z.string().trim().min(1).max(100),
+  /** Овог — tells apart people with the same given name. */
+  lastName: z.string().trim().max(100).optional().nullable(),
   birthDate: pastDateStringSchema,
   sex: sexSchema,
   heightCm: z.number().finite().positive().max(300),
@@ -32,6 +34,7 @@ export const profileCreateSchema = z.object({
 export const profileUpdateSchema = z
   .object({
     name: z.string().trim().min(1).max(100).optional(),
+    lastName: z.string().trim().max(100).optional().nullable(),
     heightCm: z.number().finite().positive().max(300).optional(),
     doshaType: optionalDoshaTypeSchema,
     ktScore: optionalKtScoreSchema,
@@ -39,6 +42,7 @@ export const profileUpdateSchema = z
   .refine(
     (value) =>
       value.name !== undefined ||
+      value.lastName !== undefined ||
       value.heightCm !== undefined ||
       value.doshaType !== undefined ||
       value.ktScore !== undefined,

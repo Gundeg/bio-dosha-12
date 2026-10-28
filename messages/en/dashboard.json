@@ -8,6 +8,9 @@
   "noProfileTitle": "No profile yet",
   "noProfileBody": "Start with the 12-question assessment",
   "startAssessment": "Start assessment",
+  "statusLabel": "Current state",
+  "balancedRange": "Balanced: {from} to {to}",
+  "trendHint": "Last {count} measurements",
   "balanceTitle": "Constitution balance",
   "statWeight": "Weight",
   "statSeason": "Season",
@@ -23,7 +26,7 @@
   "bediGauge": "BEDI gauge",
   "deviation": "Deviation (Δ)",
   "trendTitle": "BEDI trend",
-  "now": "NOW",
+  "now": "Now",
   "quickActions": "Quick actions",
   "seeAll": "See all →",
   "actions": {
@@ -45,11 +48,7 @@
     "balancedBody": "Your constitution is in balance. Keep up your current routine.",
     "khiiBody": "Khii (Wind) is dominant. Warmth, oil massage and rest are needed.",
     "sharBadganTitle": "Shar/Badgan",
-    "sharBadganBody": "Shar (Fire) or Badgan (Earth) is in excess. A diet plan and cooling exercise are needed.",
+    "sharBadganBody": "Shar (Fire) or Badgan (Earth) is in excess. See the food and lifestyle advice under Remedies.",
     "ktNote": "The Kt coefficient is determined once, by the 12-question assessment."
-  },
-  "practitionerBanner": {
-    "approved": "Your practitioner access is approved. Sign out and sign in again to turn on the practitioner menu.",
-    "pending": "Your practitioner request is waiting for admin approval. You'll be told here once it's approved — meanwhile every personal feature is available."
   }
 }

@@ -13,15 +13,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { HelpIllustration } from "@/components/help/illustrations";
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { DOSHA_COLOR } from "@/lib/doshaUi";
+import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
 import { DominantType, Question } from "@/lib/questionnaireEngine";
+import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
 
-/** Панелийн дэвсгэр — махбодын туяа (Х/Ш/Б өнгөний код). */
-const PANEL_BG: Record<DominantType, string> = {
-  H: "bg-primary/8",
-  S: "bg-secondary-container/15",
-  B: "bg-tertiary/10",
-};
+/** Махбодын үсэг бүхий дугуй тэмдэг (Х/Ш/Б өнгөний код). */
+function DoshaMark({ value, letter, className }: { value: DominantType; letter: string; className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-inset ring-current/20",
+        DOSHA_BG[value],
+        DOSHA_COLOR[value],
+        className
+      )}
+    >
+      {letter}
+    </span>
+  );
+}
 
 /**
  * Асуултын карт дээрх "Хэрхэн тодорхойлох вэ?" товч + сорилын тусламжийн цонх.
@@ -45,10 +57,10 @@ export function QuestionHelpButton({ question }: { question: Question }) {
     >
       <DialogTrigger
         render={
-          <Button variant="ghost" size="sm" className="mt-2 -ml-2.5 text-primary" />
+          <Button variant="ghost" size="sm" className="mt-2 -ml-2.5 text-primary hover:text-primary" />
         }
       >
-        <span aria-hidden="true" className="material-symbols-outlined text-[16px]">help</span>
+        <Icon name="help" className="size-4" />
         {t("trigger")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto">
@@ -58,34 +70,29 @@ export function QuestionHelpButton({ question }: { question: Question }) {
         </DialogHeader>
 
         {/* Өргөн дэлгэц: 3 хариултыг зэрэгцүүлсэн харьцуулалт */}
-        <div className="hidden sm:grid sm:grid-cols-3 gap-2.5">
+        <div className="hidden gap-3 sm:grid sm:grid-cols-3">
           {question.options.map((opt) => {
             const doshaName = tShared(`dosha3.${opt.value}`);
             return (
               <div
                 key={opt.value}
-                className={`rounded-2xl p-2.5 flex flex-col gap-2 ${PANEL_BG[opt.value]}`}
+                className="flex flex-col gap-2.5 rounded-xl p-2.5 ring-1 ring-inset ring-outline-variant"
               >
-                <div className="rounded-xl overflow-hidden bg-surface-container-lowest/40">
+                <div className="overflow-hidden rounded-lg bg-surface-container-low">
                   <HelpIllustration
                     questionId={question.id}
                     variant={opt.value}
-                    className="w-full h-auto text-on-surface"
+                    className="h-auto w-full text-on-surface"
                   />
                 </div>
                 <div className="flex items-start gap-2">
-                  <div
-                    aria-hidden="true"
-                    className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-black text-[11px] bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
-                  >
-                    {doshaName.charAt(0)}
-                  </div>
+                  <DoshaMark value={opt.value} letter={doshaName.charAt(0)} className="size-6 text-xs" />
                   <div className="min-w-0">
-                    <p className={`font-bold text-xs leading-tight ${DOSHA_COLOR[opt.value]}`}>
+                    <p className="text-sm font-semibold leading-tight text-on-surface">
                       <span className="sr-only">{doshaName}: </span>
                       {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
                     </p>
-                    <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
+                    <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">
                       {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
                     </p>
                   </div>
@@ -96,25 +103,27 @@ export function QuestionHelpButton({ question }: { question: Question }) {
         </div>
 
         {/* Нарийн дэлгэц: нэг эргэлдэх зураг + дарж царцаах мөрүүд */}
-        <div className="sm:hidden space-y-3">
-          <div className="rounded-2xl bg-surface-container-low p-2">
+        <div className="space-y-3 sm:hidden">
+          <div className="rounded-lg bg-surface-container-low p-2">
             <HelpIllustration
               questionId={question.id}
               variant={variant}
-              className="w-full h-auto text-on-surface"
+              className="h-auto w-full text-on-surface"
             />
           </div>
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex min-h-8 items-center justify-between gap-2">
             <p className="text-xs text-on-surface-variant">{t("hint")}</p>
             {variant && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setVariant(undefined)}
-                className="shrink-0 text-xs font-bold text-primary hover:underline"
+                className="-mr-2 shrink-0 text-primary hover:text-primary"
               >
-                <span aria-hidden="true">▶</span> {t("auto")}
-              </button>
+                <Icon name="play" className="size-4" />
+                {t("auto")}
+              </Button>
             )}
           </div>
 
@@ -130,27 +139,23 @@ export function QuestionHelpButton({ question }: { question: Question }) {
                   onClick={() =>
                     setVariant((v) => (v === opt.value ? undefined : opt.value))
                   }
-                  className={`w-full text-left rounded-2xl p-3 motion-safe:transition-all ${PANEL_BG[opt.value]} ${
-                    selected ? "ring-2 ring-primary/40" : "hover:shadow-ambient"
-                  }`}
+                  className={cn(
+                    "flex w-full items-start gap-3 rounded-lg p-3 text-left ring-1 ring-inset transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    selected
+                      ? "bg-primary/8 ring-primary/30"
+                      : "bg-surface-container-lowest ring-outline-variant hover:bg-surface-container-low"
+                  )}
                 >
-                  <div className="flex items-start gap-3">
-                    <div
-                      aria-hidden="true"
-                      className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
-                    >
-                      {doshaName.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-sm ${DOSHA_COLOR[opt.value]}`}>
-                        <span className="sr-only">{doshaName}: </span>
-                        {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
-                      </p>
-                      <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                        {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
-                      </p>
-                    </div>
-                  </div>
+                  <DoshaMark value={opt.value} letter={doshaName.charAt(0)} className="size-8 text-xs" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold text-on-surface">
+                      <span className="sr-only">{doshaName}: </span>
+                      {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
+                    </span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-on-surface-variant">
+                      {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
+                    </span>
+                  </span>
                 </button>
               );
             })}

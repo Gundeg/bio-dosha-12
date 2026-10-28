@@ -1,6 +1,7 @@
 {
   "header": {
     "brandSubtitle": "Tb Otoch A",
+    "about": "About",
     "login": "Sign in",
     "register": "Create account"
   },
@@ -10,7 +11,8 @@
     "titleLine2": "inner balance",
     "lead": "Based on your constitution, age and the season, it calculates your BEDI index, identifies your body's deviation and suggests personal remedies.",
     "ctaStart": "Start for free",
-    "ctaLogin": "Sign in"
+    "ctaLogin": "Sign in",
+    "clinicLine": "Run a clinic? <link>Register your organization</link> — once it is verified, your practitioners keep patient records together."
   },
   "stats": {
     "constitutionTypes": "Constitution types",
@@ -55,7 +57,7 @@
   },
   "audience": {
     "title": "Who is it for?",
-    "subtitle": "From individuals to practitioners",
+    "subtitle": "From individuals and families to clinics",
     "individual": {
       "title": "Individuals and families",
       "subtitle": "Everyday health monitoring",
@@ -67,15 +69,18 @@
       ]
     },
     "practitioner": {
-      "title": "Tb Otoch (Practitioner)",
-      "subtitle": "One place to manage many patients",
+      "title": "Clinics and Tb Otoch practitioners",
+      "subtitle": "Shared patient records for your organization",
       "features": [
-        "Manage many patients",
-        "Keep clinical notes",
+        "Practitioners share the organization's patients",
+        "Intake cards and treatment schedules",
         "Print PDF reports",
-        "Detailed assessment system"
-      ]
-    }
+        "Verified organizations and 2-step sign-in"
+      ],
+      "note": "Patient records open once platform staff have verified the organization.",
+      "cta": "Register your organization"
+    },
+    "aboutLine": "Read about the method, what the results mean and how data is protected on the <link>About</link> page."
   },
   "cta": {
     "title": "Start tracking your body's balance",

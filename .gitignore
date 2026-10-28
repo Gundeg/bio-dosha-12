@@ -47,3 +47,6 @@ bedi-backup-*.json
 
 # local browser-automation output
 .playwright-mcp/
+
+# account backups written by scripts/reset-accounts.ts --apply
+accounts-backup-*.json

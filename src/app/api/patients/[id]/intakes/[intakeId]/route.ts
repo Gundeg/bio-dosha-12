@@ -1,57 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { clinicalIntakeUpdateSchema } from "@/lib/apiSchemas";
+import { actorOf, requireAuth } from "@/lib/authz";
+import { handle, readJson } from "@/lib/http";
+import { loadClinicalPatient, loadPatientIntake } from "@/lib/clinical";
+import { audit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
-interface RouteParams {
-  params: Promise<{ id: string; intakeId: string }>;
-}
+type Params = { params: Promise<{ id: string; intakeId: string }> };
 
-async function authorize(patientId: string, intakeId: string, practitionerId: string) {
-  const intake = await prisma.clinicalIntake.findFirst({
-    where: {
-      id: intakeId,
-      practitionerId,
-      profile: {
-        asPatient: { some: { id: patientId, practitionerId } },
-      },
-    },
-    include: { treatmentLog: true },
-  });
-  return intake;
-}
-
-export async function GET(_: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "PRACTITIONER") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+export const GET = handle(async (_req: NextRequest, { params }: Params) => {
+  const ctx = await requireAuth();
   const { id, intakeId } = await params;
-  const intake = await authorize(id, intakeId, session.user.id);
-  if (!intake) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(intake);
-}
+  const { patient } = await loadClinicalPatient(ctx, id);
+  return NextResponse.json(await loadPatientIntake(patient, intakeId));
+});
 
-export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "PRACTITIONER") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+export const PATCH = handle(async (req: NextRequest, { params }: Params) => {
+  const ctx = await requireAuth();
   const { id, intakeId } = await params;
-  const existing = await authorize(id, intakeId, session.user.id);
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const { patient, membership } = await loadClinicalPatient(ctx, id);
+  await loadPatientIntake(patient, intakeId);
+  const data = clinicalIntakeUpdateSchema.parse(await readJson(req));
 
-  const body = await req.json().catch(() => null);
-  const parsed = clinicalIntakeUpdateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
-  }
-
-  const data = parsed.data;
   const intake = await prisma.clinicalIntake.update({
     where: { id: intakeId },
     data: {
@@ -84,5 +56,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     include: { treatmentLog: true },
   });
 
+  await audit({
+    action: "intake.updated",
+    actor: actorOf(ctx),
+    organizationId: membership.organizationId,
+    targetType: "intake",
+    targetId: intakeId,
+    meta: { patientId: patient.id },
+    headers: req.headers,
+  });
   return NextResponse.json(intake);
-}
+});

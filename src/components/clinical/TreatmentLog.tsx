@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { THERAPY_GROUPS, TREATMENT_MAX_SESSIONS, ALL_THERAPY_KEYS } from "@/lib/clinicalConstants";
+import { apiFetch } from "@/lib/api";
+import { useErrorMessage } from "@/components/kit/hooks";
 import { toast } from "sonner";
 
 export type TreatmentCounts = Record<string, number>;
@@ -22,6 +24,7 @@ function buildEmptyCounts(): TreatmentCounts {
 
 export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLogProps) {
   const t = useTranslations("clinical.treatment");
+  const errorMessage = useErrorMessage();
   const [counts, setCounts] = useState<TreatmentCounts>(() => ({
     ...buildEmptyCounts(),
     ...initialCounts,
@@ -35,16 +38,12 @@ export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLo
     const payload = dirtyRef.current;
     dirtyRef.current = null;
     setSaving(true);
-    fetch(`/api/patients/${patientId}/intakes/${intakeId}/treatments`, {
+    apiFetch(`/api/patients/${patientId}/intakes/${intakeId}/treatments`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
-      .then((r) => {
-        if (!r.ok) throw new Error();
-      })
-      .catch(() => {
-        toast.error(t("saveError"));
+      .catch((err) => {
+        toast.error(t("saveError"), { description: errorMessage(err) });
       })
       .finally(() => setSaving(false));
   }
@@ -168,7 +167,7 @@ function CounterCells({
   labelFor: (n: number) => string;
 }) {
   return (
-    <div className="flex gap-1">
+    <div className="flex flex-wrap gap-1">
       {Array.from({ length: TREATMENT_MAX_SESSIONS }, (_, i) => {
         const n = i + 1;
         const filled = n <= value;
@@ -179,7 +178,7 @@ function CounterCells({
             onClick={() => onSet(n)}
             aria-label={labelFor(n)}
             aria-pressed={filled}
-            className={`w-6 h-6 rounded text-[10px] border transition-colors ${
+            className={`size-8 rounded-md text-xs font-medium border transition-colors ${
               filled
                 ? "bg-primary text-on-primary border-primary"
                 : "bg-transparent border-input hover:bg-muted"

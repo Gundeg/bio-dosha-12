@@ -3,7 +3,6 @@
   "title": "Family monitoring",
   "subtitle": "Tracking the BEDI index of {count, plural, one {# member} other {# members}}",
   "addMember": "Add member",
-  "selfBadge": "YOU",
   "ageValue": "age {age}",
   "heightValue": "{height} cm",
   "sexShort": {
@@ -17,6 +16,12 @@
   "deleteAria": "Delete the profile of {name}",
   "addDialog": {
     "title": "Add a family member",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Father's or mother's name",
+    "weight": "Current weight (kg), optional",
+    "weightHint": "Weight changes, so each calculation asks for it. Enter it now to go straight to the assessment after adding.",
+    "weightRange": "Enter a weight between {min} and {max} kg.",
+    "submitAndAssess": "Add and assess",
     "name": "Name",
     "namePlaceholder": "Member name",
     "birthDate": "Date of birth",
@@ -39,5 +44,11 @@
     "addError": "Could not add the member.",
     "deleted": "Deleted.",
     "deleteError": "Could not delete the member."
+  },
+  "planLimit": {
+    "reachedTitle": "Profile limit reached",
+    "reachedBody": "The {plan} plan holds up to {limit, plural, one {# profile} other {# profiles}}. To add a new member, delete a profile you no longer need, or contact the system administrator to upgrade your plan.",
+    "errorTitle": "You have reached your profile limit",
+    "errorHint": "Delete a profile you no longer need, or contact the system administrator about a plan with more profiles."
   }
 }

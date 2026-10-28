@@ -4,9 +4,12 @@
  * Хоёр хэлтэй ({mn, en}) — i18n давхаргатай хамт хэрэглэгдэнэ.
  */
 
+import type { IconName } from "@/components/ui/icon";
+
 export interface GlossaryEntry {
   key: string;
-  emoji: string;
+  /** Icon name from src/components/ui/icon.tsx. */
+  icon: IconName;
   term: { mn: string; en: string };
   short: { mn: string; en: string };
 }
@@ -14,7 +17,7 @@ export interface GlossaryEntry {
 export const GLOSSARY: GlossaryEntry[] = [
   {
     key: "makhbod",
-    emoji: "🧬",
+    icon: "dna",
     term: { mn: "Махбод", en: "Constitution" },
     short: {
       mn: "Таны төрөлхийн биеийн төрөл. Хий, Шар, Бадган гурван хүчний харьцаагаар тодорхойлогдоно.",
@@ -23,7 +26,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "khii",
-    emoji: "🌬️",
+    icon: "air",
     term: { mn: "Хий", en: "Khii (Wind)" },
     short: {
       mn: "Хөдөлгөөний хүч — хөнгөн, хүйтэн, хуурай чанартай. Илүүдвэл түгшүүр, нойргүйдэл, хуурайшилт илэрдэг.",
@@ -32,7 +35,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "shar",
-    emoji: "🔥",
+    icon: "local_fire_department",
     term: { mn: "Шар", en: "Shar (Fire)" },
     short: {
       mn: "Илч, хувиргалтын хүч — халуун, хурц чанартай. Илүүдвэл уур уцаар, үрэвсэл, халуу оргих байдал илэрдэг.",
@@ -41,7 +44,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "badgan",
-    emoji: "🏔️",
+    icon: "landscape",
     term: { mn: "Бадган", en: "Badgan (Earth)" },
     short: {
       mn: "Тогтвор, бүтцийн хүч — хүнд, тослог, хүйтэн чанартай. Илүүдвэл жин нэмэгдэх, залхуурал, бөглөрөл илэрдэг.",
@@ -50,7 +53,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "bedi",
-    emoji: "🧭",
+    icon: "compass",
     term: { mn: "BEDI индекс", en: "BEDI index" },
     short: {
       mn: "Bio-Energetic Dosha Index — жин, өндөр, нас, улирал, махбодын Kt-г нэгтгэсэн биеийн тэнцвэрийн үзүүлэлт.",
@@ -59,7 +62,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "kt",
-    emoji: "🔢",
+    icon: "tag",
     term: { mn: "Kt коэффициент", en: "Kt coefficient" },
     short: {
       mn: "Таны махбодын суурь тоо (0.70–1.50). 12 асуултын үнэлгээгээр нэг удаа тодорхойлогдоно.",
@@ -68,7 +71,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "khazailt",
-    emoji: "⚖️",
+    icon: "balance",
     term: { mn: "Хазайлт (Δ)", en: "Deviation (Δ)" },
     short: {
       mn: "BEDI индекс 0 цэгээс хэр зөрсөнийг харуулна (Δ = BEDI − 1). 0 = яг тэнцвэр; −0.3-аас бага бол Хий, +0.3-аас их бол Шар/Бадган арвидсан.",
@@ -77,7 +80,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "zero-point",
-    emoji: "🎯",
+    icon: "target",
     term: { mn: "0 цэг", en: "Zero Point" },
     short: {
       mn: "Биеийн төгс тэнцвэрийн цэг. Луужингийн зүү 0 цэг дээр байвал таны бие өөрийн хэвийн байдалдаа байна гэсэн үг.",
@@ -86,7 +89,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "yorondog",
-    emoji: "🌿",
+    icon: "spa",
     term: { mn: "Ерөндөг", en: "Remedies" },
     short: {
       mn: "Тэнцвэрийг сэргээх хоол хүнс, дэглэмийн зөвлөмж — жишээ нь Хийд бурам, шар тос; Шарт мөсөн чихэр.",
@@ -95,7 +98,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "season",
-    emoji: "❄️",
+    icon: "partly_cloudy_day",
     term: { mn: "Улирлын нөлөө", en: "Seasonal effect" },
     short: {
       mn: "Улирал бүр биеийн тэнцвэрт өөр өөрөөр нөлөөлнө: өвөл хүндрүүлж, зун хөнгөрүүлдэг. Тооцоололд автоматаар тусгагдана.",
@@ -104,7 +107,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   },
   {
     key: "buguin-soril",
-    emoji: "🖐️",
+    icon: "front_hand",
     term: { mn: "Бугуйн сорил", en: "Wrist test" },
     short: {
       mn: "Ясны хэмжээг мэдэх энгийн сорил: нэг гарынхаа бугуйг (алга шуутай залгагдах хэсгийг) нөгөө гараараа атгана. Эрхий, долоовор хуруу давж гарвал жижиг, үзүүрүүд яг хүрвэл дундаж, хүрэхгүй бол том ястай.",

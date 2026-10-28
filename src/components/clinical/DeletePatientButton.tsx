@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { useErrorMessage } from "@/components/kit/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,11 +19,14 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * Permanently deletes a patient and all of their records. The practitioner must
- * type the patient's name to confirm, because the action cannot be undone.
+ * Permanently deletes a patient and all of their records. Shown to the
+ * organization owner and to the practitioner who registered the patient (the
+ * API allows nobody else). The name must be typed to confirm, because the
+ * action cannot be undone.
  */
 export function DeletePatientButton({ patientId, patientName }: { patientId: string; patientName: string }) {
   const t = useTranslations("clinical.delete");
+  const errorMessage = useErrorMessage();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
@@ -38,14 +42,14 @@ export function DeletePatientButton({ patientId, patientName }: { patientId: str
       router.push("/patients");
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("error"));
+      toast.error(t("error"), { description: errorMessage(err) });
       setDeleting(false);
     }
   }
 
   return (
     <>
-      <Button variant="outline" size="sm" className="text-red-700 border-red-200 hover:bg-red-50" onClick={() => setOpen(true)}>
+      <Button variant="destructive" size="lg" onClick={() => setOpen(true)}>
         {t("button")}
       </Button>
       <Dialog

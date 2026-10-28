@@ -1,44 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { treatmentLogUpdateSchema } from "@/lib/apiSchemas";
+import { actorOf, requireAuth } from "@/lib/authz";
+import { handle, readJson } from "@/lib/http";
+import { loadClinicalPatient, loadPatientIntake } from "@/lib/clinical";
+import { audit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string; intakeId: string }> }
-) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "PRACTITIONER") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+export const PATCH = handle(
+  async (req: NextRequest, { params }: { params: Promise<{ id: string; intakeId: string }> }) => {
+    const ctx = await requireAuth();
+    const { id, intakeId } = await params;
+    const { patient } = await loadClinicalPatient(ctx, id);
+    await loadPatientIntake(patient, intakeId);
+    const data = treatmentLogUpdateSchema.parse(await readJson(req));
+
+    const log = await prisma.treatmentLog.upsert({
+      where: { intakeId },
+      create: { intakeId, ...data },
+      update: data,
+    });
+    await audit({
+      action: "intake.updated",
+      actor: actorOf(ctx),
+      organizationId: patient.organizationId,
+      targetType: "intake",
+      targetId: intakeId,
+      meta: { part: "treatments", patientId: patient.id },
+      headers: req.headers,
+    });
+    return NextResponse.json(log);
   }
-
-  const { id, intakeId } = await params;
-
-  const intake = await prisma.clinicalIntake.findFirst({
-    where: {
-      id: intakeId,
-      practitionerId: session.user.id,
-      profile: {
-        asPatient: { some: { id, practitionerId: session.user.id } },
-      },
-    },
-    select: { id: true },
-  });
-  if (!intake) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const body = await req.json().catch(() => null);
-  const parsed = treatmentLogUpdateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
-  }
-
-  const log = await prisma.treatmentLog.upsert({
-    where: { intakeId },
-    create: { intakeId, ...parsed.data },
-    update: parsed.data,
-  });
-
-  return NextResponse.json(log);
-}
+);

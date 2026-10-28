@@ -2,18 +2,22 @@
 
 import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/formatDate";
 import { IntakeForm, type IntakeFormProfile, type IntakeFormInitial } from "./IntakeForm";
 import { TreatmentLog, type TreatmentCounts } from "./TreatmentLog";
 import { IntakeHistory, type IntakeHistoryEntry } from "./IntakeHistory";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 export interface PatientDetailIntake extends IntakeFormInitial {
   id: string;
   admissionDate: string;
   dischargeDate: string | null;
   diagnosis: string | null;
+  /** Who recorded the intake; null when that account no longer exists. */
+  practitionerName?: string | null;
   treatmentLog: (TreatmentCounts & { id?: string }) | null;
 }
 
@@ -23,7 +27,10 @@ interface PatientDetailTabsProps {
   profile: IntakeFormProfile;
   intakes: PatientDetailIntake[];
   defaultWeightKg: number | null;
+  /** The signed-in practitioner, who signs new intakes. */
   doctorName: string;
+  /** The organization's plan includes intake PDF export. */
+  pdfEnabled: boolean;
 }
 
 type TabValue = "intake" | "treatments" | "history";
@@ -37,8 +44,10 @@ export function PatientDetailTabs({
   intakes,
   defaultWeightKg,
   doctorName,
+  pdfEnabled,
 }: PatientDetailTabsProps) {
   const t = useTranslations("clinical.tabs");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -88,7 +97,11 @@ export function PatientDetailTabs({
     admissionDate: i.admissionDate,
     dischargeDate: i.dischargeDate,
     diagnosis: i.diagnosis,
+    practitionerName: i.practitionerName ?? null,
   }));
+
+  // An existing intake is signed by its author; a new one by the person writing it.
+  const intakeDoctor = selectedIntake ? selectedIntake.practitionerName ?? "—" : doctorName;
 
   return (
     <Tabs
@@ -96,26 +109,27 @@ export function PatientDetailTabs({
       onValueChange={(value) => updateQuery({ tab: value as TabValue })}
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <TabsList>
+        <TabsList className="group-data-horizontal/tabs:h-10">
           <TabsTrigger value="intake">{t("intake")}</TabsTrigger>
           <TabsTrigger value="treatments">{t("treatments")}</TabsTrigger>
           <TabsTrigger value="history">{t("history")}</TabsTrigger>
         </TabsList>
 
         {tab === "intake" && (
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {selectedIntake && (
               <span className="text-xs text-muted-foreground">
-                {selectedIntake.admissionDate.slice(0, 10)} • {patientName}
+                {formatDate(selectedIntake.admissionDate, locale)} · {patientName}
               </span>
             )}
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => updateQuery({ tab: "intake", new: "1", intake: null })}
             >
-              <span aria-hidden="true">+</span> {t("newIntake")}
+              <Icon name="add" className="size-4" />
+              {t("newIntake")}
             </Button>
           </div>
         )}
@@ -123,11 +137,13 @@ export function PatientDetailTabs({
 
       <TabsContent value="intake" className="mt-4">
         <IntakeForm
+          // A fresh form for each intake (and for a new one), so fields never carry over.
+          key={selectedIntake?.id ?? "new"}
           patientId={patientId}
           profile={profile}
           initial={selectedIntake ?? undefined}
           defaultWeightKg={defaultWeightKg}
-          doctorName={doctorName}
+          doctorName={intakeDoctor}
         />
       </TabsContent>
 
@@ -140,7 +156,7 @@ export function PatientDetailTabs({
             initialCounts={(selectedIntake.treatmentLog ?? {}) as TreatmentCounts}
           />
         ) : (
-          <div className="rounded-lg border border-dashed border-input p-10 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-outline-variant p-10 text-center text-sm text-muted-foreground">
             {t("saveIntakeFirst")}
           </div>
         )}
@@ -151,6 +167,7 @@ export function PatientDetailTabs({
           patientId={patientId}
           intakes={historyEntries}
           selectedIntakeId={selectedIntake?.id}
+          pdfEnabled={pdfEnabled}
           onSelect={(intakeId) => updateQuery({ tab: "intake", intake: intakeId, new: null })}
         />
       </TabsContent>

@@ -1,0 +1,160 @@
+{
+  "metaTitle": "About",
+  "metaDescription": "What Bio-Dosha-12 is, what the BEDI index looks at, what the results mean and how your data is protected.",
+  "header": {
+    "login": "Sign in",
+    "register": "Create account",
+    "openApp": "Open the app"
+  },
+  "eyebrow": "Method and purpose",
+  "title": "What is Bio-Dosha-12?",
+  "lead": "Bio-Dosha-12 helps you monitor your body's balance and take care of your health before problems start. It is grounded in the constitution theory of traditional Mongolian medicine. You enter your weight and a few details, the system assesses your balance with the BEDI index and suggests food and lifestyle advice.",
+  "leadNote": "It does not replace a doctor's examination or diagnosis. It gives you information that helps you notice changes day to day and talk with your doctor.",
+  "dosha": {
+    "title": "The three doshas and body balance",
+    "intro": "Traditional medicine describes the body through the balance of three doshas: Khii, Shar and Badgan. Everyone is born with their own mix (their constitution type), and the balance shifts with age, the season, diet and lifestyle.",
+    "khii": {
+      "name": "Khii",
+      "body": "The force of movement. Linked with breathing, circulation, thinking and motion. Light, cold and dry in nature. In excess it tends towards tiredness, poor sleep, worry and dry skin."
+    },
+    "shar": {
+      "name": "Shar",
+      "body": "The force of heat and transformation. Linked with digestion, body warmth and the liver and gall bladder. Hot and sharp in nature. In excess it tends towards feeling hot, irritability and a dry mouth."
+    },
+    "badgan": {
+      "name": "Badgan",
+      "body": "The force of stability and structure. Linked with the body's build, the joints and fluid balance. Heavy, cold and oily in nature. In excess it tends towards weight gain, sluggishness and slow digestion."
+    },
+    "balance": "Balance between the three doshas is seen as the basis of good health. Bio-Dosha-12 shows which way your current state leans from your balance point and gives advice that helps you return to it."
+  },
+  "inputs": {
+    "title": "What the BEDI index looks at",
+    "intro": "BEDI (Bio-Energetic Dosha Index) is a single measure of body balance. It takes the following into account together.",
+    "items": {
+      "weight": {
+        "name": "Weight",
+        "body": "The main value you enter each time. Weighing at the same time each day, for example in the morning, makes results easier to compare."
+      },
+      "height": {
+        "name": "Height",
+        "body": "Entered once in the profile."
+      },
+      "age": {
+        "name": "Age",
+        "body": "Worked out automatically from the date of birth."
+      },
+      "sex": {
+        "name": "Sex",
+        "body": "Reflects the body differences between men and women."
+      },
+      "season": {
+        "name": "Season",
+        "body": "Each season affects the body differently, so the current season is taken into account."
+      },
+      "constitution": {
+        "name": "Constitution type",
+        "body": "Set once by the 12-question assessment of your inborn constitution."
+      }
+    },
+    "method": "The exact formula, coefficients and group limits that combine these values are the author's intellectual work and are not published. The same information always gives the same result."
+  },
+  "results": {
+    "title": "The three result groups",
+    "intro": "Each calculation places your current state in one of three groups. This is not a diagnosis of disease: it describes body balance as traditional medicine sees it.",
+    "balanced": {
+      "name": "Balanced",
+      "body": "Your current weight is within the balance range for your constitution, age, sex, height and the season.",
+      "focus": "Focus: keep your healthy routine and keep measuring regularly."
+    },
+    "khiiExcess": {
+      "name": "Khii excess",
+      "body": "The light, cold, moving qualities of Khii dominate, and your body leans to the lighter side of its balance point.",
+      "focus": "Focus: warm, nourishing food, enough rest and a regular sleep routine."
+    },
+    "sharBadganExcess": {
+      "name": "Shar/Badgan excess",
+      "body": "The heat of Shar or the heaviness of Badgan dominates, and your body leans to the heavier side of its balance point.",
+      "focus": "Focus: light, easily digested food, regular activity, and less oily or very spicy food."
+    },
+    "note": "Moving between groups is not a cause for alarm: balance naturally shifts with weight, the season and lifestyle. Measuring regularly and watching the trend is what matters."
+  },
+  "recommendations": {
+    "title": "How recommendations are formed",
+    "intro": "The system puts the advice together automatically, in this order.",
+    "steps": {
+      "group": "The result group sets the main direction: which qualities need balancing.",
+      "constitution": "Food and lifestyle advice that suits your inborn constitution is added. Anything that conflicts with your current state is left out.",
+      "age": "Age is taken into account, with separate advice for children, adults and older people. For example, following traditional medicine guidance, honey is not given to children under 13.",
+      "safety": "Advice that may not suit the person is clearly marked “Caution” or “Do not use”."
+    },
+    "note": "The advice is general food and lifestyle guidance from traditional medicine. It is not a prescription or a treatment plan."
+  },
+  "limits": {
+    "title": "Please keep in mind",
+    "items": {
+      "diagnosis": "Bio-Dosha-12 does not diagnose disease. The result is a general assessment of body balance.",
+      "examination": "It does not replace a doctor's examination, tests or treatment. Talk to a qualified practitioner before acting on the advice.",
+      "special": "If you are pregnant or breastfeeding, for young children and older people, and if you have a long-term illness or take medicines regularly, always talk to your doctor before changing your diet or routine.",
+      "inputs": "Results depend on accurate information. Please enter your real weight, height, date of birth and honest answers.",
+      "unwell": "If you feel unwell, or symptoms get worse or last a long time, see a doctor without waiting."
+    }
+  },
+  "audience": {
+    "title": "Who it is for",
+    "individuals": {
+      "name": "Individuals",
+      "body": "People who want to follow their body's balance day to day and adjust food and routine to the season."
+    },
+    "families": {
+      "name": "Families",
+      "body": "Keep profiles for family members, including children and older relatives, in one account."
+    },
+    "clinics": {
+      "name": "Clinics",
+      "body": "Verified clinics, hospitals and private practices keep patient records, intake cards, treatment schedules and reports together in one place."
+    }
+  },
+  "security": {
+    "title": "How your data is protected",
+    "intro": "Health information is sensitive, so the platform uses these protections.",
+    "items": {
+      "encryption": {
+        "name": "Encryption",
+        "body": "Sensitive details such as intake notes, national register number, phone and address are stored encrypted in the database. Connections are protected with HTTPS."
+      },
+      "mfa": {
+        "name": "2-step sign-in",
+        "body": "Platform staff and every member of a medical organization sign in with a code from a phone app as well as their password. Individuals can turn it on if they wish."
+      },
+      "verified": {
+        "name": "Verified organizations",
+        "body": "Patient records open only after platform staff have checked and verified a new clinic or organization."
+      },
+      "audit": {
+        "name": "Audit log",
+        "body": "Records who opened or changed which record and when. The log never contains health information."
+      },
+      "staff": {
+        "name": "Staff cannot see your records",
+        "body": "Platform staff manage accounts and organizations but cannot open the health records of patients or individuals."
+      },
+      "rights": {
+        "name": "Your rights",
+        "body": "In Settings you can download a copy of your data and permanently delete your account."
+      }
+    },
+    "privacyLine": "Read the <link>Privacy Notice</link> for details."
+  },
+  "research": {
+    "title": "Research basis",
+    "body": "The BEDI method was developed at the Tumurbaatar Otoch traditional medicine clinic from 400 medical records (2023–2025) and checked against the diagnoses made by its practitioners. Author of the method: V. Tumurbaatar."
+  },
+  "cta": {
+    "title": "Start following your body's balance",
+    "body": "Registration is free, and the constitution assessment takes about 3 minutes. Clinics can register their organization when they sign up.",
+    "register": "Create a free account"
+  },
+  "footer": {
+    "home": "Home"
+  }
+}

@@ -1,48 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { profileCreateSchema } from "@/lib/apiSchemas";
+import { requireAuth } from "@/lib/authz";
+import { handle, readJson } from "@/lib/http";
+import { assertWithinLimit, getEffectivePlan, lockLimit } from "@/lib/entitlements";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
+/** The caller's own profiles (self and family). Patients live under /api/patients. */
+export const GET = handle(async () => {
+  const ctx = await requireAuth();
   const profiles = await prisma.profile.findMany({
-    where: { userId: session.user.id, relationship: { not: "patient" } },
+    where: { userId: ctx.userId, organizationId: null, relationship: { not: "patient" } },
     include: {
       bediRecords: { orderBy: { date: "desc" }, take: 1, include: { recommendation: true } },
     },
     orderBy: { createdAt: "asc" },
   });
-
   return NextResponse.json(profiles);
-}
+});
 
-export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const POST = handle(async (req: NextRequest) => {
+  const ctx = await requireAuth();
+  const data = profileCreateSchema.parse(await readJson(req));
 
-  const body = await req.json().catch(() => null);
-  const parsed = profileCreateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
-  }
-  const { name, birthDate, sex, heightCm, doshaType, ktScore, relationship } = parsed.data;
+  const plan = await getEffectivePlan({ userId: ctx.userId });
 
-  const profile = await prisma.profile.create({
-    data: {
-      userId: session.user.id,
-      name,
-      birthDate: new Date(birthDate),
-      sex,
-      heightCm,
-      doshaType,
-      ktScore,
-      relationship: relationship ?? "self",
-    },
+  // Count and create under one lock so parallel requests cannot pass the limit.
+  const profile = await prisma.$transaction(async (tx) => {
+    await lockLimit(tx, `profiles:${ctx.userId}`);
+    const count = await tx.profile.count({ where: { userId: ctx.userId, organizationId: null } });
+    assertWithinLimit(plan, "maxProfiles", count, "профайлын тоо");
+    return tx.profile.create({
+      data: {
+        userId: ctx.userId,
+        name: data.name,
+        lastName: data.lastName || null,
+        birthDate: new Date(data.birthDate),
+        sex: data.sex,
+        heightCm: data.heightCm,
+        doshaType: data.doshaType,
+        ktScore: data.ktScore,
+        relationship: data.relationship ?? "self",
+      },
+    });
   });
-
   return NextResponse.json(profile, { status: 201 });
-}
+});

@@ -1,27 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { ErrorState } from "@/components/states";
+import { EmptyState, ErrorState, PageLoading } from "@/components/states";
+import { Callout, PageHeader } from "@/components/kit/layout";
+import { FilterTabs, SearchInput } from "@/components/kit/DataTable";
+import { StatusBadge, type BadgeTone } from "@/components/kit/status";
+import { useApiQuery, useErrorMessage } from "@/components/kit/hooks";
+import { ClinicalAccessState, isClinicalAccessCode } from "@/components/clinical/ClinicalAccessState";
+import { useShell } from "@/components/shell/ShellProvider";
 import { apiFetch, ApiError } from "@/lib/api";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge } from "@/lib/bediEngine";
-import { toast } from "sonner";
+import { Icon } from "@/components/ui/icon";
 
+/** GET /api/patients: the active organization's patients, newest first. */
 interface Patient {
   id: string;
   addedAt: string;
-  clinicalNotes: string | null;
+  /** The practitioner who registered the patient (null once that account is removed). */
+  practitioner: { id: string; name: string } | null;
   profile: {
     id: string;
     name: string;
+    lastName: string | null;
     birthDate: string;
     sex: "MALE" | "FEMALE";
     heightCm: number;
@@ -31,176 +41,276 @@ interface Patient {
   };
 }
 
-const STATUS_CONFIG = {
-  khii_excess: { variant: "secondary" as const },
-  balanced: { variant: "default" as const },
-  shar_badgan_excess: { variant: "destructive" as const },
+const STATUS_TONE: Record<string, BadgeTone> = {
+  khii_excess: "primary",
+  balanced: "success",
+  shar_badgan_excess: "warning",
 };
 
 /** Darker shades for readable contrast on white. */
 const STATUS_TEXT: Record<string, string> = {
-  khii_excess: "text-blue-700",
+  khii_excess: "text-primary",
   balanced: "text-emerald-700",
-  shar_badgan_excess: "text-red-700",
+  shar_badgan_excess: "text-secondary",
 };
 
 const SEX_VALUES = ["MALE", "FEMALE"] as const;
 
+/** Optional details the API accepts; register number, phone and address are encrypted at rest. */
+const OPTIONAL_FIELDS = ["registerNumber", "phone", "address", "occupation"] as const;
+
+const EMPTY_FORM = {
+  name: "",
+  birthDate: "",
+  sex: "MALE",
+  heightCm: "",
+  lastName: "",
+  registerNumber: "",
+  phone: "",
+  address: "",
+  occupation: "",
+};
+
+function fullName(p: Patient): string {
+  return `${p.profile.lastName ?? ""} ${p.profile.name}`.trim();
+}
+
 export default function PatientsPage() {
+  const { access } = useShell();
+  // Another organization has another list: start fresh when the active one changes.
+  return <PatientList key={access.org?.id ?? "none"} />;
+}
+
+function PatientList() {
   const t = useTranslations("patients");
   const ts = useTranslations("shared");
   const td = useTranslations("dosha");
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const errorMessage = useErrorMessage();
+  const { activeMembership } = useShell();
+  const orgName = activeMembership?.organizationName;
+
+  const { data, error, reload } = useApiQuery<Patient[]>("/api/patients");
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({
-    name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "patient",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [addError, setAddError] = useState<{ code?: string; message: string } | null>(null);
 
-  const loadPatients = useCallback(async () => {
-    setLoadError(null);
-    try {
-      const data = await apiFetch<Patient[]>("/api/patients");
-      setPatients(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setLoadError(
-        err instanceof ApiError ? err.message : t("loadError")
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
+  const accessCode = error?.code;
+  if (isClinicalAccessCode(accessCode)) {
+    return (
+      <div className="space-y-6">
+        <PageHeader eyebrow={orgName} title={t("title")} />
+        <ClinicalAccessState code={accessCode} organizationName={orgName} />
+      </div>
+    );
+  }
 
-  useEffect(() => { loadPatients(); }, [loadPatients]);
+  const patients = Array.isArray(data) ? data : null;
+
+  function openAdd() {
+    setAddError(null);
+    setShowAdd(true);
+  }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setAddError(null);
     try {
       await apiFetch("/api/patients", {
         method: "POST",
         body: JSON.stringify({
+          lastName: form.lastName.trim(),
           name: form.name,
           birthDate: form.birthDate,
           sex: form.sex,
           heightCm: parseFloat(form.heightCm),
-          relationship: form.relationship,
+          ...Object.fromEntries(OPTIONAL_FIELDS.map((field) => [field, form[field].trim() || null])),
         }),
       });
       toast.success(t("addDialog.success"));
       setShowAdd(false);
-      setForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "patient" });
-      await loadPatients();
+      setForm(EMPTY_FORM);
+      reload();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("addDialog.error"));
+      setAddError({ code: err instanceof ApiError ? err.code : undefined, message: errorMessage(err) });
     } finally {
       setSubmitting(false);
     }
   }
 
-  const filtered = patients.filter((p) =>
-    p.profile.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  if (loading) return <div className="text-center py-12 text-muted-foreground">{t("loading")}</div>;
+  const query = search.trim().toLowerCase();
+  const filtered = (patients ?? []).filter((p) => fullName(p).toLowerCase().includes(query));
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("total", { count: patients.length })}</p>
-        </div>
-        <Button onClick={() => setShowAdd(true)}>
-          <span aria-hidden="true">+</span> {t("add")}
-        </Button>
-      </div>
-
-      <Input
-        type="search"
-        aria-label={t("searchLabel")}
-        placeholder={t("searchPlaceholder")}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="max-w-sm"
+      <PageHeader
+        eyebrow={orgName}
+        title={t("title")}
+        description={patients ? t("total", { count: patients.length }) : undefined}
+        actions={
+          patients ? (
+            <Button size="lg" className="px-3" onClick={openAdd}>
+              <Icon name="person_add" className="size-4" />
+              {t("add")}
+            </Button>
+          ) : undefined
+        }
       />
 
-      {loadError ? (
-        <ErrorState message={loadError} onRetry={loadPatients} />
+      {!patients ? (
+        error ? (
+          <ErrorState message={errorMessage(error)} onRetry={reload} />
+        ) : (
+          <PageLoading label={t("loading")} />
+        )
+      ) : patients.length === 0 ? (
+        <EmptyState
+          icon="stethoscope"
+          title={t("emptyTitle")}
+          body={t("emptyBody")}
+          action={
+            <Button variant="outline" size="lg" onClick={openAdd}>
+              {t("add")}
+            </Button>
+          }
+        />
       ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((p) => {
-          const latest = p.profile.bediRecords?.[0];
-          const doshaKey =
-            p.profile.doshaType && p.profile.doshaType in DOSHA_MAP
-              ? (p.profile.doshaType as DoshaKey)
-              : null;
-          const sc = latest ? STATUS_CONFIG[latest.status as keyof typeof STATUS_CONFIG] : null;
+        <>
+          {error && (
+            <Callout
+              tone="danger"
+              action={
+                <Button variant="outline" size="lg" className="px-3" onClick={reload}>
+                  {t("retry")}
+                </Button>
+              }
+            >
+              {errorMessage(error)}
+            </Callout>
+          )}
 
-          return (
-            <Card key={p.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-base">{p.profile.name}</CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      {t("ageSex", {
-                        age: calcAge(p.profile.birthDate),
-                        sex: ts(`sex.${p.profile.sex}`),
-                      })}
-                    </p>
-                  </div>
-                  {sc && latest && (
-                    <Badge variant={sc.variant} className="text-xs">{ts(`status.${latest.status}`)}</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {doshaKey ? (
-                  <div className="bg-slate-50 rounded-lg p-2 text-sm">
-                    <span className="text-muted-foreground">{t("constitution")} </span>
-                    <span className="font-medium">{td(`${doshaKey}.label`)}</span>
-                    <span className="text-muted-foreground"> Kt={p.profile.ktScore}</span>
-                  </div>
-                ) : (
-                  <div className="bg-yellow-50 rounded-lg p-2 text-sm text-yellow-800">
-                    {t("notAssessed")}
-                  </div>
-                )}
+          <SearchInput
+            label={t("searchLabel")}
+            placeholder={t("searchPlaceholder")}
+            value={search}
+            onChange={setSearch}
+            className="sm:max-w-sm"
+          />
 
-                {latest && (
-                  <div className="text-sm flex justify-between">
-                    <span className="text-muted-foreground">{t("latestDelta")}</span>
-                    <span className={`font-semibold ${STATUS_TEXT[latest.status] ?? ""}`}>
-                      {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
-                    </span>
-                  </div>
-                )}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((p) => {
+              const latest = p.profile.bediRecords?.[0];
+              const doshaKey =
+                p.profile.doshaType && p.profile.doshaType in DOSHA_MAP ? (p.profile.doshaType as DoshaKey) : null;
+              const tone = latest ? STATUS_TONE[latest.status] : undefined;
 
-                <div className="flex gap-2">
-                  <ButtonLink size="sm" className="flex-1" href={`/patients/${p.id}`}>{t("openCard")}</ButtonLink>
-                  <ButtonLink size="sm" variant="outline" className="flex-1" href={`/calculator?profile=${p.profile.id}`}>{t("calculate")}</ButtonLink>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              return (
+                <Card key={p.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <CardTitle className="truncate text-base">
+                          <Link
+                            href={`/patients/${p.id}`}
+                            className="rounded-sm hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+                          >
+                            {fullName(p)}
+                          </Link>
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground">
+                          {t("ageSex", { age: calcAge(p.profile.birthDate), sex: ts(`sex.${p.profile.sex}`) })}
+                        </p>
+                      </div>
+                      {tone && latest && (
+                        <StatusBadge tone={tone}>{ts(`status.${latest.status}`)}</StatusBadge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {doshaKey ? (
+                      <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-container-low px-3 py-2.5 text-sm">
+                        <span>
+                          <span className="text-on-surface-variant">{t("constitution")} </span>
+                          <span className="font-medium text-on-surface">{td(`${doshaKey}.label`)}</span>
+                        </span>
+                        {p.profile.ktScore != null && (
+                          <span className="shrink-0 text-xs tabular-nums text-on-surface-variant">
+                            Kt {p.profile.ktScore.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="rounded-lg bg-surface-container-low px-3 py-2.5 text-sm text-on-surface-variant">
+                        {t("notAssessed")}
+                      </div>
+                    )}
 
-        {filtered.length === 0 && (
-          <div className="col-span-full text-center py-12 text-muted-foreground">
-            {t("empty")}
+                    {latest && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{t("latestDelta")}</span>
+                        <span className={`font-semibold ${STATUS_TEXT[latest.status] ?? ""}`}>
+                          {latest.deviation >= 0 ? "+" : ""}
+                          {latest.deviation.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+
+                    {p.practitioner?.name && (
+                      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Icon name="badge" className="size-3.5" />
+                        {t("registeredBy", { name: p.practitioner.name })}
+                      </p>
+                    )}
+
+                    <div className="flex gap-2">
+                      <ButtonLink variant="outline" className="flex-1" href={`/patients/${p.id}`}>
+                        {t("openCard")}
+                      </ButtonLink>
+                      <ButtonLink variant="ghost" className="flex-1" href={`/calculator?profile=${p.profile.id}`}>
+                        {t("calculate")}
+                      </ButtonLink>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+
+            {filtered.length === 0 && (
+              <p className="col-span-full py-12 text-center text-sm text-muted-foreground" role="status">
+                {t("noMatch")}
+              </p>
+            )}
           </div>
-        )}
-      </div>
+        </>
       )}
 
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+      <Dialog
+        open={showAdd}
+        onOpenChange={(open) => {
+          setShowAdd(open);
+          if (!open) setAddError(null);
+        }}
+      >
         <DialogContent>
-          <DialogHeader><DialogTitle>{t("addDialog.title")}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{t("addDialog.title")}</DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
+            {/* Овог first, as Mongolian names are written; it tells apart patients with the same name. */}
+            <div className="space-y-1">
+              <Label htmlFor="new-patient-lastName">{t("addDialog.lastName")}</Label>
+              <Input
+                id="new-patient-lastName"
+                required
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                placeholder={t("addDialog.lastNamePlaceholder")}
+                autoComplete="off"
+                maxLength={100}
+              />
+            </div>
             <div className="space-y-1">
               <Label htmlFor="new-patient-name">{t("addDialog.name")}</Label>
               <Input
@@ -222,23 +332,16 @@ export default function PatientsPage() {
               />
             </div>
             <div className="space-y-1">
-              <span id="new-patient-sex" className="text-sm leading-none font-medium">
+              <span className="block text-sm font-medium leading-none" aria-hidden="true">
                 {t("addDialog.sex")}
               </span>
-              <div role="group" aria-labelledby="new-patient-sex" className="grid grid-cols-2 gap-2">
-                {SEX_VALUES.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={form.sex === value}
-                    onClick={() => setForm({ ...form, sex: value })}
-                    className={`border rounded-lg p-2 text-sm transition-colors ${
-                      form.sex === value ? "border-primary bg-primary/5 font-semibold" : "border-gray-200"
-                    }`}
-                  >
-                    {ts(`sex.${value}`)}
-                  </button>
-                ))}
+              <div>
+                <FilterTabs
+                  label={t("addDialog.sex")}
+                  value={form.sex}
+                  onChange={(sex) => setForm({ ...form, sex })}
+                  options={SEX_VALUES.map((value) => ({ value, label: ts(`sex.${value}`) }))}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -246,17 +349,64 @@ export default function PatientsPage() {
               <Input
                 id="new-patient-height"
                 type="number"
+                inputMode="decimal"
                 required
                 value={form.heightCm}
                 onChange={(e) => setForm({ ...form, heightCm: e.target.value })}
                 placeholder="170"
               />
             </div>
+
+            {/* Optional identity and contact details (stored encrypted). */}
+            <details className="group rounded-lg border border-outline-variant p-3">
+              <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium">
+                {t("addDialog.moreDetails")}
+                <Icon name="expand_more" className="size-5 transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="mt-3 space-y-3">
+                <p className="text-xs text-on-surface-variant">{t("addDialog.moreDetailsHint")}</p>
+                {OPTIONAL_FIELDS.map((field) => (
+                  <div key={field} className="space-y-1">
+                    <Label htmlFor={`new-patient-${field}`}>{t(`addDialog.${field}`)}</Label>
+                    <Input
+                      id={`new-patient-${field}`}
+                      value={form[field]}
+                      onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                      autoComplete="off"
+                      inputMode={field === "phone" ? "tel" : undefined}
+                      maxLength={field === "address" ? 500 : field === "occupation" ? 200 : 50}
+                    />
+                  </div>
+                ))}
+              </div>
+            </details>
+
+            {/* Callout announces itself (role="alert"). */}
+            <div>
+              {addError &&
+                (addError.code === "plan_limit" ? (
+                  <Callout tone="warning" title={t("planLimit.title")}>
+                    <p>{addError.message}</p>
+                    <p className="mt-1">
+                      {t.rich("planLimit.hint", {
+                        link: (chunks) => (
+                          <Link href="/org" className="font-semibold underline underline-offset-2">
+                            {chunks}
+                          </Link>
+                        ),
+                      })}
+                    </p>
+                  </Callout>
+                ) : (
+                  <Callout tone="danger">{addError.message}</Callout>
+                ))}
+            </div>
+
             <div className="flex gap-2">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => setShowAdd(false)}>
+              <Button type="button" variant="outline" size="lg" className="flex-1" onClick={() => setShowAdd(false)}>
                 {t("addDialog.cancel")}
               </Button>
-              <Button type="submit" className="flex-1" disabled={submitting}>
+              <Button type="submit" size="lg" className="flex-1" disabled={submitting}>
                 {submitting ? t("addDialog.submitting") : t("addDialog.submit")}
               </Button>
             </div>

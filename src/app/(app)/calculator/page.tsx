@@ -4,11 +4,16 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { apiFetch, ApiError } from "@/lib/api";
-import { ErrorState } from "@/components/states";
+import { EmptyState, ErrorState, PageLoading } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Icon, type IconName } from "@/components/ui/icon";
+import { IconTile, PageHeader, Section } from "@/components/kit/layout";
+import { FilterTabs } from "@/components/kit/DataTable";
+import { StatusBadge, type BadgeTone } from "@/components/kit/status";
+import { SelectInput } from "@/components/settings/shared/Field";
 import DoshaRadar from "@/components/DoshaRadar";
 import DoshaCard from "@/components/DoshaCard";
 import RemedyPanel from "@/components/RemedyPanel";
@@ -21,6 +26,8 @@ import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
 import { QUESTION_HELP } from "@/lib/questionHelp";
 import { QuestionHelpButton } from "@/components/help/QuestionHelpDialog";
 import { HelpIllustration } from "@/components/help/illustrations";
+import { WEIGHT_MAX_KG, WEIGHT_MIN_KG, fullName, isValidWeight } from "@/lib/person";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -28,6 +35,7 @@ import { toast } from "sonner";
 interface Profile {
   id: string;
   name: string;
+  lastName?: string | null;
   sex: "MALE" | "FEMALE";
   heightCm: number;
   ktScore: number | null;
@@ -40,52 +48,51 @@ type Tab = "calc" | "assessment";
 type AssessmentStep = "profile-select" | "info" | "questions" | "result";
 
 interface ProfileForm {
+  lastName: string;
   name: string;
   birthDate: string;
   sex: "MALE" | "FEMALE";
   heightCm: string;
+  /** Carried to the measurement step, which needs it for the calculation. */
+  weightKg: string;
   relationship: string;
 }
 
-const SEASONS: { key: SeasonKey; icon: string }[] = [
-  { key: "WINTER", icon: "❄" },
-  { key: "SPRING", icon: "🌸" },
-  { key: "SUMMER", icon: "☀" },
-  { key: "AUTUMN", icon: "🍂" },
+/** What loading the profile list produced; applied to state in one place. */
+type ProfilesLoad =
+  | { ok: true; list: Profile[]; deepLinked?: Profile; deepLinkMissing: boolean }
+  | { ok: false; error: string };
+
+const EMPTY_PROFILE_FORM: ProfileForm = {
+  lastName: "", name: "", birthDate: "", sex: "MALE", heightCm: "", weightKg: "", relationship: "self",
+};
+
+const SEASONS: { key: SeasonKey; icon: IconName }[] = [
+  { key: "WINTER", icon: "season_winter" },
+  { key: "SPRING", icon: "season_spring" },
+  { key: "SUMMER", icon: "season_summer" },
+  { key: "AUTUMN", icon: "season_autumn" },
 ];
 
 // Labels: shared.relationship.<key>. "patient" is not offered here: patient
 // profiles reach the calculator through a practitioner's deep link only.
 const RELATIONSHIP_OPTIONS = ["self", "spouse", "child", "parent", "other"] as const;
 
-const SEX_OPTIONS: { value: "MALE" | "FEMALE"; icon: string }[] = [
-  { value: "MALE", icon: "♂" },
-  { value: "FEMALE", icon: "♀" },
-];
+const SEX_ICON: Record<Profile["sex"], IconName> = { MALE: "male", FEMALE: "female" };
+const SEX_OPTIONS = ["MALE", "FEMALE"] as const;
 
-/** Same bounds as bediCreateSchema in src/lib/apiSchemas.ts */
-const WEIGHT_MIN_KG = 1;
-const WEIGHT_MAX_KG = 500;
+/** Fill colour per constitution (Khii, Shar, Badgan), matching DOSHA_COLOR. */
+const DOSHA_FILL: Record<DominantType, string> = {
+  H: "bg-primary",
+  S: "bg-secondary",
+  B: "bg-tertiary",
+};
 
-const STATUS_STYLE: Record<BEDIResult["status"], { text: string; bg: string; badge: string; dot: string }> = {
-  khii_excess: {
-    text: "text-primary",
-    bg: "bg-primary/6 border-primary/20",
-    badge: "bg-primary/15 text-primary",
-    dot: "bg-primary",
-  },
-  balanced: {
-    text: "text-emerald-700",
-    bg: "bg-emerald-500/6 border-emerald-500/20",
-    badge: "bg-emerald-500/15 text-emerald-800",
-    dot: "bg-emerald-600",
-  },
-  shar_badgan_excess: {
-    text: "text-secondary",
-    bg: "bg-secondary/6 border-secondary/20",
-    badge: "bg-secondary/15 text-secondary",
-    dot: "bg-secondary",
-  },
+// The status always comes from the engine; these only colour it.
+const STATUS_STYLE: Record<BEDIResult["status"], { tone: BadgeTone; text: string; dot: string }> = {
+  khii_excess:        { tone: "primary", text: "text-primary",     dot: "bg-primary" },
+  balanced:           { tone: "success", text: "text-emerald-700", dot: "bg-emerald-600" },
+  shar_badgan_excess: { tone: "warning", text: "text-secondary",   dot: "bg-secondary" },
 };
 
 // One entry per questionnaire category, in order. The category name is shown
@@ -101,10 +108,72 @@ const WIZARD_STEPS = ["assessment", "measurement", "result"] as const;
 
 // Texts: calculator.guide.constitution.<key>.{title,desc}
 const CONSTITUTION_CARDS = [
-  { key: "light",  bg: "bg-primary/8",   text: "text-primary",   dot: "bg-primary" },
-  { key: "medium", bg: "bg-secondary/8", text: "text-secondary", dot: "bg-secondary" },
-  { key: "heavy",  bg: "bg-tertiary/8",  text: "text-tertiary",  dot: "bg-tertiary" },
+  { key: "light",  fill: DOSHA_FILL.H },
+  { key: "medium", fill: DOSHA_FILL.S },
+  { key: "heavy",  fill: DOSHA_FILL.B },
 ] as const;
+
+// ─── Shared styles ───────────────────────────────────────────────────────────
+
+/** A selectable option tile (sex, season): 40px, hairline, tinted when selected. */
+function optionTileClass(selected: boolean) {
+  return cn(
+    "inline-flex h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium ring-1 ring-inset transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+    selected
+      ? "bg-primary/8 text-primary ring-primary/30"
+      : "bg-surface-container-lowest text-on-surface ring-outline-variant hover:bg-surface-container-low"
+  );
+}
+
+/** A value taken from the profile, shown where an input would be. */
+const READ_ONLY_FIELD =
+  "flex h-10 items-center gap-2 rounded-lg bg-surface-container-low px-3 text-sm tabular-nums text-on-surface";
+
+const FIELD_LABEL = "mb-1.5 text-sm font-medium leading-none text-on-surface";
+
+// ─── Guide column parts ───────────────────────────────────────────────────────
+
+function GuideHeader({ icon, title }: { icon: IconName; title: React.ReactNode }) {
+  return (
+    <div className="mb-3 flex items-center gap-2.5">
+      <IconTile name={icon} tone="primary" size="sm" />
+      <h3 className="text-sm font-semibold text-on-surface">{title}</h3>
+    </div>
+  );
+}
+
+function GuideIntro({ children }: { children: React.ReactNode }) {
+  return <p className="mb-4 text-sm leading-relaxed text-on-surface-variant">{children}</p>;
+}
+
+function Dot({ fill }: { fill: string }) {
+  return <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-full", fill)} />;
+}
+
+function GuideItem({
+  marker,
+  title,
+  body,
+  active,
+  badge,
+}: {
+  marker: React.ReactNode;
+  title: React.ReactNode;
+  body: React.ReactNode;
+  active?: boolean;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <li className={cn("rounded-lg p-3", active ? "bg-primary/8 ring-1 ring-inset ring-primary/30" : "bg-surface-container-low")}>
+      <div className="flex items-center gap-2">
+        {marker}
+        <p className="min-w-0 flex-1 text-sm font-medium text-on-surface">{title}</p>
+        {badge}
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{body}</p>
+    </li>
+  );
+}
 
 // ─── Inner component ─────────────────────────────────────────────────────────
 
@@ -119,6 +188,10 @@ function CalculatorInner() {
   const requestedTab  = searchParams.get("tab");
   const requestedProfile = searchParams.get("profile");
   const newParam      = searchParams.get("new");
+  // A weight entered when the person was added (family page) fills the measurement step.
+  const requestedWeight = searchParams.get("weight");
+  const initialWeight =
+    requestedWeight && isValidWeight(parseFloat(requestedWeight)) ? requestedWeight : "";
 
   // Хэрэв тодорхой ?tab=calc эсвэл ?profile=X эсвэл ?new=1 байхгүй бол
   // үргэлж 1-р алхам (Махбодын үнэлгээ) -аас эхлүүлнэ
@@ -136,7 +209,7 @@ function CalculatorInner() {
 
   // ── Calculator state ──
   const [selectedProfileId, setSelectedProfileId] = useState("");
-  const [weightKg, setWeightKg]   = useState("");
+  const [weightKg, setWeightKg]   = useState(initialWeight);
   const [season, setSeason]       = useState<SeasonKey>(getCurrentSeason());
   const [notes, setNotes]         = useState("");
   const [calcResult, setCalcResult]     = useState<BEDIResult | null>(null);
@@ -148,9 +221,7 @@ function CalculatorInner() {
   // ── Assessment state ──
   const [assessStep, setAssessStep]         = useState<AssessmentStep>("profile-select");
   const [assessProfileId, setAssessProfileId] = useState("__new__");
-  const [profileForm, setProfileForm]       = useState<ProfileForm>({
-    name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "self",
-  });
+  const [profileForm, setProfileForm]       = useState<ProfileForm>(EMPTY_PROFILE_FORM);
   const [currentQ, setCurrentQ]   = useState(0);
   const [answers, setAnswers]     = useState<Record<number, DominantType>>({});
   const [ktResult, setKtResult]   = useState<ReturnType<typeof scoreQuestionnaire> | null>(null);
@@ -167,9 +238,9 @@ function CalculatorInner() {
   }, [t]);
 
   // ── Load profiles ──
-  const load = useCallback(async () => {
-    setLoadError(null);
-    setLoadingProfiles(true);
+  // Fetching sets no state, so the mount effect can apply the result in a
+  // callback and ignore it once the deep link changes (see the effect below).
+  const fetchProfiles = useCallback(async (): Promise<ProfilesLoad> => {
     try {
       const data = await apiFetch<Profile[]>("/api/profiles");
       let list = Array.isArray(data) ? data : [];
@@ -178,6 +249,7 @@ function CalculatorInner() {
       // profile list leaves out. Load it directly instead of silently falling
       // back to the practitioner's own profile.
       let deepLinked: Profile | undefined;
+      let deepLinkMissing = false;
       if (requestedProfile) {
         deepLinked = list.find((p) => p.id === requestedProfile);
         if (!deepLinked) {
@@ -185,48 +257,70 @@ function CalculatorInner() {
             deepLinked = await apiFetch<Profile>(`/api/profiles/${requestedProfile}`);
             list = [...list, deepLinked];
           } catch {
-            toast.error(tRef.current("toast.profileNotFound"));
+            deepLinkMissing = true;
           }
         }
       }
-
-      setAllProfiles(list);
-      const withKt = list.filter((p) => p.ktScore);
-
-      if (deepLinked && !deepLinked.ktScore) {
-        // The linked person has no assessment yet → start it for them.
-        setSelectedProfileId(deepLinked.id);
-        setAssessProfileId(deepLinked.id);
-        setCurrentQ(0);
-        setAnswers({});
-        setKtResult(null);
-        setActiveTab("assessment");
-        setAssessStep("questions");
-      } else if (withKt.length === 0) {
-        setActiveTab("assessment");
-        setAssessStep(list.length > 0 ? "profile-select" : "info");
-      } else {
-        // With a deep link, select only that profile; never substitute another one.
-        const initial = requestedProfile ? deepLinked : withKt[0];
-        setSelectedProfileId(initial?.id ?? "");
-
-        if (goDirectlyToCalc) {
-          setActiveTab("calc");
-        } else {
-          setActiveTab("assessment");
-          setAssessStep("profile-select");
-        }
-      }
+      return { ok: true, list, deepLinked, deepLinkMissing };
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : tRef.current("loadError"));
-    } finally {
-      setLoadingProfiles(false);
+      return { ok: false, error: err instanceof ApiError ? err.message : tRef.current("loadError") };
+    }
+  }, [requestedProfile]);
+
+  const applyProfiles = useCallback((result: ProfilesLoad) => {
+    setLoadingProfiles(false);
+    if (!result.ok) {
+      setLoadError(result.error);
+      return;
+    }
+    setLoadError(null);
+    const { list, deepLinked } = result;
+    if (result.deepLinkMissing) toast.error(tRef.current("toast.profileNotFound"));
+
+    setAllProfiles(list);
+    const withKt = list.filter((p) => p.ktScore);
+
+    if (deepLinked && !deepLinked.ktScore) {
+      // The linked person has no assessment yet → start it for them.
+      setSelectedProfileId(deepLinked.id);
+      setAssessProfileId(deepLinked.id);
+      setCurrentQ(0);
+      setAnswers({});
+      setKtResult(null);
+      setActiveTab("assessment");
+      setAssessStep("questions");
+    } else if (withKt.length === 0) {
+      setActiveTab("assessment");
+      setAssessStep(list.length > 0 ? "profile-select" : "info");
+    } else {
+      // With a deep link, select only that profile; never substitute another one.
+      const initial = requestedProfile ? deepLinked : withKt[0];
+      setSelectedProfileId(initial?.id ?? "");
+
+      if (goDirectlyToCalc) {
+        setActiveTab("calc");
+      } else {
+        setActiveTab("assessment");
+        setAssessStep("profile-select");
+      }
     }
   }, [requestedProfile, goDirectlyToCalc]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    fetchProfiles().then((result) => {
+      if (!cancelled) applyProfiles(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchProfiles, applyProfiles]);
+
+  function retryLoad() {
+    setLoadError(null);
+    setLoadingProfiles(true);
+    void fetchProfiles().then(applyProfiles);
+  }
 
   useEffect(() => {
     if (assessStep === "questions") questionHeadingRef.current?.focus();
@@ -234,8 +328,9 @@ function CalculatorInner() {
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
   const weightValue = parseFloat(weightKg);
-  const weightValid =
-    Number.isFinite(weightValue) && weightValue >= WEIGHT_MIN_KG && weightValue <= WEIGHT_MAX_KG;
+  const weightValid = isValidWeight(weightValue);
+  // The new-person form asks for the weight too, so the measurement step opens with it.
+  const infoWeightValid = isValidWeight(parseFloat(profileForm.weightKg));
 
   // ── BEDI calculate ──
   function handleCalculate() {
@@ -307,6 +402,7 @@ function CalculatorInner() {
         savedProfile = await apiFetch<Profile>("/api/profiles", {
           method: "POST",
           body: JSON.stringify({
+            lastName: profileForm.lastName.trim(),
             name: profileForm.name,
             birthDate: profileForm.birthDate,
             sex: profileForm.sex,
@@ -317,7 +413,7 @@ function CalculatorInner() {
           }),
         });
         setAllProfiles((prev) => [...prev, savedProfile]);
-        toast.success(t("toast.profileCreated", { name: savedProfile.name }));
+        toast.success(t("toast.profileCreated", { name: fullName(savedProfile) }));
       } else {
         const updated = await apiFetch<Profile>(`/api/profiles/${assessProfileId}`, {
           method: "PATCH",
@@ -331,13 +427,14 @@ function CalculatorInner() {
       setSelectedProfileId(savedProfile.id);
       setCalcResult(null);
       setRemedyResult(null);
-      setWeightKg("");
+      // Keep a weight entered with the new person (or carried in from the family page).
+      setWeightKg((current) => profileForm.weightKg || current);
       setActiveTab("calc");
       setAssessStep("profile-select");
       setCurrentQ(0);
       setAnswers({});
       setKtResult(null);
-      setProfileForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "self" });
+      setProfileForm(EMPTY_PROFILE_FORM);
       setAssessProfileId("__new__");
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : t("toast.saveError"));
@@ -362,14 +459,7 @@ function CalculatorInner() {
   }
 
   if (loadingProfiles) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3" role="status">
-          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent motion-safe:animate-spin" aria-hidden="true" />
-          <p className="text-sm text-on-surface-variant">{tc("loading")}</p>
-        </div>
-      </div>
-    );
+    return <PageLoading label={tc("loading")} />;
   }
 
   const relationshipLabel = (relationship: string) =>
@@ -382,6 +472,7 @@ function CalculatorInner() {
   const progress = assessStep === "questions"
     ? Math.round(((currentQ + 1) / QUESTIONNAIRE.length) * 100)
     : assessStep === "result" ? 100 : 0;
+  const showQuizProgress = activeTab === "assessment" && assessStep === "questions";
 
   // Шидтэн алхамын индекс: 0=үнэлгээ, 1=хэмжилт оруулах, 2=үр дүн
   const activeWizardStep = activeTab === "assessment" ? 0 : calcResult ? 2 : 1;
@@ -402,20 +493,20 @@ function CalculatorInner() {
   // RENDER
   // ══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-8">
 
       {/* ── MAIN: Content area ────────────────────────────────────────── */}
-      <main className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
 
-        {/* ── Горизонтал шидтэн алхамууд ── */}
-        <div className="flex items-center gap-1 mb-5 overflow-x-auto pb-0.5">
+        {/* ── Wizard steps ── */}
+        <ol className="mb-5 flex items-center gap-1 overflow-x-auto pb-0.5">
           {WIZARD_STEPS.map((step, i) => {
             const isActive = activeWizardStep === i;
             const isDone = activeWizardStep > i;
             const isClickable = i === 0 || (i === 1 && profiles.length > 0);
             const stepLabel = t(`wizard.steps.${step}`);
             return (
-              <div key={step} className="flex items-center gap-1">
+              <li key={step} className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
                   disabled={!isClickable}
@@ -430,82 +521,74 @@ function CalculatorInner() {
                       setActiveTab("calc"); setCalcResult(null); setRemedyResult(null);
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  className={cn(
+                    "flex h-9 items-center gap-2 rounded-lg px-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-default",
                     isActive
-                      ? "bg-primary text-on-primary shadow-sm"
-                      : isDone
-                      ? "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+                      ? "text-on-surface"
                       : isClickable
-                      ? "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-                      : "bg-surface-container text-on-surface-variant/25 cursor-default"
-                  }`}
+                      ? "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
+                      : "text-on-surface-variant/60"
+                  )}
                 >
-                  <span aria-hidden="true" className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${
-                    isActive ? "bg-on-primary/20 text-on-primary"
-                    : isDone ? "bg-primary/15 text-primary"
-                    : "border border-current/30"
-                  }`}>
-                    {isDone ? "✓" : i + 1}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
+                      isActive
+                        ? "bg-primary text-on-primary"
+                        : isDone
+                        ? "bg-primary/10 text-primary"
+                        : "ring-1 ring-inset ring-outline-variant"
+                    )}
+                  >
+                    {isDone ? <Icon name="check" className="size-3.5" /> : i + 1}
                   </span>
-                  <span className="hidden sm:inline">{stepLabel}</span>
+                  <span className={isActive ? undefined : "hidden sm:inline"}>{stepLabel}</span>
                 </button>
                 {i < WIZARD_STEPS.length - 1 && (
-                  <div className={`h-px w-5 shrink-0 ${isDone ? "bg-primary/30" : "bg-outline-variant/20"}`} />
+                  <span aria-hidden="true" className={cn("h-px w-4 shrink-0 sm:w-8", isDone ? "bg-primary/40" : "bg-outline-variant")} />
                 )}
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ol>
 
-        {/* Page header */}
-        <div className="mb-6">
-          <h1 className="font-headline text-3xl font-black text-on-surface tracking-tight">
-            {stepMeta.title}
-          </h1>
-          <p className="text-on-surface-variant text-sm mt-2 max-w-lg leading-relaxed">
-            {stepMeta.subtitle}
-          </p>
+        <PageHeader
+          title={stepMeta.title}
+          description={stepMeta.subtitle}
+          className={showQuizProgress ? "mb-4" : undefined}
+        />
 
-          {activeTab === "assessment" && assessStep === "questions" && (
-            <>
-              <div className="flex items-center justify-between mt-4 mb-2">
-                <span className="text-xs font-semibold text-on-surface-variant">
-                  {t("quiz.counter", { current: currentQ + 1, total: QUESTIONNAIRE.length })}
-                </span>
-                <span className="text-xs font-semibold text-primary">{progress}%</span>
-              </div>
-              <p className="sr-only" aria-live="polite">
-                {t("quiz.questionOf", { current: currentQ + 1, total: QUESTIONNAIRE.length })}
-              </p>
-              <div
-                className="flex gap-1"
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={progress}
-                aria-label={t("quiz.progressLabel")}
-              >
-                {Array.from({ length: 10 }, (_, i) => (
-                  <div
-                    key={i}
-                    className={`flex-1 h-1.5 rounded-full transition-colors duration-300 ${
-                      i < Math.round(progress / 10)
-                        ? "bg-primary"
-                        : "bg-surface-container-high"
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        {showQuizProgress && (
+          <div className="mb-6 max-w-xl">
+            <div className="mb-2 flex items-center justify-between text-xs font-medium">
+              <span className="text-on-surface-variant">
+                {t("quiz.counter", { current: currentQ + 1, total: QUESTIONNAIRE.length })}
+              </span>
+              <span className="tabular-nums text-primary">{progress}%</span>
+            </div>
+            <p className="sr-only" aria-live="polite">
+              {t("quiz.questionOf", { current: currentQ + 1, total: QUESTIONNAIRE.length })}
+            </p>
+            <div
+              className="h-1.5 overflow-hidden rounded-full bg-surface-container-high"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+              aria-label={t("quiz.progressLabel")}
+            >
+              <div className="h-full rounded-full bg-primary transition-[width] duration-300" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        )}
 
         {/* ══════════════════════════════════════════════════════════════
             LOAD ERROR — алдаа хэзээ ч "хоосон" мэт харагдах ёсгүй
         ══════════════════════════════════════════════════════════════ */}
         {loadError && (
           <div className="max-w-xl">
-            <ErrorState message={loadError} onRetry={load} />
+            <ErrorState message={loadError} onRetry={retryLoad} />
           </div>
         )}
 
@@ -513,74 +596,87 @@ function CalculatorInner() {
             ASSESSMENT CONTENT
         ══════════════════════════════════════════════════════════════ */}
         {!loadError && activeTab === "assessment" && (
-          <div className="max-w-xl space-y-5">
+          <div className="max-w-xl space-y-4">
 
             {/* Profile select */}
             {assessStep === "profile-select" && (
-              <div className="space-y-3">
-                <p className="text-sm text-on-surface-variant font-medium">{t("profileSelect.prompt")}</p>
-                <div className="grid gap-3">
+              <Section title={t("profileSelect.prompt")} className="overflow-hidden" bodyClassName="p-0">
+                <ul className="divide-y divide-outline-variant">
                   {allProfiles.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => startAssessment(p.id)}
-                      className="flex items-center justify-between bg-surface-container-low rounded-2xl p-4 hover:bg-surface-container transition-colors text-left"
-                    >
-                      <div>
-                        <p className="font-semibold text-on-surface">{p.name}</p>
-                        <p className="text-xs text-on-surface-variant">
-                          {relationshipLabel(p.relationship)}
-                          {p.doshaType && ` · ${doshaLabel(p.doshaType)} · Kt ${p.ktScore?.toFixed(2)}`}
-                        </p>
-                      </div>
-                      <span className="text-primary text-sm font-medium">
-                        {p.ktScore ? t("profileSelect.retake") : t("profileSelect.start")}
-                        <span aria-hidden="true"> →</span>
-                      </span>
-                    </button>
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        onClick={() => startAssessment(p.id)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-container-low focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                      >
+                        <IconTile name="person" size="sm" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-on-surface">{fullName(p)}</span>
+                          <span className="block text-xs text-on-surface-variant">
+                            {relationshipLabel(p.relationship)}
+                            {p.doshaType && ` · ${doshaLabel(p.doshaType)} · Kt ${p.ktScore?.toFixed(2)}`}
+                          </span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
+                          {p.ktScore ? t("profileSelect.retake") : t("profileSelect.start")}
+                          <Icon name="chevron_right" className="size-4" />
+                        </span>
+                      </button>
+                    </li>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => startAssessment("__new__")}
-                    className="flex items-center gap-3 bg-surface-container-low rounded-2xl p-4 hover:bg-surface-container transition-colors border-2 border-dashed border-outline-variant"
-                  >
-                    <span aria-hidden="true" className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-bold">+</span>
-                    <div>
-                      <p className="font-semibold text-on-surface">{t("profileSelect.newProfile")}</p>
-                      <p className="text-xs text-on-surface-variant">{t("profileSelect.newProfileDesc")}</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => startAssessment("__new__")}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-container-low focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                    >
+                      <IconTile name="person_add" tone="primary" size="sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-on-surface">{t("profileSelect.newProfile")}</span>
+                        <span className="block text-xs text-on-surface-variant">{t("profileSelect.newProfileDesc")}</span>
+                      </span>
+                      <Icon name="chevron_right" className="size-4 text-on-surface-variant" />
+                    </button>
+                  </li>
+                </ul>
+              </Section>
             )}
 
             {/* Profile info form */}
             {assessStep === "info" && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 space-y-1.5">
-                    <Label htmlFor="assess-name" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.name")}</Label>
+              <Section bodyClassName="space-y-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {/* Овог first, as Mongolian names are written; it tells apart people with the same name. */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="assess-last-name" className="text-on-surface">{t("form.lastName")}</Label>
+                    <Input
+                      id="assess-last-name"
+                      value={profileForm.lastName}
+                      onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                      placeholder={t("form.lastNamePlaceholder")}
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="assess-name" className="text-on-surface">{t("form.name")}</Label>
                     <Input
                       id="assess-name"
                       value={profileForm.name}
                       onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                       placeholder={t("form.namePlaceholder")}
-                      className="bg-surface-container-low border-none h-12 rounded-xl"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="assess-birth-date" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.birthDate")}</Label>
+                    <Label htmlFor="assess-birth-date" className="text-on-surface">{t("form.birthDate")}</Label>
                     <Input
                       id="assess-birth-date"
                       type="date"
                       value={profileForm.birthDate}
                       onChange={(e) => setProfileForm({ ...profileForm, birthDate: e.target.value })}
-                      className="bg-surface-container-low border-none h-12 rounded-xl"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="assess-height" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.height")}</Label>
+                    <Label htmlFor="assess-height" className="text-on-surface">{t("form.height")}</Label>
                     <Input
                       id="assess-height"
                       type="number"
@@ -588,121 +684,154 @@ function CalculatorInner() {
                       onChange={(e) => setProfileForm({ ...profileForm, heightCm: e.target.value })}
                       placeholder="170"
                       min="100" max="250"
-                      className="bg-surface-container-low border-none h-12 rounded-xl"
                     />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="assess-weight" className="text-on-surface">{t("form.weight")}</Label>
+                    <Input
+                      id="assess-weight"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.1"
+                      min={WEIGHT_MIN_KG}
+                      max={WEIGHT_MAX_KG}
+                      value={profileForm.weightKg}
+                      onChange={(e) => setProfileForm({ ...profileForm, weightKg: e.target.value })}
+                      placeholder="60"
+                      aria-invalid={profileForm.weightKg !== "" && !infoWeightValid}
+                      aria-describedby="assess-weight-hint"
+                    />
+                    <p
+                      id="assess-weight-hint"
+                      className={cn("text-xs", profileForm.weightKg !== "" && !infoWeightValid ? "text-red-700" : "text-on-surface-variant")}
+                    >
+                      {profileForm.weightKg !== "" && !infoWeightValid
+                        ? t("calc.weightRange", { min: WEIGHT_MIN_KG, max: WEIGHT_MAX_KG })
+                        : t("form.weightHint")}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label id="assess-sex-label" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.sex")}</Label>
+                  <Label id="assess-sex-label" className="text-on-surface">{t("form.sex")}</Label>
                   <div className="grid grid-cols-2 gap-3" role="group" aria-labelledby="assess-sex-label">
-                    {SEX_OPTIONS.map(({ value, icon }) => (
+                    {SEX_OPTIONS.map((value) => (
                       <button
                         key={value}
                         type="button"
                         aria-pressed={profileForm.sex === value}
                         onClick={() => setProfileForm({ ...profileForm, sex: value })}
-                        className={`rounded-full py-3 text-sm font-bold flex items-center justify-center gap-2 transition-all motion-safe:active:scale-95 ${
-                          profileForm.sex === value
-                            ? "bg-primary text-on-primary shadow-lg shadow-primary/20"
-                            : "bg-surface-container-high text-on-surface"
-                        }`}
+                        className={optionTileClass(profileForm.sex === value)}
                       >
-                        <span aria-hidden="true">{icon}</span>{tShared(`sex.${value}`)}
+                        <Icon name={SEX_ICON[value]} className="size-4" />
+                        {tShared(`sex.${value}`)}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="assess-relationship" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.relationship")}</Label>
-                  <select
+                  <Label htmlFor="assess-relationship" className="text-on-surface">{t("form.relationship")}</Label>
+                  <SelectInput
                     id="assess-relationship"
-                    className="w-full bg-surface-container-low border-none h-12 rounded-xl px-4 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
                     value={profileForm.relationship}
                     onChange={(e) => setProfileForm({ ...profileForm, relationship: e.target.value })}
                   >
                     {RELATIONSHIP_OPTIONS.map((value) => (
                       <option key={value} value={value}>{tShared(`relationship.${value}`)}</option>
                     ))}
-                  </select>
+                  </SelectInput>
                 </div>
 
-                <div className="flex gap-3 pt-1">
+                <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row">
                   {allProfiles.length > 0 && (
-                    <Button variant="outline" onClick={resetAssessment} className="flex-1 h-12">
-                      <span aria-hidden="true">← </span>{t("actions.back")}
+                    <Button variant="outline" size="lg" onClick={resetAssessment} className="sm:flex-1">
+                      <Icon name="arrow_back" className="size-4" />
+                      {t("actions.back")}
                     </Button>
                   )}
                   <Button
-                    className="flex-1 h-12 font-bold"
-                    disabled={!profileForm.name || !profileForm.birthDate || !profileForm.heightCm}
+                    size="lg"
+                    className="sm:flex-1"
+                    disabled={
+                      !profileForm.lastName.trim() || !profileForm.name.trim() || !profileForm.birthDate ||
+                      !profileForm.heightCm || !infoWeightValid
+                    }
                     onClick={() => setAssessStep("questions")}
                   >
-                    {t("form.startQuestions")}<span aria-hidden="true"> →</span>
+                    {t("form.startQuestions")}
                   </Button>
                 </div>
-              </div>
+              </Section>
             )}
 
             {/* Questions */}
             {assessStep === "questions" && (
               <div className="space-y-4">
-                <div className="bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
-                  <div className="bg-surface-container-low px-6 py-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-                          {tQ(`q${q.id}.category`)}
-                        </span>
-                        <h2
-                          ref={questionHeadingRef}
-                          tabIndex={-1}
-                          className="font-headline text-xl font-bold text-on-surface leading-snug mt-3 focus:outline-none"
-                        >
-                          {tQ(`q${q.id}.question`)}
-                        </h2>
-                        <QuestionHelpButton question={q} />
-                      </div>
-                      {currentQ > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setCurrentQ(currentQ - 1)}
-                          className="shrink-0 text-xs font-medium text-on-surface-variant hover:text-primary transition-colors"
-                        >
-                          <span aria-hidden="true">← </span>{t("actions.back")}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="px-6 py-5 space-y-3">
-                    {q.options.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        aria-pressed={answers[q.id] === opt.value}
-                        onClick={() => handleAnswer(opt.value)}
-                        className={`w-full text-left rounded-2xl p-4 transition-all motion-safe:hover:-translate-y-0.5 hover:shadow-ambient group ${DOSHA_BG[opt.value]} ${
-                          answers[q.id] === opt.value ? "ring-2 ring-primary" : ""
-                        }`}
+                <section className="rounded-xl bg-surface-container-lowest shadow-ambient">
+                  <div className="flex items-start justify-between gap-3 border-b border-outline-variant px-5 py-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-primary">{tQ(`q${q.id}.category`)}</p>
+                      <h2
+                        ref={questionHeadingRef}
+                        tabIndex={-1}
+                        className="mt-1 text-lg font-semibold leading-snug text-on-surface focus:outline-none"
                       >
-                        <div className="flex items-center gap-4">
-                          <div aria-hidden="true" className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-black text-sm bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}>
-                            {t(`doshaLetter.${opt.value}`)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={`font-bold text-sm ${DOSHA_COLOR[opt.value]}`}>{tQ(`q${q.id}.options.${opt.value}.label`)}</p>
-                            <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">{tQ(`q${q.id}.options.${opt.value}.hint`)}</p>
-                          </div>
-                          <span aria-hidden="true" className={`shrink-0 text-base opacity-0 group-hover:opacity-100 transition-opacity ${DOSHA_COLOR[opt.value]}`}>→</span>
-                        </div>
-                      </button>
-                    ))}
+                        {tQ(`q${q.id}.question`)}
+                      </h2>
+                      <QuestionHelpButton question={q} />
+                    </div>
+                    {currentQ > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentQ(currentQ - 1)}
+                        className="-mr-2 shrink-0"
+                      >
+                        <Icon name="arrow_back" className="size-4" />
+                        {t("actions.back")}
+                      </Button>
+                    )}
                   </div>
-                </div>
+                  <div className="space-y-2 p-5">
+                    {q.options.map((opt) => {
+                      const selected = answers[q.id] === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => handleAnswer(opt.value)}
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-lg p-3 text-left ring-1 ring-inset transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                            selected
+                              ? "bg-primary/8 ring-primary/30"
+                              : "bg-surface-container-lowest ring-outline-variant hover:bg-surface-container-low"
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ring-1 ring-inset ring-current/20",
+                              DOSHA_BG[opt.value],
+                              DOSHA_COLOR[opt.value]
+                            )}
+                          >
+                            {t(`doshaLetter.${opt.value}`)}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-on-surface">{tQ(`q${q.id}.options.${opt.value}.label`)}</span>
+                            <span className="mt-0.5 block text-sm leading-relaxed text-on-surface-variant">{tQ(`q${q.id}.options.${opt.value}.hint`)}</span>
+                          </span>
+                          {selected && <Icon name="check" className="size-4 text-primary" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
 
                 {/* Category mini-map */}
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex flex-wrap gap-1.5">
                   {CATEGORIES.map(({ category, firstQuestionId }) => {
                     const catQuestions = QUESTIONNAIRE.filter((cq) => cq.category === category);
                     const done = catQuestions.every((cq) => answers[cq.id]);
@@ -710,14 +839,17 @@ function CalculatorInner() {
                     return (
                       <span
                         key={category}
-                        className={`flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-full font-medium ${
-                          done ? "bg-primary/10 text-primary"
-                          : active ? "bg-surface-container-high text-on-surface font-bold"
-                          : "bg-surface-container text-on-surface-variant"
-                        }`}
+                        className={cn(
+                          "inline-flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium",
+                          done
+                            ? "bg-primary/8 text-primary"
+                            : active
+                            ? "bg-surface-container-lowest text-on-surface ring-1 ring-inset ring-outline-variant"
+                            : "bg-surface-container-low text-on-surface-variant"
+                        )}
                       >
-                        {done && <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-hidden="true" />}
-                        {active && !done && <span className="w-1.5 h-1.5 rounded-full bg-on-surface-variant" aria-hidden="true" />}
+                        {done && <Icon name="check" className="size-3.5" />}
+                        {active && !done && <span className="size-1.5 rounded-full bg-on-surface-variant" aria-hidden="true" />}
                         {tQ(`q${firstQuestionId}.category`)}
                       </span>
                     );
@@ -729,66 +861,55 @@ function CalculatorInner() {
             {/* Assessment result */}
             {assessStep === "result" && ktResult && (
               <div className="space-y-4">
-                <div className="bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
-                  <div className="bg-surface-container-low px-6 py-5">
-                    <h2 className="font-headline font-bold text-on-surface">{t("assessmentResult.title")}</h2>
-                    <p className="text-on-surface-variant text-sm mt-0.5">
-                      {assessProfileId === "__new__"
-                        ? t("assessmentResult.newProfileNote")
-                        : t("assessmentResult.updateNote")}
-                    </p>
-                  </div>
-                  <div className="px-6 py-5 space-y-4">
-                    <div className="space-y-3">
-                      {[
-                        { key: "H" as DominantType, color: "bg-primary" },
-                        { key: "S" as DominantType, color: "bg-secondary-container" },
-                        { key: "B" as DominantType, color: "bg-tertiary-container" },
-                      ].map(({ key, color }) => {
-                        const score = ktResult.scores[key];
-                        const pct = Math.round((score / QUESTIONNAIRE.length) * 100);
-                        const label = t(`assessmentResult.elements.${key}`);
-                        return (
-                          <div key={key} className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                              <span className={`font-semibold ${DOSHA_COLOR[key]}`}>{label}</span>
-                              <span className="font-bold text-on-surface">{t("assessmentResult.points", { score })}</span>
-                            </div>
-                            <Progress value={pct} aria-label={label} trackClassName="h-3" indicatorClassName={color} />
+                <Section
+                  title={t("assessmentResult.title")}
+                  description={
+                    assessProfileId === "__new__"
+                      ? t("assessmentResult.newProfileNote")
+                      : t("assessmentResult.updateNote")
+                  }
+                  bodyClassName="space-y-5"
+                >
+                  <div className="space-y-4">
+                    {(["H", "S", "B"] as DominantType[]).map((key) => {
+                      const score = ktResult.scores[key];
+                      const pct = Math.round((score / QUESTIONNAIRE.length) * 100);
+                      const label = t(`assessmentResult.elements.${key}`);
+                      return (
+                        <div key={key} className="space-y-1.5">
+                          <div className="flex justify-between gap-3 text-sm">
+                            <span className={cn("font-medium", DOSHA_COLOR[key])}>{label}</span>
+                            <span className="font-semibold tabular-nums text-on-surface">{t("assessmentResult.points", { score })}</span>
                           </div>
-                        );
-                      })}
-                    </div>
-                    <div className="bg-surface-container-low rounded-2xl p-4 text-center">
-                      <p className="text-xs text-on-surface-variant mb-1">{t("assessmentResult.ktLabel")}</p>
-                      <p className="font-headline text-4xl font-black text-on-surface">{ktResult.kt}</p>
-                    </div>
+                          <Progress value={pct} aria-label={label} trackClassName="h-2" indicatorClassName={DOSHA_FILL[key]} />
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                  <div className="rounded-lg bg-surface-container-low p-4 text-center">
+                    <p className="text-sm text-on-surface-variant">{t("assessmentResult.ktLabel")}</p>
+                    <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-on-surface">{ktResult.kt}</p>
+                  </div>
+                </Section>
 
                 <DoshaCard doshaKey={ktResult.doshaKey} kt={ktResult.kt} />
 
-                <div className="flex gap-3">
+                <div className="flex flex-col-reverse gap-3 sm:flex-row">
                   <Button
                     variant="outline"
+                    size="lg"
                     onClick={() => { setCurrentQ(0); setAnswers({}); setAssessStep("questions"); }}
-                    className="flex-1"
+                    className="sm:flex-1"
                   >
                     {t("assessmentResult.retake")}
                   </Button>
                   <Button
+                    size="lg"
                     onClick={handleSaveAssessment}
                     disabled={savingAssessment}
-                    className="flex-1 h-11 font-semibold"
+                    className="sm:flex-1"
                   >
-                    {savingAssessment ? (
-                      t("actions.saving")
-                    ) : (
-                      <>
-                        {t("assessmentResult.saveAndCalculate")}
-                        <span aria-hidden="true"> →</span>
-                      </>
-                    )}
+                    {savingAssessment ? t("actions.saving") : t("assessmentResult.saveAndCalculate")}
                   </Button>
                 </div>
               </div>
@@ -800,189 +921,157 @@ function CalculatorInner() {
             PHYSICAL METRICS INPUT
         ══════════════════════════════════════════════════════════════ */}
         {!loadError && activeTab === "calc" && !calcResult && (
-          <div className="max-w-xl space-y-6">
+          <div className="max-w-xl space-y-3">
 
             {profiles.length === 0 ? (
-              <div className="bg-surface-container-lowest rounded-3xl p-10 text-center shadow-ambient">
-                <p className="text-4xl mb-4" aria-hidden="true">🌀</p>
-                <p className="text-on-surface-variant mb-5 text-sm">{t("calc.noProfiles")}</p>
-                <Button onClick={() => { setActiveTab("assessment"); setAssessStep("info"); }}>
-                  {t("calc.startAssessment")}<span aria-hidden="true"> →</span>
-                </Button>
-              </div>
+              <EmptyState
+                icon="orbit"
+                title={t("calc.noProfiles")}
+                action={
+                  <Button onClick={() => { setActiveTab("assessment"); setAssessStep("info"); }}>
+                    {t("calc.startAssessment")}
+                  </Button>
+                }
+              />
             ) : (
               <>
-                {/* Profile selector pills — always shown so it is clear whose data is saved */}
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-                    {t("calc.whose")}
-                  </p>
-                  <div className="flex gap-2 flex-wrap" role="group" aria-label={t("calc.profileGroup")}>
-                    {profiles.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        aria-pressed={selectedProfileId === p.id}
-                        onClick={() => { setSelectedProfileId(p.id); setCalcResult(null); setRemedyResult(null); setSaved(false); }}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                          selectedProfileId === p.id
-                            ? "bg-primary text-on-primary"
-                            : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
-                        }`}
-                      >
-                        {p.name}
-                        {p.relationship === "patient" && (
-                          <span className="ml-1.5 text-[10px] font-bold opacity-80">· {tShared("relationship.patient")}</span>
-                        )}
-                      </button>
-                    ))}
+                <Section bodyClassName="space-y-6">
+                  {/* Profile selector — always shown so it is clear whose data is saved */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-on-surface">{t("calc.whose")}</p>
+                    <FilterTabs
+                      label={t("calc.profileGroup")}
+                      value={selectedProfileId}
+                      onChange={(id) => { setSelectedProfileId(id); setCalcResult(null); setRemedyResult(null); setSaved(false); }}
+                      options={profiles.map((p) => ({
+                        value: p.id,
+                        label: (
+                          <>
+                            {fullName(p)}
+                            {p.relationship === "patient" && (
+                              <span className="text-xs font-normal opacity-70">· {tShared("relationship.patient")}</span>
+                            )}
+                          </>
+                        ),
+                      }))}
+                    />
+                    {!selectedProfile && (
+                      <p className="text-sm text-amber-700" role="status">
+                        {t("calc.selectProfile")}
+                      </p>
+                    )}
                   </div>
-                  {!selectedProfile && (
-                    <p className="text-xs text-secondary" role="status">
-                      {t("calc.selectProfile")}
-                    </p>
-                  )}
-                </div>
 
-                {/* 3-column metrics row */}
-                <div className="grid grid-cols-3 gap-3">
-                  {/* Өндөр — профайлаас */}
+                  {/* Measurements: height, age and sex come from the profile; weight is entered. */}
                   <div>
-                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">
-                      {t("calc.height")}
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                      <div>
+                        <p className={FIELD_LABEL}>{t("calc.height")}</p>
+                        <div className={READ_ONLY_FIELD}>{selectedProfile?.heightCm ?? "—"}</div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="calc-weight" className={FIELD_LABEL}>
+                          {t("calc.weight")}
+                        </Label>
+                        <Input
+                          id="calc-weight"
+                          type="number"
+                          inputMode="decimal"
+                          value={weightKg}
+                          onChange={(e) => setWeightKg(e.target.value)}
+                          placeholder="70"
+                          min={WEIGHT_MIN_KG}
+                          max={WEIGHT_MAX_KG}
+                          step="0.1"
+                          aria-invalid={weightKg !== "" && !weightValid}
+                          aria-describedby={weightKg !== "" && !weightValid ? "calc-weight-error" : undefined}
+                          className="tabular-nums"
+                        />
+                      </div>
+
+                      <div>
+                        <p className={FIELD_LABEL}>{t("calc.age")}</p>
+                        <div className={READ_ONLY_FIELD}>{selectedProfile ? calcAge(selectedProfile.birthDate) : "—"}</div>
+                      </div>
+
+                      <div>
+                        <p className={FIELD_LABEL}>{t("calc.sex")}</p>
+                        <div className={READ_ONLY_FIELD}>
+                          {selectedProfile ? (
+                            <>
+                              <Icon name={SEX_ICON[selectedProfile.sex]} className="size-4 text-on-surface-variant" />
+                              {tShared(`sex.${selectedProfile.sex}`)}
+                            </>
+                          ) : (
+                            "—"
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {weightKg !== "" && !weightValid && (
+                      <p id="calc-weight-error" className="mt-2 text-xs text-red-700" role="alert">
+                        {t("calc.weightRange", { min: WEIGHT_MIN_KG, max: WEIGHT_MAX_KG })}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Улирал */}
+                  <div>
+                    <p id="calc-season-label" className={FIELD_LABEL}>
+                      {t("calc.season")}
                     </p>
-                    <div className="h-14 bg-surface-container rounded-xl flex items-center justify-center font-headline text-xl font-bold text-on-surface-variant/70">
-                      {selectedProfile?.heightCm ?? "—"}
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="group" aria-labelledby="calc-season-label">
+                      {SEASONS.map(({ key, icon }) => (
+                        <button
+                          key={key}
+                          type="button"
+                          aria-pressed={season === key}
+                          onClick={() => setSeason(key)}
+                          className={optionTileClass(season === key)}
+                        >
+                          <Icon name={icon} className="size-4" />
+                          {tShared(`season.${key}`)}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Жин — оруулах */}
-                  <div>
-                    <Label
-                      htmlFor="calc-weight"
-                      className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2"
-                    >
-                      {t("calc.weight")}
+                  {/* Тэмдэглэл */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="calc-notes" className="text-on-surface">
+                      {t("calc.notes")} <span className="font-normal text-on-surface-variant">{t("calc.optional")}</span>
                     </Label>
                     <Input
-                      id="calc-weight"
-                      type="number"
-                      inputMode="decimal"
-                      value={weightKg}
-                      onChange={(e) => setWeightKg(e.target.value)}
-                      placeholder="70"
-                      min={WEIGHT_MIN_KG}
-                      max={WEIGHT_MAX_KG}
-                      step="0.1"
-                      aria-invalid={weightKg !== "" && !weightValid}
-                      aria-describedby={weightKg !== "" && !weightValid ? "calc-weight-error" : undefined}
-                      className="h-14 rounded-xl text-center font-headline text-xl font-bold bg-surface-container-low border-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      id="calc-notes"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder={t("calc.notesPlaceholder")}
                     />
                   </div>
 
-                  {/* Нас — профайлаас */}
-                  <div>
-                    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">
-                      {t("calc.age")}
-                    </p>
-                    <div className="h-14 bg-surface-container rounded-xl flex items-center justify-center font-headline text-xl font-bold text-on-surface-variant/70">
-                      {selectedProfile ? calcAge(selectedProfile.birthDate) : "—"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Хүйс */}
-                <div>
-                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">
-                    {t("calc.sex")}
-                  </p>
-                  {/* Read-only (comes from the profile): screen readers get the value as text. */}
-                  {selectedProfile && (
-                    <p className="sr-only">{tShared(`sex.${selectedProfile.sex}`)}</p>
-                  )}
-                  <div className="grid grid-cols-2 gap-3" aria-hidden="true">
-                    {SEX_OPTIONS.map(({ value, icon }) => (
-                      <div
-                        key={value}
-                        className={`flex items-center justify-center gap-2 h-12 rounded-full font-semibold text-sm transition-all ${
-                          selectedProfile?.sex === value
-                            ? "bg-primary text-on-primary shadow-lg shadow-primary/20"
-                            : "bg-surface-container-low text-on-surface-variant"
-                        }`}
-                      >
-                        <span className="text-base">{icon}</span>
-                        {tShared(`sex.${value}`)}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Улирал */}
-                <div>
-                  <p id="calc-season-label" className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-3">
-                    {t("calc.season")}
-                  </p>
-                  <div className="grid grid-cols-4 gap-2" role="group" aria-labelledby="calc-season-label">
-                    {SEASONS.map(({ key, icon }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        aria-pressed={season === key}
-                        onClick={() => setSeason(key)}
-                        className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all group ${
-                          season === key
-                            ? "bg-surface-container-lowest ring-2 ring-primary shadow-ambient text-primary"
-                            : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-primary"
-                        }`}
-                      >
-                        <span aria-hidden="true" className={`text-2xl leading-none transition-transform duration-200 ${season !== key ? "motion-safe:group-hover:scale-110" : ""}`}>
-                          {icon}
-                        </span>
-                        <span className="text-xs font-bold">{tShared(`season.${key}`)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Тэмдэглэл */}
-                <div>
-                  <Label htmlFor="calc-notes" className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    {t("calc.notes")} <span className="normal-case font-normal text-on-surface-variant">{t("calc.optional")}</span>
-                  </Label>
-                  <Input
-                    id="calc-notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={t("calc.notesPlaceholder")}
-                    className="mt-2 bg-surface-container-low border-none h-11 rounded-xl"
-                  />
-                </div>
-
-                {weightKg !== "" && !weightValid && (
-                  <p id="calc-weight-error" className="text-xs text-secondary" role="alert">
-                    {t("calc.weightRange", { min: WEIGHT_MIN_KG, max: WEIGHT_MAX_KG })}
-                  </p>
-                )}
-
-                {/* Calculate button */}
-                <Button
-                  className="w-full h-14 font-extrabold text-base shadow-2xl shadow-primary/30 motion-safe:hover:scale-[1.01] motion-safe:active:scale-95 transition-all gap-2"
-                  disabled={!weightValid || !selectedProfile?.ktScore}
-                  onClick={handleCalculate}
-                >
-                  <span className="material-symbols-outlined text-[20px] icon-filled" aria-hidden="true">analytics</span>
-                  {t("calc.calculate")}
-                </Button>
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    disabled={!weightValid || !selectedProfile?.ktScore}
+                    onClick={handleCalculate}
+                  >
+                    <Icon name="analytics" className="size-4" />
+                    {t("calc.calculate")}
+                  </Button>
+                </Section>
 
                 {/* Assessment re-do link */}
                 {selectedProfile && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="w-full"
                     onClick={() => { setActiveTab("assessment"); startAssessment(selectedProfile.id); }}
-                    className="w-full text-xs text-primary hover:underline underline-offset-2 text-center"
                   >
                     {t("calc.retakeAssessment")}
-                  </button>
+                  </Button>
                 )}
               </>
             )}
@@ -996,107 +1085,86 @@ function CalculatorInner() {
           // Status always comes from the engine; the UI never re-derives it from numbers.
           const statusLabel = tShared(`status.${calcResult.status}`);
           const style       = STATUS_STYLE[calcResult.status];
-          const statusColor = style.text;
-          const statusBg    = style.bg;
-          const statusBadge = style.badge;
-          const statusDot   = style.dot;
           const deviationExplanation = t(`bediResult.explanation.${calcResult.status}`);
 
           return (
             <div className="max-w-xl space-y-4">
 
-              {/* ── Хиро статус карт ── */}
-              <div className={`relative overflow-hidden rounded-3xl px-7 py-6 border ${statusBg}`}>
-                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-[0.04] bg-current pointer-events-none" aria-hidden="true" />
-
-                {/* Статус ба BEDI индекс */}
-                <div className="flex items-start justify-between gap-5 flex-wrap mb-5">
+              {/* ── Status, index and deviation ── */}
+              <section className="rounded-xl bg-surface-container-lowest p-5 shadow-ambient">
+                <p className="text-sm font-medium text-on-surface-variant">{t("bediResult.heading")}</p>
+                <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
-                      {t("bediResult.heading")}
-                    </p>
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold mb-4 ${statusBadge}`}>
-                      <span className={`w-2 h-2 rounded-full motion-safe:animate-pulse ${statusDot}`} aria-hidden="true" />
-                      {statusLabel}
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className={`font-headline text-5xl font-black ${statusColor}`}>{calcResult.bedi}</span>
-                      <span className="text-sm text-on-surface-variant font-medium">{t("bediResult.index")}</span>
+                    <StatusBadge tone={style.tone}>{statusLabel}</StatusBadge>
+                    <div className="mt-3 flex items-baseline gap-2">
+                      <span className={cn("text-4xl font-semibold tabular-nums tracking-tight", style.text)}>{calcResult.bedi}</span>
+                      <span className="text-sm text-on-surface-variant">{t("bediResult.index")}</span>
                     </div>
                   </div>
 
                   {/* Хазайлт (Δ) */}
-                  <div className="bg-surface-container-lowest/80 rounded-2xl px-5 py-4 text-center shrink-0">
-                    <p className="text-[10px] text-on-surface-variant uppercase tracking-wide font-semibold mb-1">
-                      {t("bediResult.deviation")}
-                    </p>
-                    <p className={`font-headline text-3xl font-black ${statusColor}`}>
+                  <div className="shrink-0 rounded-lg bg-surface-container-low px-4 py-3 text-center">
+                    <p className="text-xs font-medium text-on-surface-variant">{t("bediResult.deviation")}</p>
+                    <p className={cn("mt-1 text-2xl font-semibold tabular-nums", style.text)}>
                       {calcResult.deviation >= 0 ? "+" : ""}{calcResult.deviation}
                     </p>
-                    <p className="text-[10px] text-on-surface-variant mt-1">{statusLabel}</p>
+                    <p className="mt-0.5 text-xs text-on-surface-variant">{statusLabel}</p>
                   </div>
                 </div>
 
                 {/* Тайлбар */}
-                <div className="pt-4 border-t border-current/10">
-                  <p className="text-sm text-on-surface leading-relaxed">{deviationExplanation}</p>
-                </div>
-              </div>
+                <p className="mt-5 border-t border-outline-variant pt-4 text-sm leading-relaxed text-on-surface">
+                  {deviationExplanation}
+                </p>
+              </section>
 
               {/* ── Радар график ── */}
               {selectedProfile.doshaType && (
-                <div className="bg-surface-container-lowest rounded-3xl shadow-ambient overflow-hidden">
-                  <div className="bg-surface-container-low px-6 py-4 border-b border-surface-container-high flex items-center justify-between">
-                    <div>
-                      <h2 className="font-headline font-bold text-on-surface text-sm">{t("bediResult.chartTitle")}</h2>
-                      <p className="text-[11px] text-on-surface-variant mt-0.5">
-                        {t("bediResult.chartLegend")}
-                      </p>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold ${statusBadge}`}>
-                      {doshaLabel(selectedProfile.doshaType)}
-                    </div>
-                  </div>
-                  <div className="px-6 py-5 flex justify-center">
-                    <DoshaRadar
-                      doshaKey={selectedProfile.doshaType as DoshaKey}
-                      deviation={calcResult.deviation}
-                      status={calcResult.status}
-                      size={280}
-                    />
-                  </div>
-                </div>
+                <Section
+                  title={t("bediResult.chartTitle")}
+                  description={t("bediResult.chartLegend")}
+                  actions={<StatusBadge tone="neutral" dot={false}>{doshaLabel(selectedProfile.doshaType)}</StatusBadge>}
+                  bodyClassName="flex justify-center"
+                >
+                  <DoshaRadar
+                    doshaKey={selectedProfile.doshaType as DoshaKey}
+                    deviation={calcResult.deviation}
+                    status={calcResult.status}
+                    size={280}
+                  />
+                </Section>
               )}
 
               {/* ── Хэмжилтийн дэлгэрэнгүй ── */}
-              <div className="grid grid-cols-3 gap-3">
+              <dl className="grid grid-cols-3 divide-x divide-outline-variant rounded-xl bg-surface-container-lowest shadow-ambient">
                 {[
                   { key: "age", value: `${calcAge(selectedProfile.birthDate)}` },
                   { key: "weight", value: weightKg },
                   { key: "height", value: `${selectedProfile.heightCm}` },
                 ].map(({ key, value }) => (
-                  <div key={key} className="bg-surface-container-lowest rounded-2xl shadow-ambient p-3 text-center">
-                    <p className="text-[10px] text-on-surface-variant uppercase tracking-wide font-semibold mb-1">{t(`bediResult.metrics.${key}.label`)}</p>
-                    <p className="font-headline text-xl font-bold text-on-surface">{value}</p>
-                    <p className="text-[10px] text-on-surface-variant">{t(`bediResult.metrics.${key}.unit`)}</p>
+                  <div key={key} className="px-3 py-4 text-center">
+                    <dt className="text-xs font-medium text-on-surface-variant">{t(`bediResult.metrics.${key}.label`)}</dt>
+                    <dd className="mt-1">
+                      <span className="text-xl font-semibold tabular-nums text-on-surface">{value}</span>
+                      <span className="ml-1 text-xs text-on-surface-variant">{t(`bediResult.metrics.${key}.unit`)}</span>
+                    </dd>
                   </div>
                 ))}
-              </div>
+              </dl>
 
               {/* ── Товчнууд ── */}
-              <div className="flex gap-3">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  size="lg"
+                  className="sm:flex-1"
                   onClick={() => { setCalcResult(null); setRemedyResult(null); }}
                 >
-                  <span className="material-symbols-outlined text-[16px] mr-1.5" aria-hidden="true">arrow_back</span>
+                  <Icon name="arrow_back" className="size-4" />
                   {t("bediResult.recalculate")}
                 </Button>
-                <Button className="flex-1" onClick={handleSaveBEDI} disabled={saving || saved}>
-                  <span className="material-symbols-outlined text-[16px] mr-1.5" aria-hidden="true">
-                    {saved ? "check" : "save"}
-                  </span>
+                <Button size="lg" className="sm:flex-1" onClick={handleSaveBEDI} disabled={saving || saved}>
+                  <Icon name={saved ? "check" : "save"} className="size-4" />
                   {saving ? t("actions.saving") : saved ? t("bediResult.saved") : t("bediResult.save")}
                 </Button>
               </div>
@@ -1107,231 +1175,151 @@ function CalculatorInner() {
             </div>
           );
         })()}
-      </main>
+      </div>
 
       {/* ── RIGHT: Dynamic helper panel ─────────────────────────────── */}
-      <aside className="hidden xl:block w-64 shrink-0">
-        <div className="sticky top-28">
-          <div className="bg-surface-container-lowest rounded-2xl shadow-ambient overflow-hidden">
+      <aside className="hidden w-64 shrink-0 xl:block">
+        <div className="sticky top-10 rounded-xl bg-surface-container-lowest p-5 shadow-ambient">
 
-            {/* Constitution helper — calc input */}
-            {activeTab === "calc" && !calcResult && (
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">psychology</span>
-                  </div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm">{t("guide.constitution.title")}</h3>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
-                  {t("guide.constitution.intro")}
-                </p>
-                <div className="space-y-2.5">
-                  {CONSTITUTION_CARDS.map(({ key, bg, text, dot }) => (
-                    <div key={key} className={`rounded-xl p-3 ${bg}`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${dot}`} />
-                        <p className={`font-bold text-xs ${text}`}>{t(`guide.constitution.${key}.title`)}</p>
-                      </div>
-                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{t(`guide.constitution.${key}.desc`)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Constitution helper — calc input */}
+          {activeTab === "calc" && !calcResult && (
+            <>
+              <GuideHeader icon="psychology" title={t("guide.constitution.title")} />
+              <GuideIntro>{t("guide.constitution.intro")}</GuideIntro>
+              <ul className="space-y-2">
+                {CONSTITUTION_CARDS.map(({ key, fill }) => (
+                  <GuideItem
+                    key={key}
+                    marker={<Dot fill={fill} />}
+                    title={t(`guide.constitution.${key}.title`)}
+                    body={t(`guide.constitution.${key}.desc`)}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
 
-            {/* BEDI result guide */}
-            {activeTab === "calc" && calcResult && (
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">monitoring</span>
-                  </div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm">{t("guide.bedi.title")}</h3>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
-                  {t("guide.bedi.intro")}
-                </p>
-                <div className="space-y-2.5">
-                  {([
-                    { status: "khii_excess", dot: "bg-primary" },
-                    { status: "balanced", dot: "bg-surface-container-high" },
-                    { status: "shar_badgan_excess", dot: "bg-secondary-container" },
-                  ] as { status: BEDIResult["status"]; dot: string }[]).map(({ status, dot }) => {
-                    const active = calcResult.status === status;
-                    return (
-                      <div key={status} className={`rounded-xl p-3 transition-all ${active ? "bg-primary/8 ring-1 ring-primary/20" : "bg-surface-container-low"}`}>
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className={`w-2 h-2 rounded-full ${dot}`} />
-                          <p className={`font-bold text-xs ${active ? "text-primary" : "text-on-surface"}`}>{tShared(`status.${status}`)}</p>
-                          {active && <span className="ml-auto text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">{t("guide.bedi.current")}</span>}
-                        </div>
-                        <p className="text-[10px] text-on-surface-variant leading-relaxed">{t(`guide.bedi.body.${status}`)}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          {/* BEDI result guide */}
+          {activeTab === "calc" && calcResult && (
+            <>
+              <GuideHeader icon="monitoring" title={t("guide.bedi.title")} />
+              <GuideIntro>{t("guide.bedi.intro")}</GuideIntro>
+              <ul className="space-y-2">
+                {(["khii_excess", "balanced", "shar_badgan_excess"] as BEDIResult["status"][]).map((status) => {
+                  const active = calcResult.status === status;
+                  return (
+                    <GuideItem
+                      key={status}
+                      active={active}
+                      marker={<Dot fill={STATUS_STYLE[status].dot} />}
+                      title={tShared(`status.${status}`)}
+                      body={t(`guide.bedi.body.${status}`)}
+                      badge={active ? <StatusBadge tone="primary" dot={false} className="h-5 px-2">{t("guide.bedi.current")}</StatusBadge> : undefined}
+                    />
+                  );
+                })}
+              </ul>
+            </>
+          )}
 
-            {/* Assessment: dosha intro */}
-            {activeTab === "assessment" && assessStep === "profile-select" && (
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-lg bg-tertiary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[14px] text-tertiary" aria-hidden="true">auto_awesome</span>
-                  </div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm">{t("guide.intro.title")}</h3>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
-                  {t("guide.intro.text")}
-                </p>
-                <div className="space-y-2.5">
-                  {([
-                    { key: "H", dot: "bg-primary", text: "text-primary" },
-                    { key: "S", dot: "bg-secondary-container", text: "text-secondary" },
-                    { key: "B", dot: "bg-tertiary-container", text: "text-tertiary" },
-                  ] as const).map(({ key, dot, text }) => (
-                    <div key={key} className="rounded-xl p-3 bg-surface-container-low">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${dot}`} />
-                        <p className={`font-bold text-xs ${text}`}>{t(`guide.intro.${key}.label`)}</p>
-                      </div>
-                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{t(`guide.intro.${key}.body`)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Assessment: dosha intro */}
+          {activeTab === "assessment" && assessStep === "profile-select" && (
+            <>
+              <GuideHeader icon="auto_awesome" title={t("guide.intro.title")} />
+              <GuideIntro>{t("guide.intro.text")}</GuideIntro>
+              <ul className="space-y-2">
+                {(["H", "S", "B"] as const).map((key) => (
+                  <GuideItem
+                    key={key}
+                    marker={<Dot fill={DOSHA_FILL[key]} />}
+                    title={t(`guide.intro.${key}.label`)}
+                    body={t(`guide.intro.${key}.body`)}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
 
-            {/* Assessment: info form guide */}
-            {activeTab === "assessment" && assessStep === "info" && (
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[14px] text-secondary" aria-hidden="true">info</span>
-                  </div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm">{t("guide.info.title")}</h3>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
-                  {t("guide.info.intro")}
-                </p>
-                <div className="space-y-2.5">
-                  {([
-                    { key: "heightWeight", dot: "bg-primary", text: "text-primary" },
-                    { key: "age", dot: "bg-secondary-container", text: "text-secondary" },
-                    { key: "sex", dot: "bg-tertiary-container", text: "text-tertiary" },
-                  ] as const).map(({ key, dot, text }) => (
-                    <div key={key} className="rounded-xl p-3 bg-surface-container-low">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${dot}`} />
-                        <p className={`font-bold text-xs ${text}`}>{t(`guide.info.${key}.label`)}</p>
-                      </div>
-                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{t(`guide.info.${key}.body`)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Assessment: info form guide */}
+          {activeTab === "assessment" && assessStep === "info" && (
+            <>
+              <GuideHeader icon="info" title={t("guide.info.title")} />
+              <GuideIntro>{t("guide.info.intro")}</GuideIntro>
+              <ul className="space-y-2">
+                {([
+                  { key: "heightWeight", icon: "height" },
+                  { key: "age", icon: "cake" },
+                  { key: "sex", icon: "wc" },
+                ] as const).map(({ key, icon }) => (
+                  <GuideItem
+                    key={key}
+                    marker={<Icon name={icon} className="size-4 text-on-surface-variant" />}
+                    title={t(`guide.info.${key}.label`)}
+                    body={t(`guide.info.${key}.body`)}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
 
-            {/* Assessment: questions guide */}
-            {activeTab === "assessment" && assessStep === "questions" && q && (
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[14px] text-primary" aria-hidden="true">help</span>
+          {/* Assessment: questions guide */}
+          {activeTab === "assessment" && assessStep === "questions" && q && (
+            <>
+              <GuideHeader icon="help" title={tQ(`q${q.id}.category`)} />
+              <GuideIntro>{t("guide.questions.hint")}</GuideIntro>
+              {QUESTION_HELP[q.id] && (
+                <div className="mb-4">
+                  <div className="rounded-lg bg-surface-container-low p-1.5">
+                    <HelpIllustration
+                      questionId={q.id}
+                      className="h-auto w-full text-on-surface"
+                    />
                   </div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm">{tQ(`q${q.id}.category`)}</h3>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-3">
-                  {t("guide.questions.hint")}
-                </p>
-                {QUESTION_HELP[q.id] && (
-                  <div className="mb-3">
-                    <div className="rounded-xl bg-surface-container-low p-1.5">
-                      <HelpIllustration
-                        questionId={q.id}
-                        className="w-full h-auto text-on-surface"
-                      />
-                    </div>
-                    <p className="text-[10px] text-on-surface-variant leading-relaxed mt-1.5 px-0.5">
-                      {tHelp(`q${q.id}.instruction`)}
-                    </p>
-                  </div>
-                )}
-                <div className="space-y-2.5">
-                  {([
-                    { dot: "bg-primary", text: "text-primary", value: "H" as DominantType },
-                    { dot: "bg-secondary-container", text: "text-secondary", value: "S" as DominantType },
-                    { dot: "bg-tertiary-container", text: "text-tertiary", value: "B" as DominantType },
-                  ]).map(({ dot, text, value }) => {
-                    // Question-specific outcomes when a help test exists, otherwise the generic text.
-                    const hasHelp = Boolean(QUESTION_HELP[q.id]);
-                    const label = hasHelp
-                      ? tHelp(`q${q.id}.outcomes.${value}.label`)
-                      : t(`guide.questions.${value}.label`);
-                    const body = hasHelp
-                      ? tHelp(`q${q.id}.outcomes.${value}.description`)
-                      : t(`guide.questions.${value}.body`);
-                    return (
-                      <div key={value} className="rounded-xl p-3 bg-surface-container-low">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className={`w-2 h-2 rounded-full ${dot}`} />
-                          <p className={`font-bold text-xs ${text}`}>{label}</p>
-                        </div>
-                        <p className="text-[10px] text-on-surface-variant leading-relaxed">{body}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-3 pt-3 border-t border-outline-variant/15">
-                  <p className="text-[10px] text-on-surface-variant">
-                    {t("quiz.questionOf", { current: currentQ + 1, total: QUESTIONNAIRE.length })}
+                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant">
+                    {tHelp(`q${q.id}.instruction`)}
                   </p>
                 </div>
-              </div>
-            )}
-
-            {/* Assessment: result / Kt guide */}
-            {activeTab === "assessment" && assessStep === "result" && (
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-lg bg-tertiary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[14px] text-tertiary" aria-hidden="true">biotech</span>
-                  </div>
-                  <h3 className="font-headline font-bold text-on-surface text-sm">{t("guide.kt.title")}</h3>
-                </div>
-                <p className="text-[11px] text-on-surface-variant leading-relaxed mb-4">
-                  {t("guide.kt.intro")}
-                </p>
-                <div className="space-y-2.5">
-                  {([
-                    { key: "low", dot: "bg-primary", text: "text-primary" },
-                    { key: "balanced", dot: "bg-surface-container-high", text: "text-on-surface" },
-                    { key: "high", dot: "bg-secondary-container", text: "text-secondary" },
-                  ] as const).map(({ key, dot, text }) => (
-                    <div key={key} className="rounded-xl p-3 bg-surface-container-low">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${dot}`} />
-                        <p className={`font-bold text-xs ${text}`}>{t(`guide.kt.${key}.label`)}</p>
-                      </div>
-                      <p className="text-[10px] text-on-surface-variant leading-relaxed">{t(`guide.kt.${key}.body`)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Decorative footer — always visible */}
-            <div className="h-20 bg-linear-to-br from-primary/15 via-tertiary/10 to-secondary/10 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 flex items-end justify-center pb-2">
-                <span className="text-5xl opacity-50" aria-hidden="true">🌿</span>
-              </div>
-              <p className="relative text-[10px] font-bold text-primary uppercase tracking-widest">
-                {tc("appName")}
+              )}
+              <ul className="space-y-2">
+                {(["H", "S", "B"] as DominantType[]).map((value) => {
+                  // Question-specific outcomes when a help test exists, otherwise the generic text.
+                  const hasHelp = Boolean(QUESTION_HELP[q.id]);
+                  const label = hasHelp
+                    ? tHelp(`q${q.id}.outcomes.${value}.label`)
+                    : t(`guide.questions.${value}.label`);
+                  const body = hasHelp
+                    ? tHelp(`q${q.id}.outcomes.${value}.description`)
+                    : t(`guide.questions.${value}.body`);
+                  return <GuideItem key={value} marker={<Dot fill={DOSHA_FILL[value]} />} title={label} body={body} />;
+                })}
+              </ul>
+              <p className="mt-4 border-t border-outline-variant pt-3 text-xs text-on-surface-variant">
+                {t("quiz.questionOf", { current: currentQ + 1, total: QUESTIONNAIRE.length })}
               </p>
-            </div>
-          </div>
+            </>
+          )}
+
+          {/* Assessment: result / Kt guide */}
+          {activeTab === "assessment" && assessStep === "result" && (
+            <>
+              <GuideHeader icon="biotech" title={t("guide.kt.title")} />
+              <GuideIntro>{t("guide.kt.intro")}</GuideIntro>
+              <ul className="space-y-2">
+                {([
+                  { key: "low", fill: DOSHA_FILL.H },
+                  { key: "balanced", fill: STATUS_STYLE.balanced.dot },
+                  { key: "high", fill: DOSHA_FILL.S },
+                ] as const).map(({ key, fill }) => (
+                  <GuideItem
+                    key={key}
+                    marker={<Dot fill={fill} />}
+                    title={t(`guide.kt.${key}.label`)}
+                    body={t(`guide.kt.${key}.body`)}
+                  />
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </aside>
 
@@ -1344,12 +1332,7 @@ function CalculatorInner() {
 export default function CalculatorPage() {
   const tc = useTranslations("common");
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-64" role="status">
-        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent motion-safe:animate-spin" aria-hidden="true" />
-        <span className="sr-only">{tc("loading")}</span>
-      </div>
-    }>
+    <Suspense fallback={<PageLoading label={tc("loading")} />}>
       <CalculatorInner />
     </Suspense>
   );

@@ -65,3 +65,19 @@ export function formatDate(value: Date | string, locale: string, style: DateStyl
       return `${year} оны ${month}-р сарын ${day}`;
   }
 }
+
+/**
+ * Date and 24-hour time in the clinic's time zone:
+ * mn "2026.10.23 14:05", en "23/10/2026 14:05".
+ */
+export function formatDateTime(value: Date | string, locale: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: APP_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+  return `${formatDate(date, locale, "numeric")} ${time}`;
+}

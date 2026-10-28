@@ -21,11 +21,11 @@
   },
   "header": {
     "bediResult": {
-      "title": "BEDI Index Calculation",
+      "title": "BEDI index calculation",
       "subtitle": "Your analysis is complete. Review the result and save it."
     },
     "measurement": {
-      "title": "Enter Measurements",
+      "title": "Enter measurements",
       "subtitle": "Enter the biometric data and the current season."
     },
     "questions": {
@@ -33,7 +33,7 @@
       "subtitle": "Answer from your innate nature — not from how you feel today."
     },
     "assessmentResult": {
-      "title": "Assessment Result",
+      "title": "Assessment result",
       "subtitle": "Your Kt coefficient has been determined. Save it to continue to the BEDI calculation."
     },
     "profile": {
@@ -59,10 +59,14 @@
     "newProfileDesc": "Details and assessment for a new person"
   },
   "form": {
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Father's or mother's name",
     "name": "Name",
     "namePlaceholder": "Your name",
     "birthDate": "Date of birth",
     "height": "Height (cm)",
+    "weight": "Current weight (kg)",
+    "weightHint": "Weight changes, so you update it with each calculation.",
     "sex": "Sex",
     "relationship": "Relationship",
     "startQuestions": "Start questions"
@@ -105,8 +109,8 @@
     "deviation": "Deviation (Δ)",
     "explanation": {
       "balanced": "Your Khii, Shar and Badgan are in balance. Keep up your current lifestyle.",
-      "khii_excess": "Khii (Wind) is in excess. Add warm meals, a restful routine and warming exercises.",
-      "shar_badgan_excess": "Shar (Fire) or Badgan (Earth) is dominant. Light meals and exercise that avoids the cold are recommended."
+      "khii_excess": "Khii (Wind) is in excess. Warm meals and a regular, restful routine are needed. See the detailed advice below.",
+      "shar_badgan_excess": "Shar (Fire) or Badgan (Earth) is dominant. See the food and lifestyle advice below."
     },
     "chartTitle": "Constitution balance chart",
     "chartLegend": "Dashed grey — base constitution  ·  Coloured — current state",
@@ -121,7 +125,7 @@
   },
   "guide": {
     "constitution": {
-      "title": "Body Type Reference",
+      "title": "Body type reference",
       "intro": "A reference to help identify the basic body type.",
       "light": {
         "title": "Light build",
@@ -143,7 +147,7 @@
       "body": {
         "khii_excess": "Khii is dominant. Warm meals and a restful routine are needed.",
         "balanced": "Khii, Shar and Badgan are in balance. Keep your current routine.",
-        "shar_badgan_excess": "Shar/Badgan is dominant. Light meals and cooling exercise."
+        "shar_badgan_excess": "Shar/Badgan is dominant. See the food and lifestyle advice below."
       }
     },
     "intro": {
@@ -163,7 +167,7 @@
       }
     },
     "info": {
-      "title": "Why Is This Needed?",
+      "title": "Why is this needed?",
       "intro": "This information is used to calculate the BEDI index accurately.",
       "heightWeight": {
         "label": "Height & weight",
@@ -194,7 +198,7 @@
       }
     },
     "kt": {
-      "title": "Kt Coefficient",
+      "title": "Kt coefficient",
       "intro": "Kt is the baseline of your constitutional balance and is used in the BEDI calculation.",
       "low": {
         "label": "Kt < 1.0 · Khii dominant",

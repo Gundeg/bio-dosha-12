@@ -1,34 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ClinicalIntakeDocument } from "@/lib/clinicalIntakePdf";
 import { ALL_THERAPY_KEYS } from "@/lib/clinicalConstants";
+import { actorOf, requireAuth } from "@/lib/authz";
+import { handle, notFound } from "@/lib/http";
+import { loadClinicalPatient } from "@/lib/clinical";
+import { assertFeature, getEffectivePlan } from "@/lib/entitlements";
+import { audit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
-export async function GET(
-  _: NextRequest,
+export const GET = handle(async (
+  req: NextRequest,
   { params }: { params: Promise<{ id: string; intakeId: string }> }
-) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "PRACTITIONER") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+) => {
+  const ctx = await requireAuth();
   const { id, intakeId } = await params;
+  const { patient, membership } = await loadClinicalPatient(ctx, id);
+  assertFeature(await getEffectivePlan({ organizationId: membership.organizationId }), "pdfReports", "PDF тайлан");
 
   const intake = await prisma.clinicalIntake.findFirst({
-    where: {
-      id: intakeId,
-      practitionerId: session.user.id,
-      profile: {
-        asPatient: { some: { id, practitionerId: session.user.id } },
-      },
-    },
-    include: { profile: true, treatmentLog: true },
+    where: { id: intakeId, profileId: patient.profileId, organizationId: patient.organizationId },
+    include: { profile: true, treatmentLog: true, practitioner: { select: { name: true } } },
   });
-  if (!intake) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!intake) throw notFound();
 
   const treatmentLog = intake.treatmentLog
     ? Object.fromEntries(
@@ -77,9 +73,20 @@ export async function GET(
         address: intake.profile.address,
         occupation: intake.profile.occupation,
       },
-      doctorName: session.user.name ?? "",
+      // The intake's author signs the card; fall back to the person printing it.
+      doctorName: intake.practitioner?.name ?? ctx.name,
     })
   );
+
+  await audit({
+    action: "intake.pdf_exported",
+    actor: actorOf(ctx),
+    organizationId: membership.organizationId,
+    targetType: "intake",
+    targetId: intakeId,
+    meta: { patientId: patient.id },
+    headers: req.headers,
+  });
 
   return new NextResponse(buffer as unknown as BodyInit, {
     headers: {
@@ -89,4 +96,4 @@ export async function GET(
       "cache-control": "private, no-store",
     },
   });
-}
+});

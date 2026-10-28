@@ -84,11 +84,14 @@
   Netlify's edge middleware it wins. `src/__tests__/proxyMatcher.test.ts` guards this.
 - **Rule:** A sign-out is confirmed by reading the session back, never by the status of the
   sign-out request (`signOutHere` in `src/components/auth/session.ts`).
-- **Rule:** Sign-in, sign-out and account switching are checked on the Netlify deploy
-  preview before merge. A local `next start` merges middleware and handler cookies in a
-  different order and can pass while production fails.
+- **Rule:** Sign-in, sign-out and account switching are checked on Netlify, not only with
+  a local `next start`, which merges middleware and handler cookies in a different order
+  and can pass while production fails. Deploy previews have no database (DATABASE_URL is
+  production-only), so these flows are checked on production right after the deploy, with
+  the previous deploy ready to republish.
 - **Why:** on 2026-10-29 "Гараад өөр бүртгэлээр нэвтрэх" did nothing on production: six
   sign-out requests all answered 200, yet the person stayed signed in. Locally the same flow
   had passed, because there the handler's cookie deletion came last.
 - **How to apply:** for any change that touches cookies, sessions or the proxy, give the
-  owner the deploy-preview steps to try before saying it is fixed.
+  owner the steps to try on production after the deploy, check the function logs myself,
+  and say how to roll back, before saying it is fixed.

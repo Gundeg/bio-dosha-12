@@ -3,7 +3,6 @@
   "title": "Family monitoring",
   "subtitle": "Tracking the BEDI index of {count, plural, one {# member} other {# members}}",
   "addMember": "Add member",
-  "selfBadge": "YOU",
   "ageValue": "age {age}",
   "heightValue": "{height} cm",
   "sexShort": {

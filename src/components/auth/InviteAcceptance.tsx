@@ -28,6 +28,7 @@ import {
 import { loginHref } from "./safeNext";
 import { refreshSessionClaims, signInWithPassword, navigateAfterAuth } from "./session";
 import { CardSkeleton, LoadError } from "./states";
+import { Icon } from "@/components/ui/icon";
 
 /** GET /api/public/invite/[token] (src/app/api/public/invite/[token]/route.ts). */
 interface InviteInfo {
@@ -110,29 +111,23 @@ function InviteDetails({ invite, token, onGone }: { invite: InviteInfo; token: s
       <div className="space-y-4">
         {roleKey && (
           <div className="rounded-xl bg-surface-container-low p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("invite.roleLabel")}</p>
-            <p className="mt-1 font-headline text-lg font-bold text-on-surface">{t(`roles.${roleKey}.name`)}</p>
+            <p className="text-xs font-medium text-on-surface-variant">{t("invite.roleLabel")}</p>
+            <p className="mt-1 text-base font-semibold text-on-surface">{t(`roles.${roleKey}.name`)}</p>
             <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">{t(`roles.${roleKey}.desc`)}</p>
           </div>
         )}
 
         <ul className="space-y-2.5 text-sm leading-relaxed text-on-surface">
           <li className="flex gap-2.5">
-            <span className="material-symbols-outlined shrink-0 text-[20px] text-primary" aria-hidden="true">
-              mail
-            </span>
+            <Icon name="mail" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
             <span className="min-w-0 break-words">{t("invite.forEmail", { email: invite.email })}</span>
           </li>
           <li className="flex gap-2.5">
-            <span className="material-symbols-outlined shrink-0 text-[20px] text-primary" aria-hidden="true">
-              phonelink_lock
-            </span>
+            <Icon name="phonelink_lock" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
             <span>{t("invite.mfa")}</span>
           </li>
           <li className="flex gap-2.5">
-            <span className="material-symbols-outlined shrink-0 text-[20px] text-primary" aria-hidden="true">
-              schedule
-            </span>
+            <Icon name="schedule" className="mt-0.5 size-4 shrink-0 text-on-surface-variant" />
             <span>{t("invite.expires", { date: formatDate(invite.expiresAt, locale, "long") })}</span>
           </li>
         </ul>
@@ -147,7 +142,7 @@ function InviteDetails({ invite, token, onGone }: { invite: InviteInfo; token: s
         )}
       </div>
 
-      <div className="mt-6 border-t border-outline-variant/40 pt-6">
+      <div className="mt-6 border-t border-outline-variant pt-6">
         {invite.accountExists ? (
           <ExistingAccount invite={invite} token={token} invitePath={invitePath} onGone={onGone} />
         ) : (
@@ -189,7 +184,7 @@ function ProblemCallout({ problem, invitePath }: { problem: Problem; invitePath:
       tone="danger"
       action={
         needsLogin ? (
-          <ButtonLink href={loginHref(invitePath)} className="h-11 px-4 font-semibold">
+          <ButtonLink href={loginHref(invitePath)} variant="outline" size="lg">
             {t("invite.existing.signIn")}
           </ButtonLink>
         ) : undefined
@@ -396,7 +391,7 @@ function NewAccountForm({
 
   return (
     <form noValidate onSubmit={submit} className="space-y-5">
-      <h2 className="font-headline text-lg font-bold text-on-surface">{t("invite.newAccount.title")}</h2>
+      <h2 className="text-base font-semibold text-on-surface">{t("invite.newAccount.title")}</h2>
 
       {otherSession && (
         <Callout tone="info">

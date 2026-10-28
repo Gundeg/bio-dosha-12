@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FieldError, FieldLabel, INPUT_CLASS, describedBy } from "./fields";
 import { PASSWORD_MIN_LENGTH, passwordStrength, type PasswordStrength } from "./password";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * Password input with a show/hide button and a Caps Lock warning. With
@@ -77,9 +78,7 @@ export function PasswordField({
           aria-controls={id}
           className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-on-surface-variant hover:text-on-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
         >
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            {visible ? "visibility_off" : "visibility"}
-          </span>
+          <Icon name={visible ? "visibility_off" : "visibility"} className="size-[18px]" />
         </button>
       </div>
 
@@ -88,8 +87,8 @@ export function PasswordField({
         {capsLock ? t("capsLock") : ""}
       </p>
       {capsLock && (
-        <p aria-hidden="true" className="flex items-center gap-1 text-xs font-medium text-amber-800">
-          <span className="material-symbols-outlined text-[16px]">keyboard_capslock</span>
+        <p aria-hidden="true" className="flex items-center gap-1.5 text-xs font-medium text-amber-700">
+          <Icon name="keyboard_capslock" className="size-4" />
           {t("capsLock")}
         </p>
       )}
@@ -97,15 +96,10 @@ export function PasswordField({
       {showRules && rulesId && (
         <div id={rulesId} className="space-y-2">
           <p className="flex items-start gap-1.5 text-xs leading-relaxed text-on-surface-variant">
-            <span
-              className={cn(
-                "material-symbols-outlined mt-px shrink-0 text-[16px]",
-                ruleMet ? "icon-filled text-emerald-700" : "text-on-surface-variant"
-              )}
-              aria-hidden="true"
-            >
-              {ruleMet ? "check_circle" : "radio_button_unchecked"}
-            </span>
+            <Icon
+              name={ruleMet ? "check_circle" : "radio_button_unchecked"}
+              className={cn("mt-px size-4 shrink-0", ruleMet ? "text-emerald-700" : "text-on-surface-variant")}
+            />
             <span>{t("rule", { min: PASSWORD_MIN_LENGTH })}</span>
           </p>
           <StrengthMeter strength={passwordStrength(value)} />
@@ -140,7 +134,7 @@ function StrengthMeter({ strength }: { strength: PasswordStrength | null }) {
         ))}
       </div>
       <p className="shrink-0 text-xs text-on-surface-variant">
-        {t("strengthLabel")} <span className="font-semibold text-on-surface">{t(`strength.${strength}`)}</span>
+        {t("strengthLabel")} <span className="font-medium text-on-surface">{t(`strength.${strength}`)}</span>
       </p>
     </div>
   );

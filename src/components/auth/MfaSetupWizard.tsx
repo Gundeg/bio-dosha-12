@@ -25,6 +25,7 @@ import {
 } from "./problems";
 import { loginHref } from "./safeNext";
 import { refreshSessionClaims, navigateAfterAuth } from "./session";
+import { Icon } from "@/components/ui/icon";
 
 const STEPS = ["install", "scan", "confirm", "save"] as const;
 type StepNumber = 1 | 2 | 3 | 4;
@@ -244,16 +245,14 @@ export function MfaSetupWizard({ next }: { next: string | null }) {
             {required && <Callout tone="info" icon="shield_lock" title={t("mfa.required")} />}
             <p className="text-sm leading-relaxed text-on-surface">{t("mfa.install.why")}</p>
             <div>
-              <p className="text-sm font-semibold text-on-surface">{t("mfa.install.appsTitle")}</p>
+              <p className="text-sm font-medium text-on-surface">{t("mfa.install.appsTitle")}</p>
               <ul className="mt-3 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
                 {AUTHENTICATOR_APPS.map((app) => (
                   <li
                     key={app}
-                    className="flex min-h-11 items-center gap-2.5 rounded-xl bg-surface-container-low px-3 py-2 text-sm font-medium text-on-surface"
+                    className="flex min-h-11 items-center gap-2.5 rounded-lg bg-surface-container-low px-3 py-2 text-sm font-medium text-on-surface"
                   >
-                    <span className="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">
-                      smartphone
-                    </span>
+                    <Icon name="smartphone" className="size-4 text-on-surface-variant" />
                     {app}
                   </li>
                 ))}
@@ -276,7 +275,8 @@ export function MfaSetupWizard({ next }: { next: string | null }) {
           <>
             <p className="text-sm leading-relaxed text-on-surface">{t("mfa.scan.body")}</p>
             <div className="flex justify-center">
-              <div className="rounded-2xl bg-white p-3 ring-1 ring-outline-variant/40">
+              {/* White in every theme: scanners need the light quiet zone around the code. */}
+              <div className="rounded-xl bg-white p-3 ring-1 ring-outline-variant">
                 <Image
                   src={setup.qrDataUrl}
                   alt={t("mfa.scan.qrAlt")}
@@ -288,14 +288,9 @@ export function MfaSetupWizard({ next }: { next: string | null }) {
               </div>
             </div>
             <details className="group rounded-xl bg-surface-container-low">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-primary focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-4 py-2 text-sm font-medium text-primary focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
                 {t("mfa.scan.manualTitle")}
-                <span
-                  className="material-symbols-outlined text-[20px] transition-transform group-open:rotate-180"
-                  aria-hidden="true"
-                >
-                  expand_more
-                </span>
+                <Icon name="expand_more" className="size-4 transition-transform group-open:rotate-180" />
               </summary>
               <div className="space-y-3 px-4 pb-4">
                 <p className="text-sm leading-relaxed text-on-surface-variant">{t("mfa.scan.manualBody")}</p>
@@ -305,10 +300,8 @@ export function MfaSetupWizard({ next }: { next: string | null }) {
             <PrimaryButton type="button" onClick={() => goTo(3)}>
               {t("mfa.scan.continue")}
             </PrimaryButton>
-            <TextButton onClick={() => goTo(1)} className="gap-1">
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                arrow_back
-              </span>
+            <TextButton onClick={() => goTo(1)} className="gap-1.5">
+              <Icon name="arrow_back" className="size-4" />
               {t("mfa.scan.back")}
             </TextButton>
           </>
@@ -346,11 +339,9 @@ export function MfaSetupWizard({ next }: { next: string | null }) {
                 goTo(2);
               }}
               disabled={busy}
-              className="gap-1"
+              className="gap-1.5"
             >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                arrow_back
-              </span>
+              <Icon name="arrow_back" className="size-4" />
               {t("mfa.confirm.back")}
             </TextButton>
           </form>
@@ -405,14 +396,12 @@ function SetupKey({ secret }: { secret: string }) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{tScan("keyLabel")}</p>
-      <p className="select-all break-words rounded-lg bg-surface-container-lowest px-3 py-3 font-mono text-base font-semibold leading-relaxed tracking-wider text-on-surface ring-1 ring-outline-variant/40 [word-spacing:0.3em]">
+      <p className="text-xs font-medium text-on-surface-variant">{tScan("keyLabel")}</p>
+      <p className="select-all break-words rounded-lg bg-surface-container-lowest px-3 py-3 font-mono text-base font-semibold leading-relaxed tracking-wider text-on-surface ring-1 ring-outline-variant [word-spacing:0.3em]">
         {groups.join(" ")}
       </p>
-      <Button type="button" variant="outline" onClick={copy} className="h-11 w-full font-semibold">
-        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-          {copyState === "copied" ? "check" : "content_copy"}
-        </span>
+      <Button type="button" variant="outline" size="lg" onClick={copy} className="w-full">
+        <Icon name={copyState === "copied" ? "check" : "content_copy"} className="size-4" />
         {copyState === "copied" ? tScan("copied") : tScan("copy")}
       </Button>
       <p aria-live="polite" className="text-xs text-on-surface-variant">

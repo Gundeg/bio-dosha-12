@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/formatDate";
+import { Icon } from "@/components/ui/icon";
 
 export const RECOVERY_FILE_NAME = "bio-dosha-12-recovery-codes.txt";
 
@@ -64,7 +65,7 @@ export function RecoveryCodesPanel({
     <div className="space-y-4">
       {/* Heading for the printed sheet only. */}
       <div className="hidden print:block">
-        <p className="text-xl font-bold">{tFile("title")}</p>
+        <p className="text-xl font-semibold">{tFile("title")}</p>
         {email && <p className="mt-1 text-sm">{tFile("account", { email })}</p>}
         <p className="text-sm">{tFile("created", { date: created })}</p>
       </div>
@@ -76,7 +77,7 @@ export function RecoveryCodesPanel({
         {codes.map((code, i) => (
           <li
             key={code}
-            className="flex items-baseline gap-2 rounded-lg bg-surface-container-lowest px-3 py-2 font-mono text-[15px] font-semibold tracking-wider text-on-surface ring-1 ring-outline-variant/30 print:ring-black/40"
+            className="flex items-baseline gap-2 rounded-lg bg-surface-container-lowest px-3 py-2 font-mono text-[15px] font-semibold tracking-wider text-on-surface ring-1 ring-outline-variant print:ring-black/40"
           >
             <span className="w-5 shrink-0 text-right text-xs font-normal text-on-surface-variant" aria-hidden="true">
               {i + 1}.
@@ -90,22 +91,16 @@ export function RecoveryCodesPanel({
 
       {/* Buttons keep their natural width and wrap to a new row when the labels do not fit. */}
       <div className="flex flex-wrap gap-2 print:hidden">
-        <Button type="button" variant="outline" onClick={copyAll} className="h-11 flex-auto px-4 font-semibold">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            {copyState === "copied" ? "check" : "content_copy"}
-          </span>
+        <Button type="button" variant="outline" size="lg" onClick={copyAll} className="flex-auto">
+          <Icon name={copyState === "copied" ? "check" : "content_copy"} className="size-4" />
           {copyState === "copied" ? t("copied") : t("copyAll")}
         </Button>
-        <Button type="button" variant="outline" onClick={download} className="h-11 flex-auto px-4 font-semibold">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            download
-          </span>
+        <Button type="button" variant="outline" size="lg" onClick={download} className="flex-auto">
+          <Icon name="download" className="size-4" />
           {t("download")}
         </Button>
-        <Button type="button" variant="outline" onClick={() => window.print()} className="h-11 flex-auto px-4 font-semibold">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            print
-          </span>
+        <Button type="button" variant="outline" size="lg" onClick={() => window.print()} className="flex-auto">
+          <Icon name="print" className="size-4" />
           {t("print")}
         </Button>
       </div>

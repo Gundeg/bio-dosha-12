@@ -1,111 +1,91 @@
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
+import { cn } from "@/lib/utils";
 
 interface DoshaCardProps {
   doshaKey: DoshaKey;
   kt: number;
 }
 
-// Dosha-specific gradient headers and accent colors.
-// Header stops are -700 shades so the white text keeps ≥ 4.5:1 contrast.
-const DOSHA_THEME: Record<string, { gradient: string; accent: string; dot: string }> = {
-  Khii:         { gradient: "from-blue-700 to-sky-700",       accent: "bg-blue-50 text-blue-700 border-blue-200",   dot: "bg-blue-500" },
-  Khii_Shar:    { gradient: "from-blue-700 to-amber-700",     accent: "bg-sky-50 text-sky-700 border-sky-200",      dot: "bg-sky-500" },
-  Khii_Badgan:  { gradient: "from-blue-700 to-violet-700",    accent: "bg-cyan-50 text-cyan-700 border-cyan-200",   dot: "bg-cyan-500" },
-  Shar_Khii:    { gradient: "from-amber-700 to-blue-700",     accent: "bg-orange-50 text-orange-700 border-orange-200", dot: "bg-orange-400" },
-  Shar:         { gradient: "from-amber-700 to-orange-700",   accent: "bg-amber-50 text-amber-700 border-amber-200",dot: "bg-amber-500" },
-  Tentsveertei: { gradient: "from-emerald-700 to-teal-700",   accent: "bg-green-50 text-green-700 border-green-200",dot: "bg-emerald-500" },
-  Shar_Badgan:  { gradient: "from-amber-700 to-violet-700",   accent: "bg-yellow-50 text-yellow-700 border-yellow-200", dot: "bg-yellow-500" },
-  Badgan_Khii:  { gradient: "from-violet-700 to-blue-700",    accent: "bg-slate-50 text-slate-700 border-slate-200",dot: "bg-slate-500" },
-  Badgan_Shar:  { gradient: "from-violet-700 to-amber-700",   accent: "bg-stone-50 text-stone-700 border-stone-200",dot: "bg-stone-500" },
-  Badgan:       { gradient: "from-violet-700 to-purple-700",  accent: "bg-purple-50 text-purple-700 border-purple-200", dot: "bg-violet-500" },
-};
+/** Colour of the leading dosha (the first part of the key). */
+function leadColor(doshaKey: DoshaKey): string {
+  if (doshaKey === "Tentsveertei") return "bg-emerald-600";
+  if (doshaKey.startsWith("Khii")) return "bg-primary";
+  if (doshaKey.startsWith("Shar")) return "bg-secondary";
+  return "bg-tertiary";
+}
 
-// Kt scale: 0.70 to 1.50 → 0% to 100%
+const KT_MIN = 0.7;
+const KT_MAX = 1.5;
+
+/** Where Kt sits on the 0.70–1.50 scale, as a percentage. */
 function ktToPercent(kt: number) {
-  return Math.round(((kt - 0.7) / (1.5 - 0.7)) * 100);
+  return Math.min(100, Math.max(0, ((kt - KT_MIN) / (KT_MAX - KT_MIN)) * 100));
 }
 
 export default function DoshaCard({ doshaKey, kt }: DoshaCardProps) {
-  const locale = useLocale();
   const t = useTranslations("help.doshaCard");
   const tDosha = useTranslations("dosha");
   const tShared = useTranslations("shared");
 
   if (!DOSHA_MAP[doshaKey]) return null;
 
-  const theme = DOSHA_THEME[doshaKey] ?? DOSHA_THEME.Tentsveertei;
-  const ktPct = ktToPercent(kt);
   const qualities = tDosha.raw(`${doshaKey}.qualities`) as string[];
   const risks = tDosha.raw(`${doshaKey}.risks`) as string[];
 
   return (
-    <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm bg-white">
-      {/* Colored gradient header */}
-      <div className={`bg-linear-to-r ${theme.gradient} px-5 py-4`}>
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-white leading-tight">{tDosha(`${doshaKey}.label`)}</h2>
-            {/* Нөгөө хэл дээрх нэр: MN-д англи, EN-д монгол */}
-            <p className="text-white text-sm mt-0.5" lang={locale === "en" ? "mn" : "en"}>
-              {t(`altLabel.${doshaKey}`)}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-white text-xs font-medium">{t("kt")}</p>
-            <p className="text-white text-lg font-black">{kt.toFixed(2)}</p>
-          </div>
+    <div className="rounded-xl bg-surface-container-lowest shadow-ambient">
+      <div className="flex items-start justify-between gap-4 border-b border-outline-variant px-5 py-4">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-on-surface">
+            <span className={cn("size-2.5 shrink-0 rounded-full", leadColor(doshaKey))} aria-hidden="true" />
+            {tDosha(`${doshaKey}.label`)}
+          </h2>
+          <p className="mt-0.5 text-sm text-on-surface-variant">{t("constitution")}</p>
         </div>
-
-        {/* Kt indicator — 10 segments (visual only; the value is shown above) */}
-        <div className="mt-3">
-          <div className="flex gap-1" aria-hidden="true">
-            {Array.from({ length: 10 }).map((_, idx) => (
-              <div
-                key={idx}
-                className={`flex-1 h-1.5 rounded-full transition-all ${
-                  idx < Math.round(ktPct / 10) ? "bg-white/80" : "bg-white/20"
-                }`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between mt-1">
-            <span className="text-white text-[10px]">{tShared("dosha3.H")} (0.70)</span>
-            <span className="text-white text-[10px]">{tShared("dosha3.B")} (1.50)</span>
-          </div>
+        <div className="shrink-0 text-right">
+          <p className="text-xs text-on-surface-variant">{t("kt")}</p>
+          <p className="text-lg font-semibold tabular-nums text-on-surface">{kt.toFixed(2)}</p>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="px-5 py-4 space-y-4">
-        <p className="text-sm text-slate-600 leading-relaxed">{tDosha(`${doshaKey}.description`)}</p>
-
-        <div>
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">{t("qualities")}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {qualities.map((q) => (
-              <span
-                key={q}
-                className={`text-xs font-medium px-2.5 py-1 rounded-full border ${theme.accent}`}
-              >
-                {q}
-              </span>
-            ))}
+      <div className="space-y-4 px-5 py-4">
+        {/* Kt scale (visual only; the value is shown above) */}
+        <div aria-hidden="true">
+          <div className="relative h-1.5 rounded-full bg-surface-container">
+            <span
+              className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface-container-lowest bg-primary"
+              style={{ left: `${ktToPercent(kt)}%` }}
+            />
+          </div>
+          <div className="mt-1.5 flex justify-between text-xs text-on-surface-variant">
+            <span>{tShared("dosha3.H")} 0.70</span>
+            <span>{tShared("dosha3.B")} 1.50</span>
           </div>
         </div>
 
+        <p className="text-sm leading-relaxed text-on-surface-variant">{tDosha(`${doshaKey}.description`)}</p>
+
         <div>
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">{t("risks")}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {risks.map((r) => (
-              <span
-                key={r}
-                className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-50 text-red-700 border-red-200"
-              >
-                {r}
-              </span>
+          <p className="mb-2 text-sm font-medium text-on-surface">{t("qualities")}</p>
+          <ul className="flex flex-wrap gap-1.5">
+            {qualities.map((q) => (
+              <li key={q} className="rounded-md bg-surface-container-low px-2 py-1 text-xs text-on-surface">
+                {q}
+              </li>
             ))}
-          </div>
+          </ul>
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-medium text-on-surface">{t("risks")}</p>
+          <ul className="flex flex-wrap gap-1.5">
+            {risks.map((r) => (
+              <li key={r} className="rounded-md bg-amber-50 px-2 py-1 text-xs text-amber-900">
+                {r}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

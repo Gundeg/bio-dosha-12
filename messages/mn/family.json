@@ -1,9 +1,8 @@
 {
   "eyebrow": "BEDI протокол · Гэр бүл",
-  "title": "Гэр бүлийн Хяналт",
+  "title": "Гэр бүлийн хяналт",
   "subtitle": "{count} гишүүний BEDI индекс хяналтад байна",
   "addMember": "Гишүүн нэмэх",
-  "selfBadge": "ӨӨРИЙНХ",
   "ageValue": "{age} нас",
   "heightValue": "{height} см",
   "sexShort": {

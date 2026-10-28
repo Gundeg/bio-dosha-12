@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Callout } from "@/components/kit/layout";
+import { Callout, IconTile } from "@/components/kit/layout";
 import { apiFetch } from "@/lib/api";
 import { ORGANIZATION_TYPES, type OrganizationType } from "@/lib/schemas/organization";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ import {
   type Problem,
 } from "./problems";
 import { signInWithPassword, navigateAfterAuth } from "./session";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 type AccountType = "individual" | "organization";
 
@@ -47,7 +48,7 @@ const IDS: Record<Field | "orgType" | "orgRegistration" | "orgPhone" | "orgCity"
   consent: "register-consent",
 };
 
-const ACCOUNT_TYPES: { value: AccountType; icon: string }[] = [
+const ACCOUNT_TYPES: { value: AccountType; icon: IconName }[] = [
   { value: "individual", icon: "person" },
   { value: "organization", icon: "local_hospital" },
 ];
@@ -246,7 +247,7 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
       <form noValidate onSubmit={submit} className="space-y-8">
         {/* Account type: native radios (arrow keys, form semantics) drawn as large cards. */}
         <fieldset className="min-w-0 space-y-3">
-          <legend className="mb-3 text-sm font-semibold text-on-surface">{t("register.typeLegend")}</legend>
+          <legend className="mb-3 text-sm font-medium text-on-surface">{t("register.typeLegend")}</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {ACCOUNT_TYPES.map(({ value, icon }) => {
               const checked = accountType === value;
@@ -258,7 +259,7 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
                     "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary",
                     checked
                       ? "bg-primary/5 ring-2 ring-primary"
-                      : "bg-surface-container-lowest ring-on-surface-variant/30 hover:ring-on-surface-variant/60"
+                      : "bg-surface-container-lowest ring-outline-variant hover:bg-surface-container-low"
                   )}
                 >
                   <input
@@ -269,20 +270,12 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
                     onChange={() => chooseAccountType(value)}
                     className="sr-only"
                   />
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      "material-symbols-outlined flex size-10 shrink-0 items-center justify-center rounded-xl text-[22px]",
-                      checked ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant"
-                    )}
-                  >
-                    {icon}
-                  </span>
-                  <span className="min-w-0 flex-1 pr-6">
-                    <span className="block font-headline font-bold text-on-surface">
+                  <IconTile name={icon} tone={checked ? "primary" : "default"} />
+                  <span className="min-w-0 flex-1 pr-6 pt-1.5">
+                    <span className="block text-sm font-semibold leading-6 text-on-surface">
                       {t(`register.types.${value}.title`)}
                     </span>
-                    <span className="mt-1 block text-sm leading-snug text-on-surface-variant">
+                    <span className="mt-0.5 block text-sm leading-snug text-on-surface-variant">
                       {t(`register.types.${value}.desc`)}
                     </span>
                   </span>
@@ -290,7 +283,7 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "absolute right-4 top-4 flex size-5 items-center justify-center rounded-full ring-2",
+                      "absolute right-4 top-6 flex size-5 items-center justify-center rounded-full ring-2",
                       checked ? "ring-primary" : "ring-on-surface-variant/50"
                     )}
                   >
@@ -301,16 +294,14 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
             })}
           </div>
           <p className="flex gap-2 text-sm leading-relaxed text-on-surface-variant">
-            <span className="material-symbols-outlined shrink-0 text-[18px] text-primary" aria-hidden="true">
-              mail
-            </span>
+            <Icon name="mail" className="mt-0.5 size-4 shrink-0" />
             <span>{t("register.inviteHint")}</span>
           </p>
         </fieldset>
 
         {isOrganization && (
           <fieldset className="min-w-0 space-y-4">
-            <legend className="mb-4 font-headline text-base font-bold text-on-surface">{t("register.orgSection")}</legend>
+            <legend className="mb-4 text-base font-semibold text-on-surface">{t("register.orgSection")}</legend>
             <TextField
               id={IDS.orgName}
               label={t("register.orgName")}
@@ -394,7 +385,7 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
         )}
 
         <fieldset className="min-w-0 space-y-4">
-          <legend className="mb-1 font-headline text-base font-bold text-on-surface">
+          <legend className="mb-1 text-base font-semibold text-on-surface">
             {isOrganization ? t("register.accountSectionOrg") : t("register.accountSection")}
           </legend>
           {isOrganization && (
@@ -461,7 +452,7 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
 
         {isOrganization && (
           <section aria-labelledby="register-next-title" className="rounded-xl bg-surface-container-low p-4 sm:p-5">
-            <h2 id="register-next-title" className="font-headline text-sm font-bold text-on-surface">
+            <h2 id="register-next-title" className="text-sm font-semibold text-on-surface">
               {t("register.next.title")}
             </h2>
             <ol className="mt-3 space-y-3">
@@ -469,7 +460,7 @@ export function RegisterForm({ initialType = "individual" }: { initialType?: Acc
                 <li key={key} className="flex gap-3 text-sm leading-relaxed text-on-surface">
                   <span
                     aria-hidden="true"
-                    className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary"
+                    className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-on-primary"
                   >
                     {index + 1}
                   </span>

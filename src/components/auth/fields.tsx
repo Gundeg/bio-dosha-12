@@ -5,25 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * Form pieces shared by the sign-in, sign-up, password and invitation pages.
- * Inputs are 44px tall with a border that stays visible on the white card
- * (about 3:1 contrast), labels are always visible, and every error is linked
- * to its field with aria-describedby.
+ * Inputs use the shared 40px Input, labels are always visible, and every
+ * error is linked to its field with aria-describedby.
  */
 
-export const INPUT_CLASS =
-  "h-11 rounded-lg border-on-surface-variant/60 bg-surface-container-lowest px-3 text-on-surface";
+export const INPUT_CLASS = "text-on-surface";
 
 export const LINK_CLASS =
-  "rounded-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+  "rounded-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 /** A standalone text link with a 44px touch target. */
 export const TOUCH_LINK_CLASS = cn(LINK_CLASS, "inline-flex min-h-11 items-center");
 
-/** Main action of a step: full width, at least 44px, wraps long labels instead of overflowing. */
-export const PRIMARY_BUTTON_CLASS = "h-auto min-h-11 w-full whitespace-normal py-2 text-sm font-semibold";
+/**
+ * Main action of a step: full width and 44px for touch (h-11). A label too
+ * long for one line wraps and the button grows, instead of overflowing.
+ */
+export const PRIMARY_BUTTON_CLASS = "h-auto min-h-11 w-full whitespace-normal rounded-lg py-2 text-center";
 
 export function describedBy(...ids: (string | false | null | undefined)[]): string | undefined {
   const list = ids.filter(Boolean).join(" ");
@@ -60,9 +62,7 @@ export function FieldHint({ id, children }: { id: string; children: React.ReactN
 export function FieldError({ id, children }: { id: string; children: React.ReactNode }) {
   return (
     <p id={id} className="flex items-start gap-1.5 text-sm font-medium text-error">
-      <span className="material-symbols-outlined mt-px shrink-0 text-[18px]" aria-hidden="true">
-        error
-      </span>
+      <Icon name="error" className="mt-0.5 size-4 shrink-0" />
       <span>{children}</span>
     </p>
   );
@@ -135,7 +135,7 @@ export function SelectField({
         id={id}
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
-        className="h-11 w-full rounded-lg border border-on-surface-variant/60 bg-surface-container-lowest px-3 text-base text-on-surface outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
+        className="h-10 w-full min-w-0 rounded-lg border border-input bg-surface-container-lowest px-3 text-base text-on-surface outline-none transition-colors focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15 md:text-sm"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

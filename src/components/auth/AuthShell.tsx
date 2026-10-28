@@ -72,7 +72,7 @@ export function AuthShell({
             </span>
             <span className="text-[15px] font-semibold leading-tight text-on-surface">{tCommon("appName")}</span>
           </Link>
-          <LocaleToggle className="bg-surface-container-lowest *:min-h-11 *:min-w-11" />
+          <LocaleToggle className="*:min-h-11 *:min-w-11" />
         </header>
 
         <main className="flex flex-1 justify-center px-4 pb-8 pt-4 sm:items-center sm:px-6 sm:py-10">

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Progress } from "@/components/ui/progress";
 import { formatNumber } from "@/lib/formatNumber";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 /** Share of a plan limit at which the meter turns amber. */
 const WARN_AT = 0.8;
@@ -51,9 +52,7 @@ export function UsageMeter({
       )}
       {level !== "ok" && (
         <p className={cn("flex items-center gap-1 text-xs font-medium", level === "near" ? "text-amber-800" : "text-red-800")}>
-          <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-            {level === "near" ? "warning" : "block"}
-          </span>
+          <Icon name={level === "near" ? "warning" : "block"} className="size-4" />
           {level === "near" ? t("nearLimit") : t("atLimit")}
         </p>
       )}

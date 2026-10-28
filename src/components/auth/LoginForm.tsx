@@ -12,6 +12,7 @@ import { PasswordField } from "./PasswordField";
 import { focusField, looksLikeEmail, problemKey, useKeyText, useProblemText, type Problem } from "./problems";
 import type { LoginNotice } from "./safeNext";
 import { signInWithPassword, navigateAfterAuth } from "./session";
+import { Icon } from "@/components/ui/icon";
 
 type Step = "password" | "code";
 type Method = "app" | "recovery";
@@ -159,7 +160,7 @@ export function LoginForm({ next, notice }: { next: string | null; notice: Login
           }}
           className="space-y-5"
         >
-          <p className="break-words rounded-xl bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant">
+          <p className="break-words rounded-lg bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant">
             {t.rich("login.mfa.account", {
               email: email.trim(),
               b: (chunks) => <strong className="font-semibold text-on-surface">{chunks}</strong>,
@@ -204,18 +205,14 @@ export function LoginForm({ next, notice }: { next: string | null; notice: Login
             <TextButton onClick={switchMethod} disabled={busy}>
               {method === "app" ? t("login.mfa.useRecovery") : t("login.mfa.useApp")}
             </TextButton>
-            <TextButton onClick={backToPassword} disabled={busy} className="gap-1">
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                arrow_back
-              </span>
+            <TextButton onClick={backToPassword} disabled={busy} className="gap-1.5">
+              <Icon name="arrow_back" className="size-4" />
               {t("login.mfa.back")}
             </TextButton>
           </div>
 
-          <p className="flex gap-2 rounded-xl bg-surface-container-low p-4 text-xs leading-relaxed text-on-surface-variant">
-            <span className="material-symbols-outlined shrink-0 text-[18px] text-primary" aria-hidden="true">
-              help
-            </span>
+          <p className="flex gap-2 rounded-lg bg-surface-container-low p-4 text-xs leading-relaxed text-on-surface-variant">
+            <Icon name="help" className="size-4 shrink-0" />
             <span>{t("login.mfa.lostAccess")}</span>
           </p>
         </form>

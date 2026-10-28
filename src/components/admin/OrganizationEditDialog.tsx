@@ -108,7 +108,7 @@ export function OrganizationEditDialog({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <form onSubmit={save} noValidate className="grid gap-4">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg font-bold">{t("org.edit.title")}</DialogTitle>
+            <DialogTitle>{t("org.edit.title")}</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">{t("org.edit.description")}</DialogDescription>
           </DialogHeader>
 
@@ -179,10 +179,10 @@ export function OrganizationEditDialog({
           <FormError message={error} />
 
           <DialogFooter>
-            <Button type="button" variant="outline" className="h-10 px-4" disabled={busy} onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" size="lg" disabled={busy} onClick={() => onOpenChange(false)}>
               {tk("cancel")}
             </Button>
-            <Button type="submit" className="h-10 px-4 font-semibold" disabled={busy || !changedCount || !!nameError || !!emailError}>
+            <Button type="submit" size="lg" disabled={busy || !changedCount || !!nameError || !!emailError}>
               {busy ? tk("working") : t("common.saveChanges")}
             </Button>
           </DialogFooter>

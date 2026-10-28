@@ -105,7 +105,7 @@ export function PlanAssignDialog({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
         <form onSubmit={save} className="grid gap-4">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg font-bold">{t("planAssign.title", { name: subjectName })}</DialogTitle>
+            <DialogTitle>{t("planAssign.title", { name: subjectName })}</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">{t("planAssign.description")}</DialogDescription>
           </DialogHeader>
 
@@ -173,13 +173,13 @@ export function PlanAssignDialog({
             <Button
               type="button"
               variant="outline"
-              className="h-10 px-4"
+              size="lg"
               disabled={busy}
               onClick={() => onOpenChange(false)}
             >
               {tk("cancel")}
             </Button>
-            <Button type="submit" className="h-10 px-4 font-semibold" disabled={!changed || busy || !plans.data}>
+            <Button type="submit" size="lg" disabled={!changed || busy || !plans.data}>
               {busy ? tk("working") : t("planAssign.save")}
             </Button>
           </DialogFooter>

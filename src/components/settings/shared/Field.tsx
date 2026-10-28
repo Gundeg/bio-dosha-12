@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 /** Props a form control needs to be tied to its label, hint and error. */
 export interface FieldControlProps {
@@ -59,9 +60,7 @@ export function Field({
       })}
       {error && (
         <p id={errorId} className="flex items-start gap-1 text-sm text-error">
-          <span className="material-symbols-outlined mt-px text-[16px]" aria-hidden="true">
-            error
-          </span>
+          <Icon name="error" className="size-4 mt-px" />
           {error}
         </p>
       )}
@@ -92,12 +91,7 @@ export function SelectInput({ className, children, ...props }: React.ComponentPr
       >
         {children}
       </select>
-      <span
-        className="material-symbols-outlined pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[20px] text-on-surface-variant"
-        aria-hidden="true"
-      >
-        expand_more
-      </span>
+      <Icon name="expand_more" className="size-5 pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-on-surface-variant" />
     </div>
   );
 }
@@ -127,9 +121,7 @@ export function PasswordInput({
         aria-controls={props.id}
         className="absolute top-0 right-0 flex size-10 items-center justify-center rounded-r-lg text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
       >
-        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-          {visible ? "visibility_off" : "visibility"}
-        </span>
+        <Icon name={visible ? "visibility_off" : "visibility"} className="size-5" />
       </button>
     </div>
   );

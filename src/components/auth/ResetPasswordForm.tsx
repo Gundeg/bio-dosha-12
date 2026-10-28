@@ -16,6 +16,7 @@ import { PasswordField } from "./PasswordField";
 import { passwordProblem, passwordProblemKey } from "./password";
 import { apiErrorStatus, apiFieldNames, focusField, useKeyText, useProblemText, type Problem } from "./problems";
 import { CardSkeleton, LoadError } from "./states";
+import { Icon } from "@/components/ui/icon";
 
 const IDS = { password: "reset-password", confirm: "reset-confirm" } as const;
 const DONE_URL = "/login?notice=password_reset";
@@ -160,10 +161,8 @@ function ResetForm({ token, info, onExpired }: { token: string; info: ResetInfo;
           }}
           error={errors.confirm ? keyText(errors.confirm) : undefined}
         />
-        <p className="flex gap-2 rounded-xl bg-surface-container-low p-4 text-sm leading-relaxed text-on-surface-variant">
-          <span className="material-symbols-outlined shrink-0 text-[20px] text-primary" aria-hidden="true">
-            devices
-          </span>
+        <p className="flex gap-2 rounded-lg bg-surface-container-low p-4 text-sm leading-relaxed text-on-surface-variant">
+          <Icon name="devices" className="mt-0.5 size-4 shrink-0" />
           <span>{t("reset.signOutNote")}</span>
         </p>
         {problem && <Callout tone="danger">{problemText(problem)}</Callout>}

@@ -58,7 +58,7 @@ export function FormDialog({
           }}
         >
           <DialogHeader className="pr-8">
-            <DialogTitle className="font-headline text-lg font-bold">{title}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             {description && <DialogDescription className="text-sm leading-relaxed">{description}</DialogDescription>}
           </DialogHeader>
 
@@ -67,15 +67,14 @@ export function FormDialog({
           {error && <FormMessage>{error}</FormMessage>}
 
           <DialogFooter>
-            <Button type="button" variant="outline" className="h-10 px-4" disabled={busy} onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" size="lg" disabled={busy} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
             <Button
               type="submit"
-              className={cn(
-                "h-10 px-4 font-semibold",
-                tone === "danger" && "bg-red-700 text-white hover:bg-red-800"
-              )}
+              size="lg"
+              // The one filled action of the dialog; red when it cannot be undone.
+              className={cn(tone === "danger" && "bg-red-700 text-white hover:bg-red-800")}
               disabled={busy || submitDisabled}
             >
               {busy ? t("working") : submitLabel}

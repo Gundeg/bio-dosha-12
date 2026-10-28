@@ -92,7 +92,7 @@ export function ConfirmDialog({
     >
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-headline text-lg font-bold">{title}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription className="text-sm leading-relaxed">{description}</DialogDescription>}
         </DialogHeader>
 
@@ -111,7 +111,7 @@ export function ConfirmDialog({
               placeholder={reason.placeholder ?? t("reasonPlaceholder")}
               maxLength={300}
               rows={3}
-              className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="w-full rounded-lg border border-input bg-surface-container-lowest px-3 py-2 text-sm outline-none focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15"
             />
           </div>
         )}
@@ -127,7 +127,6 @@ export function ConfirmDialog({
               onChange={(e) => setTyped(e.target.value)}
               autoComplete="off"
               spellCheck={false}
-              className="h-10"
             />
           </div>
         )}
@@ -141,7 +140,6 @@ export function ConfirmDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            className="h-10 px-4"
             disabled={busy}
             onClick={() => {
               reset();
@@ -151,10 +149,7 @@ export function ConfirmDialog({
             {t("cancel")}
           </Button>
           <Button
-            className={cn(
-              "h-10 px-4 font-semibold",
-              tone === "danger" && "bg-red-700 text-white hover:bg-red-800 [a]:hover:bg-red-800"
-            )}
+            className={cn(tone === "danger" && "bg-red-700 text-white hover:bg-red-800")}
             disabled={!canConfirm}
             onClick={confirm}
           >

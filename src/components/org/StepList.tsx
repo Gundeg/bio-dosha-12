@@ -14,7 +14,7 @@ export function StepList({
         <li key={i} className="flex gap-3">
           <span
             className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums",
+              "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums",
               i === current ? "bg-primary text-on-primary" : "bg-primary/10 text-primary"
             )}
             aria-hidden="true"

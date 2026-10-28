@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Callout, useErrorMessage } from "@/components/kit";
+import { IconTile } from "@/components/kit/layout";
 import type { ApiError } from "@/lib/api";
+import { Icon } from "@/components/ui/icon";
 
 export interface QueryLike<T> {
   data: T | null;
@@ -23,21 +25,17 @@ export function LoadError({ message, status, onRetry }: { message: string; statu
   return (
     <div
       role="alert"
-      className="flex flex-col items-center gap-3 rounded-2xl bg-red-50 px-6 py-12 text-center ring-1 ring-red-600/20"
+      className="flex flex-col items-center gap-3 rounded-xl border border-red-600/25 bg-red-50 px-6 py-12 text-center"
     >
-      <span className="material-symbols-outlined text-[32px] text-red-700" aria-hidden="true">
-        error
-      </span>
+      <IconTile name="error" tone="danger" size="lg" className="bg-surface-container-lowest" />
       <p className="max-w-md text-sm text-red-950">{message}</p>
       {status === 401 ? (
-        <ButtonLink href="/login" className="h-10 px-4 font-semibold">
+        <ButtonLink href="/login" size="lg">
           {t("signInAgain")}
         </ButtonLink>
       ) : (
-        <Button variant="outline" className="h-10 bg-white px-4" onClick={onRetry}>
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            refresh
-          </span>
+        <Button variant="outline" size="lg" onClick={onRetry}>
+          <Icon name="refresh" className="size-4" />
           {tKit("retry")}
         </Button>
       )}
@@ -72,7 +70,7 @@ export function QueryView<T>({
             className="mb-4"
             title={t("refreshFailed")}
             action={
-              <Button variant="outline" className="h-10 bg-white px-4" onClick={query.reload}>
+              <Button variant="outline" size="lg" onClick={query.reload}>
                 {tKit("retry")}
               </Button>
             }

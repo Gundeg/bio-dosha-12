@@ -22,6 +22,7 @@ import {
   type OrgFormErrors,
 } from "./OrganizationFields";
 import { StepList } from "./StepList";
+import { Icon } from "@/components/ui/icon";
 
 const ID_PREFIX = "register-org";
 
@@ -142,7 +143,7 @@ function RegisterForm({
         {t("verifyNote")}
       </Callout>
       {formError && <FormMessage>{formError}</FormMessage>}
-      <Button type="submit" className="h-10 px-5 font-semibold" disabled={busy}>
+      <Button type="submit" size="lg" disabled={busy}>
         {busy ? t("registering") : t("register")}
       </Button>
     </form>
@@ -163,10 +164,8 @@ function RegisteredNeedsTwoStep({ name }: { name: string }) {
           ]}
           current={0}
         />
-        <ButtonLink href={mfaSetupHref("/org")} className="mt-6 h-10 px-5 font-semibold">
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            phonelink_lock
-          </span>
+        <ButtonLink href={mfaSetupHref("/org")} size="lg" className="mt-6">
+          <Icon name="phonelink_lock" className="size-4" />
           {t("doneAction")}
         </ButtonLink>
       </Section>

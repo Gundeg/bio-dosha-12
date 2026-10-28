@@ -357,7 +357,7 @@ export function RadioCards<V extends string>({
             <label
               key={o.value}
               className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-xl p-3 ring-1 transition has-focus-visible:ring-2 has-focus-visible:ring-primary",
+                "flex cursor-pointer items-start gap-3 rounded-lg p-3 ring-1 transition has-focus-visible:ring-2 has-focus-visible:ring-primary",
                 active ? "bg-primary/5 ring-primary/50" : "ring-outline-variant/40 hover:bg-surface-container-low/70",
                 o.disabled && "cursor-not-allowed opacity-50"
               )}

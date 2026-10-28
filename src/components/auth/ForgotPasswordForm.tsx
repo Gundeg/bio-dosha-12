@@ -84,7 +84,7 @@ export function ForgotPasswordForm() {
             <li key={key} className="flex gap-3 text-sm leading-relaxed text-on-surface">
               <span
                 aria-hidden="true"
-                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary"
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-on-primary"
               >
                 {index + 1}
               </span>

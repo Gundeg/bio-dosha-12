@@ -124,7 +124,7 @@ export function CreateOrganizationDialog({
         {result ? (
           <>
             <DialogHeader>
-              <DialogTitle className="font-headline text-lg font-bold">{t("orgForm.successTitle")}</DialogTitle>
+              <DialogTitle>{t("orgForm.successTitle")}</DialogTitle>
               <DialogDescription className="text-sm leading-relaxed">
                 {t("orgForm.successBody", { name: result.organization.name })}
               </DialogDescription>
@@ -163,10 +163,10 @@ export function CreateOrganizationDialog({
               </ul>
             </div>
             <DialogFooter>
-              <Button variant="outline" className="h-10 px-4" onClick={close}>
+              <Button variant="outline" size="lg" onClick={close}>
                 {t("common.done")}
               </Button>
-              <ButtonLink href={`/admin/organizations/${result.organization.id}`} className="h-10 px-4 font-semibold">
+              <ButtonLink href={`/admin/organizations/${result.organization.id}`} size="lg">
                 {t("orgForm.openOrganization")}
               </ButtonLink>
             </DialogFooter>
@@ -174,12 +174,12 @@ export function CreateOrganizationDialog({
         ) : (
           <form onSubmit={submit} noValidate className="grid gap-4">
             <DialogHeader>
-              <DialogTitle className="font-headline text-lg font-bold">{t("orgForm.title")}</DialogTitle>
+              <DialogTitle>{t("orgForm.title")}</DialogTitle>
               <DialogDescription className="text-sm leading-relaxed">{t("orgForm.description")}</DialogDescription>
             </DialogHeader>
 
             <fieldset className="grid gap-4 sm:grid-cols-2">
-              <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+              <legend className="mb-1 text-xs font-semibold text-on-surface-variant">
                 {t("orgForm.sectionOrganization")}
               </legend>
               <TextField
@@ -242,7 +242,7 @@ export function CreateOrganizationDialog({
             </fieldset>
 
             <fieldset className="grid gap-4">
-              <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+              <legend className="mb-1 text-xs font-semibold text-on-surface-variant">
                 {t("orgForm.sectionOwner")}
               </legend>
               <TextField
@@ -286,10 +286,10 @@ export function CreateOrganizationDialog({
             <FormError message={error} />
 
             <DialogFooter>
-              <Button type="button" variant="outline" className="h-10 px-4" disabled={busy} onClick={close}>
+              <Button type="button" variant="outline" size="lg" disabled={busy} onClick={close}>
                 {tk("cancel")}
               </Button>
-              <Button type="submit" className="h-10 px-4 font-semibold" disabled={busy}>
+              <Button type="submit" size="lg" disabled={busy}>
                 {busy ? tk("working") : t("orgForm.submit")}
               </Button>
             </DialogFooter>

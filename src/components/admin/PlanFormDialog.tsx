@@ -218,7 +218,7 @@ export function PlanFormDialog({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <form onSubmit={submit} noValidate className="grid gap-5">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg font-bold">
+            <DialogTitle>
               {plan ? t("planForm.editTitle", { name: labels.planName(plan) }) : t("planForm.createTitle")}
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
@@ -252,7 +252,7 @@ export function PlanFormDialog({
           )}
 
           <fieldset className="grid gap-4 sm:grid-cols-2">
-            <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+            <legend className="mb-1 text-xs font-semibold text-on-surface-variant">
               {t("planForm.sectionNames")}
             </legend>
             <TextField
@@ -288,7 +288,7 @@ export function PlanFormDialog({
           </fieldset>
 
           <fieldset className="grid gap-4 sm:grid-cols-2">
-            <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+            <legend className="mb-1 text-xs font-semibold text-on-surface-variant">
               {t("planForm.sectionPrice")}
             </legend>
             <TextField
@@ -310,7 +310,7 @@ export function PlanFormDialog({
           </fieldset>
 
           <fieldset className="grid gap-3">
-            <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+            <legend className="mb-1 text-xs font-semibold text-on-surface-variant">
               {t("planForm.sectionLimits", { audience: audienceLabel })}
             </legend>
             {relevantKeys.map((key) => {
@@ -346,7 +346,7 @@ export function PlanFormDialog({
             <p className="text-xs text-on-surface-variant">{t("planForm.limitsHint")}</p>
           </fieldset>
 
-          <fieldset className="grid gap-3 rounded-xl bg-surface-container-low/60 p-3 ring-1 ring-outline-variant/30">
+          <fieldset className="grid gap-3 rounded-lg bg-surface-container-low/60 p-3 ring-1 ring-outline-variant/30">
             <legend className="sr-only">{t("planForm.sectionAvailability")}</legend>
             {plan?.isDefault ? (
               <Callout tone="info" icon="star">
@@ -378,10 +378,10 @@ export function PlanFormDialog({
           <FormError message={error} />
 
           <DialogFooter>
-            <Button type="button" variant="outline" className="h-10 px-4" disabled={busy} onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" size="lg" disabled={busy} onClick={() => onOpenChange(false)}>
               {tk("cancel")}
             </Button>
-            <Button type="submit" className="h-10 px-4 font-semibold" disabled={busy || (editing && changeCount === 0)}>
+            <Button type="submit" size="lg" disabled={busy || (editing && changeCount === 0)}>
               {busy ? tk("working") : plan ? t("common.saveChanges") : t("planForm.createSubmit")}
             </Button>
           </DialogFooter>

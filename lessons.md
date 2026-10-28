@@ -42,3 +42,21 @@
   experiment" and asked for a complete, professional app.
 - **How to apply:** before reporting a feature as finished, check it in a production
   build against the same flows the owner will use, and list what still needs a deploy.
+
+## 2026-10-28 — Every screen follows one design system; look at it before calling it done
+
+- **Rule:** Build screens only from the shared pieces in `docs/design-system.md`
+  (`ui/*`, `kit/*`, `states`, `<Icon name>`). Do not restyle a button, input, dialog
+  title, tab strip or status colour on one page; change the shared component instead.
+- **Rule:** Each view has one filled primary action, and each action appears in one place.
+  Secondary actions go in the account menu, an outline/ghost button, or a quiet icon.
+- **Rule:** Before reporting UI work as finished, screenshot every touched page at 1440px
+  and 390px and check: icons sit next to their text, corners and heights match the scale,
+  the same thing (status, separator, picker) looks the same on every page, and no page
+  starts at a different left edge.
+- **Why:** on 2026-10-28 the owner sent a screenshot of the sign-in page: misaligned icons,
+  mixed round and sharp corners, mixed sizes, thick icon strokes, and a navigation row of
+  equal buttons. Pages had been styled one by one, so they read as a collection, not an app.
+- **How to apply:** for new UI, start from the kit; when a page needs something the kit
+  lacks, add it to the kit and the doc first. Parallel agents get the doc as their brief,
+  and the lead reviews their pages in the browser, not only their reports.

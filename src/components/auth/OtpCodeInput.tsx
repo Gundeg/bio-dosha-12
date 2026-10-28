@@ -58,8 +58,8 @@ export function OtpCodeInput({
         aria-describedby={describedBy(hintId, errorId)}
         className={cn(
           // tracking adds space after every digit; the matching left padding keeps the code centered.
-          "h-14 w-full rounded-xl border border-on-surface-variant/60 bg-surface-container-lowest pl-[0.45em] text-center font-mono text-3xl font-semibold tracking-[0.45em] text-on-surface tabular-nums outline-none transition-colors",
-          "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+          "h-14 w-full rounded-lg border border-input bg-surface-container-lowest pl-[0.45em] text-center font-mono text-3xl font-semibold tracking-[0.45em] text-on-surface tabular-nums outline-none transition-colors",
+          "focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15",
           error && "border-error ring-3 ring-error/15"
         )}
       />
@@ -119,8 +119,8 @@ export function RecoveryCodeInput({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(hintId, errorId)}
         className={cn(
-          "h-14 w-full rounded-xl border border-on-surface-variant/60 bg-surface-container-lowest px-3 text-center font-mono text-xl font-semibold tracking-widest text-on-surface uppercase outline-none transition-colors placeholder:text-on-surface-variant/50",
-          "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+          "h-14 w-full rounded-lg border border-input bg-surface-container-lowest px-3 text-center font-mono text-xl font-semibold text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/50",
+          "focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15",
           error && "border-error ring-3 ring-error/15"
         )}
       />

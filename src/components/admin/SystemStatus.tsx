@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Callout, PageHeader, Section, StatusBadge, useApiQuery, type BadgeTone } from "@/components/kit";
+import { IconTile } from "@/components/kit/layout";
 import { formatNumber } from "@/lib/formatNumber";
 import { cn } from "@/lib/utils";
 import { LoadFailure, PageSkeleton, StaleNotice, SuperadminOnly } from "./AdminStates";
 import { useAdminViewer } from "./AdminViewer";
 import { DateText } from "./badges";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 /** GET /api/admin/system */
 interface SystemResponse {
@@ -39,7 +41,7 @@ interface SystemResponse {
 type CheckState = "ok" | "warning" | "danger" | "info";
 
 const STATE_TONE: Record<CheckState, BadgeTone> = { ok: "success", warning: "warning", danger: "danger", info: "info" };
-const STATE_ICON: Record<CheckState, string> = { ok: "check_circle", warning: "warning", danger: "error", info: "info" };
+const STATE_ICON: Record<CheckState, IconName> = { ok: "check_circle", warning: "warning", danger: "error", info: "info" };
 const SEASONS = ["WINTER", "SPRING", "SUMMER", "AUTUMN"] as const;
 const SLOW_DB_MS = 1000;
 
@@ -62,7 +64,7 @@ function CheckRow({
   state,
   children,
 }: {
-  icon: string;
+  icon: IconName;
   title: string;
   state: CheckState;
   children: React.ReactNode;
@@ -70,12 +72,7 @@ function CheckRow({
   const t = useTranslations("admin");
   return (
     <li className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
-      <span
-        className="material-symbols-outlined mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface-container text-[20px] text-on-surface-variant"
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
+      <IconTile name={icon} className="mt-0.5" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="font-semibold text-on-surface">{title}</p>
@@ -100,14 +97,11 @@ function SystemStatusView() {
 
   const header = (
     <PageHeader
-      eyebrow={t("system.eyebrow")}
       title={t("system.title")}
       description={t("system.description")}
       actions={
-        <Button variant="outline" className="h-10 px-4" onClick={reload} disabled={loading}>
-          <span className={cn("material-symbols-outlined text-[20px]", loading && "motion-safe:animate-spin")} aria-hidden="true">
-            refresh
-          </span>
+        <Button variant="outline" size="lg" onClick={reload} disabled={loading}>
+          <Icon name="refresh" className={cn("size-4", loading && "motion-safe:animate-spin")} />
           {t("system.recheck")}
         </Button>
       }
@@ -366,9 +360,7 @@ function SystemStatusView() {
         id="system-formula"
         title={
           <span className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">
-              lock
-            </span>
+            <Icon name="lock" className="size-4 text-on-surface-variant" />
             {t("system.formula.title")}
           </span>
         }
@@ -379,14 +371,14 @@ function SystemStatusView() {
           {t("system.formula.locked")}
         </Callout>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-on-surface-variant">{t("system.formula.expression")}</p>
+          <p className="text-xs font-medium text-on-surface-variant">{t("system.formula.expression")}</p>
           <p className="mt-1 overflow-x-auto rounded-lg bg-surface-container-low px-3 py-2 font-mono text-sm text-on-surface">
             {formula.expression}
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-on-surface-variant">{t("system.formula.thresholds")}</p>
+            <p className="text-xs font-medium text-on-surface-variant">{t("system.formula.thresholds")}</p>
             <ul className="mt-1 space-y-1 text-sm text-on-surface">
               <li className="flex justify-between gap-3">
                 <span className="font-mono">Δ &lt; {signed(formula.thresholds.khiiBelow)}</span>
@@ -406,7 +398,7 @@ function SystemStatusView() {
             <p className="mt-2 text-xs text-on-surface-variant">{t("system.formula.precision", { count: formula.precision })}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-on-surface-variant">{t("system.formula.seasons")}</p>
+            <p className="text-xs font-medium text-on-surface-variant">{t("system.formula.seasons")}</p>
             <dl className="mt-1 space-y-1 text-sm text-on-surface">
               {SEASONS.filter((s) => s in formula.seasonCoefficients).map((season) => (
                 <div key={season} className="flex justify-between gap-3">
@@ -428,7 +420,7 @@ function SystemStatusView() {
             { label: t("system.runtime.region"), value: runtime.region ?? "—" },
           ].map((item) => (
             <div key={item.label} className="min-w-0">
-              <dt className="text-xs font-medium uppercase tracking-wide text-on-surface-variant">{item.label}</dt>
+              <dt className="text-xs font-medium text-on-surface-variant">{item.label}</dt>
               <dd className="mt-1 break-words font-mono text-sm text-on-surface" title={item.title}>
                 {item.value}
               </dd>
@@ -447,7 +439,7 @@ export function SystemStatus() {
   if (!viewer.isSuperadmin) {
     return (
       <div>
-        <PageHeader eyebrow={t("system.eyebrow")} title={t("system.title")} />
+        <PageHeader title={t("system.title")} />
         <SuperadminOnly title={t("system.onlySuperadminTitle")} body={t("system.onlySuperadminBody")} />
       </div>
     );

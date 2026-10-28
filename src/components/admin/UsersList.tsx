@@ -127,7 +127,7 @@ export function UsersList() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow={t("users.eyebrow")} title={t("users.title")} description={t("users.description")} />
+      <PageHeader title={t("users.title")} description={t("users.description")} />
 
       <Section bodyClassName="space-y-4">
         <div className="flex flex-col gap-3">

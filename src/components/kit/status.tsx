@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 export type BadgeTone = "success" | "warning" | "danger" | "info" | "neutral" | "primary";
 
@@ -26,7 +27,7 @@ export function StatusBadge({
   children: React.ReactNode;
   dot?: boolean;
   /** Material Symbols name shown instead of the dot. */
-  icon?: string;
+  icon?: IconName;
   className?: string;
 }) {
   const t = TONE[tone];
@@ -39,9 +40,7 @@ export function StatusBadge({
       )}
     >
       {icon ? (
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          {icon}
-        </span>
+        <Icon name={icon} className="size-3.5" />
       ) : (
         dot && <span className={cn("size-1.5 rounded-full", t.dot)} aria-hidden="true" />
       )}

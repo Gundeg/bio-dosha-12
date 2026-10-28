@@ -8,6 +8,9 @@
   "noProfileTitle": "No profile yet",
   "noProfileBody": "Start with the 12-question assessment",
   "startAssessment": "Start assessment",
+  "statusLabel": "Current state",
+  "balancedRange": "Balanced: {from} to {to}",
+  "trendHint": "Last {count} measurements",
   "balanceTitle": "Constitution balance",
   "statWeight": "Weight",
   "statSeason": "Season",
@@ -23,7 +26,7 @@
   "bediGauge": "BEDI gauge",
   "deviation": "Deviation (Δ)",
   "trendTitle": "BEDI trend",
-  "now": "NOW",
+  "now": "Now",
   "quickActions": "Quick actions",
   "seeAll": "See all →",
   "actions": {

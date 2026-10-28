@@ -178,7 +178,7 @@ export default async function PatientDetailPage({ params }: PageProps) {
         description={
           <>
             {t("ageSex", { age, sex: ts(`sex.${profile.sex === "MALE" ? "MALE" : "FEMALE"}`) })}
-            {profile.phone ? ` • ${profile.phone}` : ""}
+            {profile.phone ? ` · ${profile.phone}` : ""}
             {full.practitioner?.name && (
               <span className="mt-0.5 block text-xs">{t("registeredBy", { name: full.practitioner.name })}</span>
             )}

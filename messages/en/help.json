@@ -85,20 +85,9 @@
     "more": "Learn more"
   },
   "doshaCard": {
+    "constitution": "Body type",
     "kt": "Kt coefficient",
     "qualities": "Qualities",
-    "risks": "Risk factors",
-    "altLabel": {
-      "Khii": "Хий",
-      "Khii_Shar": "Хий-Шар",
-      "Khii_Badgan": "Хий-Бадган",
-      "Shar_Khii": "Шар-Хий",
-      "Shar": "Шар",
-      "Tentsveertei": "Тэнцвэртэй",
-      "Shar_Badgan": "Шар-Бадган",
-      "Badgan_Khii": "Бадган-Хий",
-      "Badgan_Shar": "Бадган-Шар",
-      "Badgan": "Бадган"
-    }
+    "risks": "Risk factors"
   }
 }

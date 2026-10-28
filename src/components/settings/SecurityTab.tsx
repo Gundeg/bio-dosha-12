@@ -11,6 +11,7 @@ import { formatDate } from "@/lib/formatDate";
 import { Field, FormMessage, PasswordInput, byteLength, fieldErrorOf, signOutTo } from "./shared";
 import { TwoStepSection } from "./TwoStepSection";
 import type { Me } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 export function SecurityTab({ me, reload }: { me: Me; reload: () => void }) {
   return (
@@ -140,7 +141,7 @@ function PasswordSection({ me }: { me: Me }) {
           )}
         </Field>
         {formError && <FormMessage>{formError}</FormMessage>}
-        <Button type="submit" className="h-10 px-5 font-semibold" disabled={busy}>
+        <Button type="submit" size="lg" disabled={busy}>
           {busy ? t("saving") : t("submit")}
         </Button>
       </form>
@@ -154,10 +155,8 @@ function SignOutEverywhere() {
 
   return (
     <Section title={t("title")} description={t("description")}>
-      <Button variant="outline" className="h-10 px-4" onClick={() => setOpen(true)}>
-        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-          logout
-        </span>
+      <Button variant="outline" size="lg" onClick={() => setOpen(true)}>
+        <Icon name="logout" className="size-4" />
         {t("button")}
       </Button>
       <ConfirmDialog

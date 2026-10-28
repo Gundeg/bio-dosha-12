@@ -9,6 +9,7 @@ import { IntakeForm, type IntakeFormProfile, type IntakeFormInitial } from "./In
 import { TreatmentLog, type TreatmentCounts } from "./TreatmentLog";
 import { IntakeHistory, type IntakeHistoryEntry } from "./IntakeHistory";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 export interface PatientDetailIntake extends IntakeFormInitial {
   id: string;
@@ -108,27 +109,27 @@ export function PatientDetailTabs({
       onValueChange={(value) => updateQuery({ tab: value as TabValue })}
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <TabsList className="group-data-horizontal/tabs:h-11">
+        <TabsList className="group-data-horizontal/tabs:h-10">
           <TabsTrigger value="intake">{t("intake")}</TabsTrigger>
           <TabsTrigger value="treatments">{t("treatments")}</TabsTrigger>
           <TabsTrigger value="history">{t("history")}</TabsTrigger>
         </TabsList>
 
         {tab === "intake" && (
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {selectedIntake && (
               <span className="text-xs text-muted-foreground">
-                {formatDate(selectedIntake.admissionDate, locale)} • {patientName}
+                {formatDate(selectedIntake.admissionDate, locale)} · {patientName}
               </span>
             )}
             <Button
               type="button"
               variant="outline"
               size="lg"
-              className="px-3"
               onClick={() => updateQuery({ tab: "intake", new: "1", intake: null })}
             >
-              <span aria-hidden="true">+</span> {t("newIntake")}
+              <Icon name="add" className="size-4" />
+              {t("newIntake")}
             </Button>
           </div>
         )}
@@ -155,7 +156,7 @@ export function PatientDetailTabs({
             initialCounts={(selectedIntake.treatmentLog ?? {}) as TreatmentCounts}
           />
         ) : (
-          <div className="rounded-lg border border-dashed border-outline-variant/60 p-10 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-outline-variant p-10 text-center text-sm text-muted-foreground">
             {t("saveIntakeFirst")}
           </div>
         )}

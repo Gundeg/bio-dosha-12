@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
+import { TAB_STRIP_CLASS, tabItemClass } from "@/components/settings/shared/PageTabs";
 
 const SECTIONS = [
   { href: "/admin", key: "overview", icon: "space_dashboard", superadmin: false },
@@ -38,28 +40,16 @@ export function AdminNav({ isSuperadmin }: { isSuperadmin: boolean }) {
   }, [pathname]);
 
   return (
-    <nav aria-label={t("layout.navLabel")} className="border-t border-outline-variant/20">
-      <ul ref={listRef} className="relative flex gap-1 overflow-x-auto px-2 sm:px-3">
+    <nav aria-label={t("layout.navLabel")}>
+      {/* The list is the scroll container, so the active tab can be scrolled into view. */}
+      <ul ref={listRef} className={cn(TAB_STRIP_CLASS, "relative flex gap-1")}>
         {items.map((item) => {
           const active = isActive(pathname, item.href);
           return (
             <li key={item.href} className="shrink-0">
-              <Link
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative inline-flex h-12 items-center gap-2 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
-                  active ? "text-primary" : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
-                )}
-              >
-                <span
-                  className={cn("material-symbols-outlined text-[20px]", active && "icon-filled")}
-                  aria-hidden="true"
-                >
-                  {item.icon}
-                </span>
+              <Link href={item.href} aria-current={active ? "page" : undefined} className={tabItemClass(active)}>
+                <Icon name={item.icon} className="size-[18px]" />
                 {t(`nav.${item.key}`)}
-                {active && <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary" aria-hidden="true" />}
               </Link>
             </li>
           );

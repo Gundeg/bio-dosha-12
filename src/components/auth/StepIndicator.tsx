@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * Numbered progress for a short wizard. Completed steps show a check (and say
@@ -40,18 +41,18 @@ export function StepIndicator({
             <span
               aria-hidden="true"
               className={cn(
-                "flex size-8 items-center justify-center rounded-full text-sm font-bold",
+                "flex size-8 items-center justify-center rounded-full text-sm font-semibold tabular-nums",
                 done && "bg-primary text-on-primary",
-                active && "bg-primary/10 text-primary ring-2 ring-primary",
+                active && "bg-primary/8 text-primary ring-2 ring-primary",
                 !done && !active && "bg-surface-container text-on-surface-variant"
               )}
             >
-              {done ? <span className="material-symbols-outlined text-[18px]">check</span> : n}
+              {done ? <Icon name="check" className="size-4" /> : n}
             </span>
             <span
               className={cn(
                 "text-[11px] leading-tight sm:text-xs",
-                active ? "font-semibold text-on-surface" : "text-on-surface-variant"
+                active ? "font-medium text-on-surface" : "text-on-surface-variant"
               )}
             >
               {name}

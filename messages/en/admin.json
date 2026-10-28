@@ -217,7 +217,6 @@
     }
   },
   "overview": {
-    "eyebrow": "Control center",
     "title": "Overview",
     "description": "The platform at a glance: accounts, organizations waiting for you, security signals and activity.",
     "totalsTitle": "Platform totals",
@@ -290,7 +289,6 @@
     }
   },
   "orgs": {
-    "eyebrow": "Control center",
     "title": "Organizations",
     "description": "Clinics and practices on the platform. Verify new ones, support existing ones and assign plans. Patients are shown as counts only.",
     "add": "Add organization",
@@ -486,7 +484,6 @@
     "removed": "Assigned plan removed. The default plan applies."
   },
   "plans": {
-    "eyebrow": "Control center",
     "title": "Plans",
     "description": "Tiers for individuals and organizations, with their limits.",
     "new": "New plan",
@@ -573,7 +570,6 @@
     "linkLabel": "Invitation link"
   },
   "invites": {
-    "eyebrow": "Control center",
     "title": "Invitations",
     "description": "Invitations to platform staff and to organizations, across the platform.",
     "inviteStaff": "Invite platform admin",
@@ -622,7 +618,6 @@
     "created": "Invitation for {email} created."
   },
   "users": {
-    "eyebrow": "Control center",
     "title": "Users",
     "description": "Every account on the platform: individuals, organization members and staff. Account data only — no health records.",
     "filters": {
@@ -823,7 +818,6 @@
     }
   },
   "audit": {
-    "eyebrow": "Control center",
     "title": "Audit log",
     "description": "Who did what, when and from where. Use it to look into sign-in problems and changes.",
     "exportCsv": "Export CSV",
@@ -872,7 +866,6 @@
     "emptyFilteredHint": "Widen the date range or clear a filter."
   },
   "system": {
-    "eyebrow": "Control center",
     "title": "System",
     "description": "Configuration and health checks. Secret values are never shown.",
     "recheck": "Check again",

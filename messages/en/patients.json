@@ -6,7 +6,7 @@
   "searchPlaceholder": "Search by name...",
   "loading": "Loading...",
   "retry": "Try again",
-  "ageSex": "Age {age} • {sex}",
+  "ageSex": "Age {age} · {sex}",
   "constitution": "Constitution:",
   "notAssessed": "Not assessed yet",
   "latestDelta": "Latest Δ:",

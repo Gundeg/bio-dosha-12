@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ import {
   type OrgRole,
   type OrgStatus,
 } from "./lib";
+import { Icon } from "@/components/ui/icon";
 
 /** GET /api/admin/organizations/[orgId] */
 interface OrgDetailResponse {
@@ -148,30 +149,24 @@ export function OrganizationDetail({ orgId }: { orgId: string }) {
   const statusActions = (
     <>
       {org.status === "PENDING" && (
-        <Button className="h-10 px-4 font-semibold" onClick={openDialog("verify")}>
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            verified
-          </span>
+        <Button size="lg" onClick={openDialog("verify")}>
+          <Icon name="verified" className="size-4" />
           {t("org.verify.action")}
         </Button>
       )}
       {org.status === "SUSPENDED" && (
-        <Button className="h-10 px-4 font-semibold" onClick={openDialog("reactivate")}>
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            restart_alt
-          </span>
+        <Button size="lg" onClick={openDialog("reactivate")}>
+          <Icon name="restart_alt" className="size-4" />
           {t("org.reactivate.action")}
         </Button>
       )}
       {org.status !== "SUSPENDED" && (
         <Button
-          variant="outline"
-          className="h-10 px-4 font-semibold text-red-700 hover:bg-red-50 hover:text-red-800"
+          variant="destructive"
+          size="lg"
           onClick={openDialog("suspend")}
         >
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            block
-          </span>
+          <Icon name="block" className="size-4" />
           {t("org.suspend.action")}
         </Button>
       )}
@@ -277,10 +272,8 @@ export function OrganizationDetail({ orgId }: { orgId: string }) {
           className="lg:col-span-2"
           title={t("org.profile.title")}
           actions={
-            <Button variant="outline" className="h-10 px-4" onClick={openDialog("edit")}>
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                edit
-              </span>
+            <Button variant="outline" size="lg" onClick={openDialog("edit")}>
+              <Icon name="edit" className="size-4" />
               {t("org.profile.edit")}
             </Button>
           }
@@ -318,14 +311,14 @@ export function OrganizationDetail({ orgId }: { orgId: string }) {
           id="org-plan"
           title={t("org.plan.title")}
           actions={
-            <Button variant="outline" className="h-10 px-4" onClick={openDialog("plan")}>
+            <Button variant="outline" size="lg" onClick={openDialog("plan")}>
               {t("org.plan.change")}
             </Button>
           }
           bodyClassName="space-y-4"
         >
           <div>
-            <p className="font-headline text-lg font-bold text-on-surface">{labels.planName(data.plan)}</p>
+            <p className="text-lg font-semibold text-on-surface">{labels.planName(data.plan)}</p>
             <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-on-surface-variant">
               <span className="font-mono">{data.plan.code}</span>
               <StatusBadge tone={data.plan.source === "subscription" ? "primary" : "neutral"} dot={false}>
@@ -393,15 +386,9 @@ export function OrganizationDetail({ orgId }: { orgId: string }) {
           title={t("org.activity.title")}
           description={t("org.activity.description")}
           actions={
-            <Link
-              href={`/admin/audit?organizationId=${encodeURIComponent(org.id)}`}
-              className="inline-flex h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary"
-            >
+            <ButtonLink href={`/admin/audit?organizationId=${encodeURIComponent(org.id)}`} variant="link" className="px-2">
               {t("common.openAudit")}
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                arrow_forward
-              </span>
-            </Link>
+            </ButtonLink>
           }
         >
           <ActivityList items={data.recentActivity} empty={t("org.activity.empty")} />
@@ -411,9 +398,9 @@ export function OrganizationDetail({ orgId }: { orgId: string }) {
       {viewer.isSuperadmin && (
         <section
           aria-labelledby="org-danger-title"
-          className="rounded-2xl bg-surface-container-lowest p-5 shadow-ambient ring-1 ring-red-600/30"
+          className="rounded-xl bg-surface-container-lowest p-5 shadow-ambient"
         >
-          <h2 id="org-danger-title" className="font-headline text-base font-bold text-red-800">
+          <h2 id="org-danger-title" className="text-base font-semibold text-red-800">
             {t("common.dangerZone")}
           </h2>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -423,10 +410,8 @@ export function OrganizationDetail({ orgId }: { orgId: string }) {
                 {t("org.delete.summary", { patients: data.usage.patients, intakes: data.usage.intakes })}
               </p>
             </div>
-            <Button className="h-10 shrink-0 bg-red-700 px-4 font-semibold text-white hover:bg-red-800" onClick={openDialog("delete")}>
-              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                delete_forever
-              </span>
+            <Button variant="destructive" size="lg" className="shrink-0" onClick={openDialog("delete")}>
+              <Icon name="delete_forever" className="size-4" />
               {t("org.delete.action")}
             </Button>
           </div>

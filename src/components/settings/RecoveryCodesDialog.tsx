@@ -10,6 +10,7 @@ import { ApiError, apiFetch } from "@/lib/api";
 import { formatDateTime } from "@/lib/formatDate";
 import { Field, FormDialog, PasswordInput, TwoStepCodeInput, looksLikeTwoStepCode } from "./shared";
 import { downloadTextFile, printRecoverySheet, recoveryText, type RecoverySheet } from "./recoveryCodesExport";
+import { Icon } from "@/components/ui/icon";
 
 type Errors = { password?: string; code?: string };
 
@@ -185,7 +186,7 @@ function CodesView({
     >
       <DialogContent showCloseButton={false} className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-headline text-lg font-bold">{t("codesTitle")}</DialogTitle>
+          <DialogTitle>{t("codesTitle")}</DialogTitle>
           <DialogDescription className="text-sm leading-relaxed">{t("codesDescription")}</DialogDescription>
         </DialogHeader>
 
@@ -208,22 +209,16 @@ function CodesView({
         </ol>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <Button type="button" variant="outline" className="h-10 px-3" onClick={copyAll}>
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              content_copy
-            </span>
+          <Button type="button" variant="outline" size="lg" onClick={copyAll}>
+            <Icon name="content_copy" className="size-4" />
             {t("copyAll")}
           </Button>
-          <Button type="button" variant="outline" className="h-10 px-3" onClick={download}>
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              download
-            </span>
+          <Button type="button" variant="outline" size="lg" onClick={download}>
+            <Icon name="download" className="size-4" />
             {t("download")}
           </Button>
-          <Button type="button" variant="outline" className="h-10 px-3" onClick={print}>
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              print
-            </span>
+          <Button type="button" variant="outline" size="lg" onClick={print}>
+            <Icon name="print" className="size-4" />
             {t("print")}
           </Button>
         </div>
@@ -243,7 +238,7 @@ function CodesView({
         </label>
 
         <DialogFooter>
-          <Button type="button" className="h-10 px-5 font-semibold" disabled={!saved} onClick={onDone}>
+          <Button type="button" size="lg" disabled={!saved} onClick={onDone}>
             {t("done")}
           </Button>
         </DialogFooter>

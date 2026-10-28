@@ -21,11 +21,11 @@
   },
   "header": {
     "bediResult": {
-      "title": "BEDI Index Calculation",
+      "title": "BEDI index calculation",
       "subtitle": "Your analysis is complete. Review the result and save it."
     },
     "measurement": {
-      "title": "Enter Measurements",
+      "title": "Enter measurements",
       "subtitle": "Enter the biometric data and the current season."
     },
     "questions": {
@@ -33,7 +33,7 @@
       "subtitle": "Answer from your innate nature — not from how you feel today."
     },
     "assessmentResult": {
-      "title": "Assessment Result",
+      "title": "Assessment result",
       "subtitle": "Your Kt coefficient has been determined. Save it to continue to the BEDI calculation."
     },
     "profile": {
@@ -125,7 +125,7 @@
   },
   "guide": {
     "constitution": {
-      "title": "Body Type Reference",
+      "title": "Body type reference",
       "intro": "A reference to help identify the basic body type.",
       "light": {
         "title": "Light build",
@@ -167,7 +167,7 @@
       }
     },
     "info": {
-      "title": "Why Is This Needed?",
+      "title": "Why is this needed?",
       "intro": "This information is used to calculate the BEDI index accurately.",
       "heightWeight": {
         "label": "Height & weight",
@@ -198,7 +198,7 @@
       }
     },
     "kt": {
-      "title": "Kt Coefficient",
+      "title": "Kt coefficient",
       "intro": "Kt is the baseline of your constitutional balance and is used in the BEDI calculation.",
       "low": {
         "label": "Kt < 1.0 · Khii dominant",

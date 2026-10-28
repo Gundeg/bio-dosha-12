@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api";
 import { linkDelivery, useAdminViewer } from "./AdminViewer";
 import { OneTimeLinkDialog, type OneTimeLink } from "./OneTimeLinkDialog";
 import type { InviteState, OneTimeLinkResponse } from "./lib";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * "New link" and "Revoke" for one invitation. A new link replaces the old one
@@ -56,14 +57,12 @@ export function InviteActions({
     <div className="flex flex-wrap justify-end gap-2">
       <Button
         variant="outline"
-        className="h-10 px-3"
+        size="lg"
         disabled={delivery === "unavailable"}
         title={delivery === "unavailable" ? t("link.adminEmailOff") : undefined}
         onClick={() => setDialog("renew")}
       >
-        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-          {delivery === "emailed" ? "forward_to_inbox" : "link"}
-        </span>
+        <Icon name={delivery === "emailed" ? "forward_to_inbox" : "link"} className="size-4" />
         {t("inviteActions.renew")}
         <span className="sr-only">
           : {invite.email}
@@ -72,8 +71,8 @@ export function InviteActions({
       </Button>
       {invite.state === "pending" && (
         <Button
-          variant="outline"
-          className="h-10 px-3 text-red-700 hover:bg-red-50 hover:text-red-800"
+          variant="destructive"
+          size="lg"
           onClick={() => setDialog("revoke")}
         >
           {t("inviteActions.revoke")}

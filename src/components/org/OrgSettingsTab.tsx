@@ -121,14 +121,14 @@ function ProfileForm({ detail, onSaved }: { detail: OrgDetail; onSaved: () => vo
         <OrganizationFields idPrefix={ID_PREFIX} values={values} errors={errors} onChange={change} disabled={busy} />
         {formError && <FormMessage>{formError}</FormMessage>}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <Button type="submit" className="h-10 px-5 font-semibold" disabled={busy || changed.length === 0}>
+          <Button type="submit" size="lg" disabled={busy || changed.length === 0}>
             {busy ? t("saving") : t("save")}
           </Button>
           {changed.length > 0 && !busy && (
             <Button
               type="button"
               variant="ghost"
-              className="h-10 px-4"
+              size="lg"
               onClick={() => {
                 setValues(initial);
                 setErrors({});

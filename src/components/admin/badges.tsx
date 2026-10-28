@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { StatusBadge, accountStatusTone, inviteStateTone, orgStatusTone, type BadgeTone } from "@/components/kit";
 import { useAdminLabels } from "./hooks";
+import type { IconName } from "@/components/ui/icon";
 
 /** Organization status, e.g. "Pending verification". */
 export function OrgStatusBadge({ status }: { status: string }) {
@@ -24,7 +25,7 @@ export function AccountStatusBadge({ disabled }: { disabled: boolean }) {
   );
 }
 
-const ROLE_STYLE: Record<string, { tone: BadgeTone; icon?: string }> = {
+const ROLE_STYLE: Record<string, { tone: BadgeTone; icon?: IconName }> = {
   SUPERADMIN: { tone: "primary", icon: "shield_person" },
   ADMIN: { tone: "info", icon: "admin_panel_settings" },
 };

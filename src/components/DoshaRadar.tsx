@@ -30,10 +30,11 @@ function statusFromDeviation(deviation: number): BEDIStatus {
 }
 
 // Status labels come from the "shared" namespace (shared.status.<status>).
+// App palette: Хий teal (primary), balanced emerald, Шар/Бадган amber (attention, not danger).
 const STATUS_VISUAL: Record<BEDIStatus, { color: string; badge: string }> = {
-  khii_excess: { color: "#3b82f6", badge: "bg-blue-600" },
-  balanced: { color: "#10b981", badge: "bg-emerald-700" },
-  shar_badgan_excess: { color: "#f87171", badge: "bg-red-600" },
+  khii_excess: { color: "#00626b", badge: "bg-primary/8 text-primary" },
+  balanced: { color: "#059669", badge: "bg-emerald-50 text-emerald-800" },
+  shar_badgan_excess: { color: "#b45309", badge: "bg-amber-50 text-amber-900" },
 };
 
 function applyDeviation(
@@ -73,10 +74,11 @@ const LR = R + 30; // label radius
 // Equilateral triangle: Хий=top, Шар=bottom-right, Бадган=bottom-left
 const ANGLES = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6] as const;
 const AXIS_KEYS = ["H", "S", "B"] as const; // calculator.radar.axis.<key>
-const AXIS_COLORS = ["#3b82f6", "#f59e0b", "#8b5cf6"] as const; // blue, amber, violet
-// Darker shades of the axis colours for text, so labels keep ≥ 4.5:1 contrast on white.
-const AXIS_TEXT_COLORS = ["#1d4ed8", "#b45309", "#6d28d9"] as const; // blue-700, amber-700, violet-700
-const AXIS_TEXT_CLASSES = ["text-blue-700", "text-amber-700", "text-violet-700"] as const;
+// Dosha colours from the app palette: Хий primary teal, Шар secondary amber, Бадган tertiary slate.
+const AXIS_COLORS = ["#00626b", "#c96a12", "#4b596e"] as const;
+// Text shades keep ≥ 4.5:1 contrast on white.
+const AXIS_TEXT_COLORS = ["#00626b", "#904d00", "#4b596e"] as const;
+const AXIS_TEXT_CLASSES = ["text-primary", "text-secondary", "text-tertiary"] as const;
 const GRID_LEVELS = [25, 50, 75, 100];
 
 function pt(angle: number, value: number, radius = R): [number, number] {
@@ -137,8 +139,8 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
             key={lvl}
             points={toPolygonPoints([lvl, lvl, lvl] as [number, number, number])}
             fill="none"
-            stroke={lvl === 100 ? "#cbd5e1" : "#e2e8f0"}
-            strokeWidth={lvl === 100 ? 1.5 : 1}
+            stroke={lvl === 100 ? "#d2dbdc" : "#e6eced"}
+            strokeWidth={1}
           />
         ))}
 
@@ -146,7 +148,7 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
         {[25, 50, 75].map((lvl) => {
           const [x, y] = pt(-Math.PI / 2, lvl);
           return (
-            <text key={lvl} x={x + 4} y={y} fontSize="8" fill="#64748b" dominantBaseline="central">
+            <text key={lvl} x={x + 4} y={y} fontSize="8" fill="#52626a" dominantBaseline="central">
               {lvl}
             </text>
           );
@@ -155,14 +157,14 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
         {/* Axis spokes */}
         {ANGLES.map((a, i) => {
           const [tx, ty] = pt(a, 100);
-          return <line key={i} x1={CX} y1={CY} x2={tx} y2={ty} stroke="#e2e8f0" strokeWidth="1" />;
+          return <line key={i} x1={CX} y1={CY} x2={tx} y2={ty} stroke="#e6eced" strokeWidth="1" />;
         })}
 
         {/* Constitutional baseline (dashed) */}
         <polygon
           points={toPolygonPoints(base)}
-          fill="rgba(148,163,184,0.07)"
-          stroke="#94a3b8"
+          fill="rgba(82,98,106,0.05)"
+          stroke="#8a989e"
           strokeWidth="1.5"
           strokeDasharray="5 3"
           strokeLinejoin="round"
@@ -171,9 +173,9 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
         {/* Current BEDI state (filled solid) */}
         <polygon
           points={toPolygonPoints(current)}
-          fill={`${statusColor}20`}
+          fill={`${statusColor}1a`}
           stroke={statusColor}
-          strokeWidth="2.5"
+          strokeWidth="2"
           strokeLinejoin="round"
         />
 
@@ -183,7 +185,7 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
           return (
             <circle
               key={i}
-              cx={x} cy={y} r={5}
+              cx={x} cy={y} r={4.5}
               fill={AXIS_COLORS[i]}
               stroke="white"
               strokeWidth="2"
@@ -192,7 +194,7 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
         })}
 
         {/* Center dot */}
-        <circle cx={CX} cy={CY} r={3} fill="#94a3b8" />
+        <circle cx={CX} cy={CY} r={2.5} fill="#8a989e" />
 
         {/* Axis labels */}
         {axisLabels.map((label, i) => {
@@ -205,7 +207,7 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
               textAnchor="middle"
               dominantBaseline="central"
               fontSize="13"
-              fontWeight="700"
+              fontWeight="600"
               fill={AXIS_TEXT_COLORS[i]}
             >
               {label}
@@ -226,8 +228,8 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
               textAnchor="middle"
               dominantBaseline="central"
               fontSize="10"
-              fontWeight="600"
-              fill="#475569"
+              fontWeight="500"
+              fill="#52626a"
             >
               {Math.round(val)}
             </text>
@@ -238,12 +240,12 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
       {!compact && (
         <>
           {/* Status badge */}
-          <span className={`text-sm font-bold px-4 py-1 rounded-full text-white ${statusBadgeClass}`}>
+          <span className={`rounded-md px-2.5 py-1 text-sm font-medium ${statusBadgeClass}`}>
             {statusLabel}
           </span>
 
           {/* Deviation value */}
-          <span className="text-sm text-muted-foreground font-mono">
+          <span className="text-sm tabular-nums text-on-surface-variant">
             Δ = {deviation >= 0 ? "+" : ""}{deviation.toFixed(2)}
           </span>
 
@@ -251,13 +253,13 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
           <div className="flex items-center gap-5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <svg width="20" height="6" aria-hidden="true">
-                <line x1="0" y1="3" x2="20" y2="3" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="5 3" />
+                <line x1="0" y1="3" x2="20" y2="3" stroke="#8a989e" strokeWidth="1.5" strokeDasharray="5 3" />
               </svg>
               {t("legendBase")}
             </span>
             <span className="flex items-center gap-1.5">
               <svg width="20" height="6" aria-hidden="true">
-                <line x1="0" y1="3" x2="20" y2="3" stroke={statusColor} strokeWidth="2.5" />
+                <line x1="0" y1="3" x2="20" y2="3" stroke={statusColor} strokeWidth="2" />
               </svg>
               {t("legendCurrent")}
             </span>
@@ -269,8 +271,8 @@ export default function DoshaRadar({ doshaKey, deviation, status, size = 260, co
         <div className="flex gap-4 mt-1">
           {axisLabels.map((label, i) => (
             <div key={AXIS_KEYS[i]} className="flex flex-col items-center">
-              <span className={`text-xs font-semibold ${AXIS_TEXT_CLASSES[i]}`}>{label}</span>
-              <span className="text-base font-bold text-slate-700">{Math.round(current[i])}</span>
+              <span className={`text-xs font-medium ${AXIS_TEXT_CLASSES[i]}`}>{label}</span>
+              <span className="text-base font-semibold tabular-nums text-on-surface">{Math.round(current[i])}</span>
             </div>
           ))}
         </div>

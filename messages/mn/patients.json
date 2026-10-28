@@ -6,7 +6,7 @@
   "searchPlaceholder": "Нэрээр хайх...",
   "loading": "Ачааллаж байна...",
   "retry": "Дахин оролдох",
-  "ageSex": "{age} нас • {sex}",
+  "ageSex": "{age} нас · {sex}",
   "constitution": "Махбод:",
   "notAssessed": "Үнэлгээ хийгдээгүй",
   "latestDelta": "Сүүлийн Δ:",

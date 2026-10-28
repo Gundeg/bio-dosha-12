@@ -25,10 +25,10 @@ export function SettingsPanelSkeleton() {
 /** Whole-page placeholder (Suspense fallback). */
 export function SettingsSkeleton() {
   return (
-    <div className="mx-auto max-w-4xl" aria-busy="true">
+    <div className="max-w-4xl" aria-busy="true">
       <Skeleton className="mb-3 h-4 w-24" />
       <Skeleton className="mb-8 h-9 w-56" />
-      <Skeleton className="mb-6 h-11" />
+      <Skeleton className="mb-6 h-10" />
       <SettingsPanelSkeleton />
     </div>
   );
@@ -46,7 +46,7 @@ export function SettingsView() {
   );
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
       <PageTabs
         value={tab}

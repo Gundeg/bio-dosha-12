@@ -25,6 +25,7 @@ import { InviteActions, InviteLinkDialog, InviteLinkNotice } from "./InviteActio
 import { PAGE_SIZE, type InviteState, type OrgRole, type OrgStatus, type Paged, type PlatformRole } from "./lib";
 import type { OneTimeLink } from "./OneTimeLinkDialog";
 import { StaffInviteDialog } from "./StaffInviteDialog";
+import { Icon } from "@/components/ui/icon";
 
 interface InviteItem {
   id: string;
@@ -140,15 +141,12 @@ export function InvitesList() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={t("invites.eyebrow")}
         title={t("invites.title")}
         description={t("invites.description")}
         actions={
           viewer.isSuperadmin ? (
-            <Button className="h-10 px-4 font-semibold" onClick={() => setInviteOpen(true)}>
-              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                person_add
-              </span>
+            <Button size="lg" onClick={() => setInviteOpen(true)}>
+              <Icon name="person_add" className="size-4" />
               {t("invites.inviteStaff")}
             </Button>
           ) : undefined

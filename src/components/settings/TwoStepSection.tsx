@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/formatDate";
 import { RecoveryCodesDialog } from "./RecoveryCodesDialog";
 import { DisableTwoStepDialog } from "./DisableTwoStepDialog";
 import { mfaSetupHref, type Me } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 /** Recovery codes issued at setup; fewer than this left earns a warning. */
 const RECOVERY_CODES_TOTAL = 10;
@@ -61,16 +62,14 @@ export function TwoStepSection({ me, reload }: { me: Me; reload: () => void }) {
             )}
             <p className="text-sm text-on-surface-variant">{t("recoveryExplain")}</p>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button className="h-10 px-4 font-semibold" onClick={() => setDialog("recovery")}>
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                  key
-                </span>
+              <Button variant="outline" size="lg" onClick={() => setDialog("recovery")}>
+                <Icon name="key" className="size-4" />
                 {t("newCodes")}
               </Button>
               {!required && (
                 <Button
-                  variant="outline"
-                  className="h-10 px-4 text-red-700 hover:bg-red-50 hover:text-red-800"
+                  variant="destructive"
+                  size="lg"
                   onClick={() => setDialog("disable")}
                 >
                   {t("turnOff")}
@@ -82,10 +81,8 @@ export function TwoStepSection({ me, reload }: { me: Me; reload: () => void }) {
         ) : (
           <>
             <p className="text-sm text-on-surface">{t("offBody")}</p>
-            <ButtonLink href={mfaSetupHref("/settings?tab=security")} className="h-10 px-5 font-semibold">
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                phonelink_lock
-              </span>
+            <ButtonLink href={mfaSetupHref("/settings?tab=security")} size="lg">
+              <Icon name="phonelink_lock" className="size-4" />
               {t("turnOn")}
             </ButtonLink>
           </>

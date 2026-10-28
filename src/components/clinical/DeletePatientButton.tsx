@@ -49,7 +49,7 @@ export function DeletePatientButton({ patientId, patientName }: { patientId: str
 
   return (
     <>
-      <Button variant="outline" size="lg" className="px-3 text-red-700 border-red-200 hover:bg-red-50" onClick={() => setOpen(true)}>
+      <Button variant="destructive" size="lg" onClick={() => setOpen(true)}>
         {t("button")}
       </Button>
       <Dialog

@@ -13,6 +13,7 @@ import { formatDateTime } from "@/lib/formatDate";
 import type { OrgRole } from "@/components/settings/types";
 import { ManageMemberDialog } from "./ManageMemberDialog";
 import type { OrgDetail, OrgMember } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 type DialogKind = "manage" | "disable" | "remove" | "leave";
 
@@ -83,8 +84,8 @@ export function MembersTab({
     if (m.isMe && !canEdit) {
       return (
         <Button
-          variant="outline"
-          className="h-10 px-3 text-red-700 hover:bg-red-50 hover:text-red-800"
+          variant="destructive"
+          size="lg"
           disabled={lastOwner}
           onClick={() => open("leave", m)}
         >
@@ -96,7 +97,7 @@ export function MembersTab({
     return (
       <Button
         variant="outline"
-        className="h-10 px-3"
+        size="lg"
         aria-label={m.isMe ? undefined : t("manageAria", { name: m.name })}
         onClick={() => open("manage", m)}
       >
@@ -177,10 +178,8 @@ export function MembersTab({
         description={t("count", { count: members.length })}
         actions={
           canEdit ? (
-            <ButtonLink href="/org?tab=invites" className="h-10 px-4 font-semibold">
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                person_add
-              </span>
+            <ButtonLink href="/org?tab=invites" size="lg">
+              <Icon name="person_add" className="size-4" />
               {t("invite")}
             </ButtonLink>
           ) : undefined

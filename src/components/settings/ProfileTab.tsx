@@ -8,12 +8,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { DescriptionList, Section, StatusBadge, orgStatusTone, useErrorMessage } from "@/components/kit";
+import { IconTile } from "@/components/kit/layout";
 import { apiFetch } from "@/lib/api";
 import { formatDate, formatDateTime } from "@/lib/formatDate";
 import { LOCALES, LOCALE_COOKIE, type Locale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { Field, FormMessage, TextInput, UsageMeter } from "./shared";
 import { planName, type Me, type MeMembership } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 type MutateMe = (update: (prev: Me | null) => Me | null) => void;
 
@@ -86,7 +88,7 @@ function PersonalDetails({ me, mutate }: { me: Me; mutate: MutateMe }) {
                 }}
                 className="sm:max-w-sm"
               />
-              <Button type="submit" className="h-10 px-5 font-semibold" disabled={busy || !changed}>
+              <Button type="submit" size="lg" disabled={busy || !changed}>
                 {busy ? tKit("working") : t("save")}
               </Button>
             </div>
@@ -94,7 +96,7 @@ function PersonalDetails({ me, mutate }: { me: Me; mutate: MutateMe }) {
         </Field>
       </form>
 
-      <div className="mt-6 border-t border-outline-variant/20 pt-5">
+      <div className="mt-6 border-t border-outline-variant pt-5">
         <DescriptionList
           items={[
             {
@@ -102,9 +104,7 @@ function PersonalDetails({ me, mutate }: { me: Me; mutate: MutateMe }) {
               value: (
                 <span className="flex flex-col gap-1">
                   <span className="flex items-center gap-1.5 font-medium break-all">
-                    <span className="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden="true">
-                      lock
-                    </span>
+                    <Icon name="lock" className="size-4 text-on-surface-variant" />
                     {me.email}
                   </span>
                   <span className="text-xs text-on-surface-variant">{t("emailHint")}</span>
@@ -167,8 +167,8 @@ function LanguageSection({ mutate }: { mutate: MutateMe }) {
             <label
               key={value}
               className={cn(
-                "flex min-h-12 cursor-pointer items-center gap-3 rounded-xl px-4 py-3 ring-1 ring-outline-variant/50 transition",
-                "hover:bg-surface-container-low has-checked:bg-primary/5 has-checked:ring-2 has-checked:ring-primary",
+                "flex h-10 cursor-pointer items-center gap-2.5 rounded-lg bg-surface-container-lowest px-3 text-sm ring-1 ring-outline-variant transition",
+                "hover:bg-surface-container-low has-checked:bg-primary/5 has-checked:ring-primary",
                 "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary",
                 busy && "cursor-wait opacity-70"
               )}
@@ -182,7 +182,7 @@ function LanguageSection({ mutate }: { mutate: MutateMe }) {
                 onChange={() => choose(value)}
                 className="size-4 accent-primary"
               />
-              <span lang={value} className="font-semibold text-on-surface">
+              <span lang={value} className="font-medium text-on-surface">
                 {tLocale(value)}
               </span>
             </label>
@@ -208,22 +208,15 @@ function PersonalPlan({ me }: { me: Me }) {
     <Section title={t("planTitle")} description={t("planDescription")}>
       <div className="space-y-5">
         <div className="flex items-center gap-3">
-          <span
-            className="material-symbols-outlined flex size-10 items-center justify-center rounded-xl bg-primary/10 text-[22px] text-primary"
-            aria-hidden="true"
-          >
-            workspace_premium
-          </span>
+          <IconTile name="workspace_premium" tone="primary" />
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-on-surface-variant">{t("planName")}</p>
-            <p className="font-headline text-lg font-bold text-on-surface">{planName(me.plan, locale)}</p>
+            <p className="text-xs font-medium text-on-surface-variant">{t("planName")}</p>
+            <p className="text-lg font-semibold text-on-surface">{planName(me.plan, locale)}</p>
           </div>
         </div>
         <UsageMeter label={t("profilesLabel")} used={me.usage.profiles} limit={me.plan.limits.maxProfiles} />
         <p className="flex items-start gap-1.5 text-sm text-on-surface-variant">
-          <span className="material-symbols-outlined mt-px text-[18px]" aria-hidden="true">
-            support_agent
-          </span>
+          <Icon name="support_agent" className="size-4 mt-0.5" />
           {t("upgradeHint")}
         </p>
       </div>
@@ -263,12 +256,12 @@ function MyOrganizations({ me }: { me: Me }) {
             <p className="font-semibold text-on-surface">{t("orgsEmpty")}</p>
             <p className="mt-0.5 text-on-surface-variant">{t("orgsEmptyHint")}</p>
           </div>
-          <ButtonLink href="/org" variant="outline" className="h-10 px-4">
+          <ButtonLink href="/org" variant="outline" size="lg">
             {t("orgsEmptyAction")}
           </ButtonLink>
         </div>
       ) : (
-        <ul className="divide-y divide-outline-variant/20">
+        <ul className="divide-y divide-outline-variant">
           {me.memberships.map((m) => {
             const current = m.organizationId === me.activeOrganizationId;
             return (
@@ -293,15 +286,13 @@ function MyOrganizations({ me }: { me: Me }) {
                 {m.status === "ACTIVE" && (
                   <Button
                     variant="outline"
-                    className="h-10 shrink-0 px-4"
+                    size="lg"
+                    className="shrink-0"
                     disabled={opening !== null}
                     onClick={() => open(m)}
                     aria-label={t("openOrgAria", { name: m.organizationName })}
                   >
                     {opening === m.organizationId ? t("opening") : t("openOrg")}
-                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                      arrow_forward
-                    </span>
                   </Button>
                 )}
               </li>

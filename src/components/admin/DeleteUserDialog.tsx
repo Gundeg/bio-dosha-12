@@ -129,7 +129,7 @@ export function DeleteUserDialog({
       <DeletionPreview plan={plan} />
       {needsConsent && !blocked && (
         <CheckboxField
-          className="rounded-xl bg-red-50 ring-1 ring-red-600/20 hover:bg-red-50"
+          className="rounded-lg bg-red-50 ring-1 ring-red-600/20 hover:bg-red-50"
           label={t("user.delete.alsoOrganizations")}
           description={t("user.delete.alsoOrganizationsHint")}
           checked={alsoOrganizations}

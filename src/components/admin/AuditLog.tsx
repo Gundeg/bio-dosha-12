@@ -17,13 +17,13 @@ import {
   withQuery,
   type Column,
 } from "@/components/kit";
-import { cn } from "@/lib/utils";
 import { SuperadminOnly } from "./AdminStates";
 import { useAdminViewer } from "./AdminViewer";
 import { DateText } from "./badges";
 import { SelectField, TextField, type SelectOption } from "./fields";
 import { useAdminLabels, usePageFor } from "./hooks";
 import { dayBoundaryIso, shortId, type Paged } from "./lib";
+import { Icon } from "@/components/ui/icon";
 
 interface AuditItem {
   id: string;
@@ -205,14 +205,11 @@ function AuditLogView() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={t("audit.eyebrow")}
         title={t("audit.title")}
         description={t("audit.description")}
         actions={
-          <a href={csvHref} download className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4 font-semibold")}>
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              download
-            </span>
+          <a href={csvHref} download className={buttonVariants({ variant: "outline", size: "lg" })}>
+            <Icon name="download" className="size-4" />
             {t("audit.exportCsv")}
           </a>
         }
@@ -226,10 +223,8 @@ function AuditLogView() {
         title={t("audit.filters.title")}
         actions={
           anyFilter ? (
-            <Button variant="ghost" className="h-10 px-3" onClick={clearFilters}>
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                filter_alt_off
-              </span>
+            <Button variant="ghost" size="lg" onClick={clearFilters}>
+              <Icon name="filter_alt_off" className="size-4" />
               {t("audit.filters.clear")}
             </Button>
           ) : undefined
@@ -280,9 +275,9 @@ function AuditLogView() {
                   type="button"
                   onClick={() => setOrganizationId("")}
                   aria-label={t("audit.filters.removeOrganization")}
-                  className="material-symbols-outlined inline-flex size-7 items-center justify-center rounded-md text-[18px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-2 focus-visible:outline-primary"
+                  className="inline-flex size-7 items-center justify-center rounded-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-2 focus-visible:outline-primary"
                 >
-                  close
+                  <Icon name="close" className="size-4" />
                 </button>
               </span>
             </div>
@@ -329,7 +324,7 @@ export function AuditLog() {
   if (!viewer.isSuperadmin) {
     return (
       <div>
-        <PageHeader eyebrow={t("audit.eyebrow")} title={t("audit.title")} />
+        <PageHeader title={t("audit.title")} />
         <SuperadminOnly title={t("audit.onlySuperadminTitle")} body={t("audit.onlySuperadminBody")} />
       </div>
     );

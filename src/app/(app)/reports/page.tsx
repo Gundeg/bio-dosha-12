@@ -7,9 +7,10 @@ import { formatDate } from "@/lib/formatDate";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState, ErrorState, PageLoading } from "@/components/states";
-import { PageHeader } from "@/components/kit/layout";
+import { FilterTabs } from "@/components/kit/DataTable";
+import { Callout, PageHeader } from "@/components/kit/layout";
+import { StatusBadge, type BadgeTone } from "@/components/kit/status";
 import { useApiQuery, useErrorMessage } from "@/components/kit/hooks";
 import { ClinicalAccessState, isClinicalAccessCode } from "@/components/clinical/ClinicalAccessState";
 import { EmergencyNote } from "@/components/shell/EmergencyNote";
@@ -18,6 +19,7 @@ import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge, BEDIStatus } from "@/lib/bediEngine";
 import { getRemedies } from "@/lib/remedyEngine";
 import { translateRemedy } from "@/lib/remedyTranslations";
+import { Icon } from "@/components/ui/icon";
 
 interface StoredRecommendation {
   remedies: string[];
@@ -59,9 +61,15 @@ interface Patient {
 
 /** Darker shades so the printed report keeps readable contrast. */
 const STATUS_TEXT: Record<string, string> = {
-  khii_excess: "text-blue-700",
+  khii_excess: "text-primary",
   balanced: "text-emerald-700",
-  shar_badgan_excess: "text-red-700",
+  shar_badgan_excess: "text-secondary",
+};
+
+const STATUS_TONE: Record<string, BadgeTone> = {
+  khii_excess: "primary",
+  balanced: "success",
+  shar_badgan_excess: "warning",
 };
 
 function displayName(profile: Pick<PatientProfile, "name" | "lastName">): string {
@@ -146,7 +154,7 @@ function ReportContent() {
         actions={
           // Print only the complete report (history and stored recommendation included).
           <Button size="lg" className="px-3" onClick={handlePrint} disabled={!fullyLoaded}>
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">print</span>
+            <Icon name="print" className="size-4" />
             {t("print")}
           </Button>
         }
@@ -160,33 +168,24 @@ function ReportContent() {
         )
       ) : patients.length === 0 ? (
         <EmptyState
-          icon={<span className="material-symbols-outlined text-[40px] text-primary">summarize</span>}
+          icon="summarize"
           title={t("emptyTitle")}
           body={t("emptyBody")}
           action={
-            <ButtonLink href="/patients" size="lg" className="px-3">
+            <ButtonLink href="/patients" variant="outline" size="lg">
               {t("toPatients")}
             </ButtonLink>
           }
         />
       ) : (
         <>
-          <div role="group" aria-label={t("patientPicker")} className="flex flex-wrap gap-2 print:hidden">
-            {patients.map((p) => (
-              <button
-                key={p.profile.id}
-                type="button"
-                aria-pressed={selectedId === p.profile.id}
-                onClick={() => setPicked(p.profile.id)}
-                className={`min-h-10 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                  selectedId === p.profile.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-outline-variant/50 hover:border-outline-variant"
-                }`}
-              >
-                {displayName(p.profile)}
-              </button>
-            ))}
+          <div className="print:hidden">
+            <FilterTabs
+              label={t("patientPicker")}
+              value={selectedId ?? ""}
+              onChange={setPicked}
+              options={patients.map((p) => ({ value: p.profile.id, label: displayName(p.profile) }))}
+            />
           </div>
 
           {detail.error ? (
@@ -198,9 +197,9 @@ function ReportContent() {
           ) : (
             <div className="mx-auto max-w-3xl space-y-4 print:max-w-none">
               {/* Report header */}
-              <div className="border-b-2 border-slate-800 pb-4 text-center">
+              <div className="border-b-2 border-on-surface pb-4 text-center">
                 {orgName && <p className="text-sm font-semibold text-on-surface">{orgName}</p>}
-                <h2 className="text-2xl font-bold">{t("reportTitle")}</h2>
+                <h2 className="text-xl font-semibold text-on-surface">{t("reportTitle")}</h2>
                 <p className="text-sm text-muted-foreground">{t("reportSubtitle")}</p>
                 <p className="mt-1 text-sm">{reportDate}</p>
               </div>
@@ -209,7 +208,7 @@ function ReportContent() {
               <Card>
                 <CardHeader><CardTitle>{t("patientInfo")}</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-1 gap-3 text-sm min-[400px]:grid-cols-2">
                     <div><span className="text-muted-foreground">{t("name")} </span><span className="font-semibold">{displayName(profile)}</span></div>
                     <div><span className="text-muted-foreground">{t("age")} </span><span>{age}</span></div>
                     <div><span className="text-muted-foreground">{t("sex")} </span><span>{ts(`sex.${profile.sex}`)}</span></div>
@@ -225,22 +224,22 @@ function ReportContent() {
                 <Card>
                   <CardHeader><CardTitle>{t("latestBedi")}</CardTitle></CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div className="rounded-lg border border-outline-variant/40 p-4">
-                        <p className="text-xs text-muted-foreground">{t("bediIndex")}</p>
-                        <p className="text-3xl font-bold">{latest.bedi.toFixed(2)}</p>
+                    <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-3">
+                      <div className="rounded-lg border border-outline-variant p-4">
+                        <p className="text-xs font-medium text-muted-foreground">{t("bediIndex")}</p>
+                        <p className="mt-1 text-2xl font-semibold tabular-nums">{latest.bedi.toFixed(2)}</p>
                       </div>
-                      <div className="rounded-lg border border-outline-variant/40 p-4">
-                        <p className="text-xs text-muted-foreground">{t("deviation")}</p>
-                        <p className={`text-3xl font-bold ${STATUS_TEXT[latest.status] ?? ""}`}>
+                      <div className="rounded-lg border border-outline-variant p-4">
+                        <p className="text-xs font-medium text-muted-foreground">{t("deviation")}</p>
+                        <p className={`mt-1 text-2xl font-semibold tabular-nums ${STATUS_TEXT[latest.status] ?? ""}`}>
                           {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
                         </p>
                       </div>
-                      <div className="rounded-lg border border-outline-variant/40 p-4">
-                        <p className="text-xs text-muted-foreground">{t("status")}</p>
-                        <Badge variant={latest.status === "balanced" ? "default" : "destructive"} className="mt-2">
+                      <div className="rounded-lg border border-outline-variant p-4">
+                        <p className="text-xs font-medium text-muted-foreground">{t("status")}</p>
+                        <StatusBadge tone={STATUS_TONE[latest.status] ?? "neutral"} className="mt-2">
                           {ts(`status.${latest.status}`)}
-                        </Badge>
+                        </StatusBadge>
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -276,49 +275,44 @@ function ReportContent() {
                   <CardHeader><CardTitle>{t("recommendations")}</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     {remedies.validationStatus && remedies.validationStatus !== "OK" && (
-                      <div
-                        role="alert"
-                        className={`rounded-lg border p-3 text-sm ${
-                          remedies.validationStatus === "CONTRAINDICATED"
-                            ? "border-red-300 bg-red-50 text-red-900"
-                            : "border-amber-300 bg-amber-50 text-amber-900"
-                        }`}
-                      >
-                        <p className="font-semibold">
-                          <span aria-hidden="true">{remedies.validationStatus === "CONTRAINDICATED" ? "⛔" : "⚠️"}</span>{" "}
-                          {remedies.validationStatus === "CONTRAINDICATED" ? t("contraindicated") : t("caution")}
-                        </p>
-                        {remedies.validationAction && <p>{tr(remedies.validationAction)}</p>}
-                      </div>
+                      remedies.validationStatus === "CONTRAINDICATED" ? (
+                        <Callout tone="danger" icon="block" title={t("contraindicated")}>
+                          {remedies.validationAction && tr(remedies.validationAction)}
+                        </Callout>
+                      ) : (
+                        <Callout tone="warning" title={t("caution")}>
+                          {remedies.validationAction && tr(remedies.validationAction)}
+                        </Callout>
+                      )
                     )}
                     <div>
-                      <p className="mb-1 text-sm font-semibold text-green-700">{t("remedies")}</p>
-                      <ul className="space-y-1 text-sm">
-                        {remedies.remedies.map((r, i) => <li key={i}><span aria-hidden="true">• </span>{tr(r)}</li>)}
+                      <p className="mb-1 text-sm font-semibold text-emerald-700">{t("remedies")}</p>
+                      <ul className="list-disc space-y-1 pl-5 text-sm">
+                        {remedies.remedies.map((r, i) => <li key={i}>{tr(r)}</li>)}
                       </ul>
                     </div>
                     <div>
                       <p className="mb-1 text-sm font-semibold text-red-700">{t("avoidFoods")}</p>
-                      <ul className="space-y-1 text-sm">
-                        {remedies.avoidFoods.map((f, i) => <li key={i}><span aria-hidden="true">• </span>{tr(f)}</li>)}
+                      <ul className="list-disc space-y-1 pl-5 text-sm">
+                        {remedies.avoidFoods.map((f, i) => <li key={i}>{tr(f)}</li>)}
                       </ul>
                     </div>
                     {remedies.lifestyle.length > 0 && (
                       <div>
-                        <p className="mb-1 text-sm font-semibold text-slate-700">{t("lifestyle")}</p>
-                        <ul className="space-y-1 text-sm">
-                          {remedies.lifestyle.map((l, i) => <li key={i}><span aria-hidden="true">• </span>{tr(l)}</li>)}
+                        <p className="mb-1 text-sm font-semibold text-on-surface">{t("lifestyle")}</p>
+                        <ul className="list-disc space-y-1 pl-5 text-sm">
+                          {remedies.lifestyle.map((l, i) => <li key={i}>{tr(l)}</li>)}
                         </ul>
                       </div>
                     )}
                     {remedies.riskFactors.length > 0 && (
                       <div>
-                        <p className="mb-1 text-sm font-semibold text-slate-700">{t("riskFactors")}</p>
+                        <p className="mb-1 text-sm font-semibold text-on-surface">{t("riskFactors")}</p>
                         <p className="text-sm">{remedies.riskFactors.map(tr).join(", ")}</p>
                       </div>
                     )}
                     {remedies.ageNote && (
-                      <div className="border-t border-outline-variant/40 pt-3">
+                      <div className="border-t border-outline-variant pt-3">
                         <p className="text-xs italic text-muted-foreground">{tr(remedies.ageNote)}</p>
                       </div>
                     )}
@@ -333,7 +327,7 @@ function ReportContent() {
                   <CardContent className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-outline-variant/40 text-xs text-muted-foreground">
+                        <tr className="border-b border-outline-variant text-xs font-medium text-muted-foreground">
                           <th scope="col" className="py-2 text-left">{t("table.date")}</th>
                           <th scope="col" className="py-2 text-right">{t("table.bedi")}</th>
                           <th scope="col" className="py-2 text-right">{t("table.delta")}</th>
@@ -366,16 +360,16 @@ function ReportContent() {
                 <div className="grid grid-cols-2 gap-8">
                   <div>
                     <p className="text-sm text-muted-foreground">{t("signature")}</p>
-                    <div className="mb-1 mt-8 border-b border-slate-400" />
+                    <div className="mb-1 mt-8 border-b border-on-surface-variant" />
                     <p className="text-xs text-muted-foreground">{t("nameStamp")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{t("signatureDate")}</p>
-                    <div className="mb-1 mt-8 border-b border-slate-400" />
+                    <div className="mb-1 mt-8 border-b border-on-surface-variant" />
                     <p className="text-xs text-muted-foreground">{reportDate}</p>
                   </div>
                 </div>
-                <div className="mt-6 space-y-2 rounded-lg border border-amber-300/60 bg-amber-50 p-3 text-amber-950 print:bg-transparent">
+                <div className="mt-6 space-y-2 rounded-lg border border-amber-600/25 bg-amber-50 p-3 text-amber-950 print:bg-transparent">
                   <p className="text-xs leading-relaxed">{tLegal("disclaimer")}</p>
                   <EmergencyNote />
                 </div>

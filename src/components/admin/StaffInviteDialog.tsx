@@ -69,7 +69,7 @@ export function StaffInviteDialog({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
         <form onSubmit={submit} noValidate className="grid gap-4">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg font-bold">{t("staffInvite.title")}</DialogTitle>
+            <DialogTitle>{t("staffInvite.title")}</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">{t("staffInvite.description")}</DialogDescription>
           </DialogHeader>
 
@@ -106,10 +106,10 @@ export function StaffInviteDialog({
           <FormError message={error} />
 
           <DialogFooter>
-            <Button type="button" variant="outline" className="h-10 px-4" disabled={busy} onClick={close}>
+            <Button type="button" variant="outline" size="lg" disabled={busy} onClick={close}>
               {tk("cancel")}
             </Button>
-            <Button type="submit" className="h-10 px-4 font-semibold" disabled={busy}>
+            <Button type="submit" size="lg" disabled={busy}>
               {busy ? tk("working") : t("staffInvite.submit")}
             </Button>
           </DialogFooter>

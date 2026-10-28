@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Callout, ConfirmDialog, DescriptionList, PageHeader, Section, StatusBadge, useApiQuery } from "@/components/kit";
+import { IconTile } from "@/components/kit/layout";
 import { apiFetch } from "@/lib/api";
 import { formatNumber } from "@/lib/formatNumber";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ import {
   type OrgStatus,
   type PlatformRole,
 } from "./lib";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 /** GET /api/admin/users/[userId] */
 interface UserDetailResponse {
@@ -74,7 +76,7 @@ function ActionRow({
   button,
   danger,
 }: {
-  icon: string;
+  icon: IconName;
   title: string;
   description: string;
   button: React.ReactNode;
@@ -82,15 +84,7 @@ function ActionRow({
 }) {
   return (
     <li className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center">
-      <span
-        className={cn(
-          "material-symbols-outlined hidden size-9 shrink-0 items-center justify-center rounded-xl text-[20px] sm:flex",
-          danger ? "bg-red-50 text-red-700" : "bg-surface-container text-on-surface-variant"
-        )}
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
+      <IconTile name={icon} tone={danger ? "danger" : "default"} className="hidden sm:flex" />
       <div className="min-w-0 flex-1 text-sm">
         <p className="font-semibold text-on-surface">{title}</p>
         <p className="mt-0.5 text-on-surface-variant">{description}</p>
@@ -239,7 +233,7 @@ export function UserDetail({ userId }: { userId: string }) {
           icon="manage_accounts"
           title={t("user.blocked.selfTitle")}
           action={
-            <ButtonLink href="/settings" variant="outline" className="h-10 px-4">
+            <ButtonLink href="/settings" variant="outline" size="lg">
               {t("user.blocked.openSettings")}
             </ButtonLink>
           }
@@ -330,7 +324,7 @@ export function UserDetail({ userId }: { userId: string }) {
             title={t("user.plan.title")}
             actions={
               canAct ? (
-                <Button variant="outline" className="h-10 px-4" onClick={openDialog("plan")}>
+                <Button variant="outline" size="lg" onClick={openDialog("plan")}>
                   {t("user.plan.change")}
                 </Button>
               ) : undefined
@@ -338,7 +332,7 @@ export function UserDetail({ userId }: { userId: string }) {
             bodyClassName="space-y-4"
           >
             <div>
-              <p className="font-headline text-lg font-bold text-on-surface">{labels.planName(data.plan)}</p>
+              <p className="text-lg font-semibold text-on-surface">{labels.planName(data.plan)}</p>
               <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-on-surface-variant">
                 <span className="font-mono">{data.plan.code}</span>
                 <StatusBadge tone={data.plan.source === "subscription" ? "primary" : "neutral"} dot={false}>
@@ -366,15 +360,9 @@ export function UserDetail({ userId }: { userId: string }) {
               title={t("user.activity.title")}
               description={t("user.activity.description")}
               actions={
-                <Link
-                  href={`/admin/audit?actor=${encodeURIComponent(user.email)}`}
-                  className="inline-flex h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary"
-                >
+                <ButtonLink href={`/admin/audit?actor=${encodeURIComponent(user.email)}`} variant="link" className="px-2">
                   {t("common.openAudit")}
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                    arrow_forward
-                  </span>
-                </Link>
+                </ButtonLink>
               }
             >
               <ActivityList items={data.recentActivity} empty={t("user.activity.empty")} />
@@ -399,7 +387,7 @@ export function UserDetail({ userId }: { userId: string }) {
                   button={
                     <Button
                       variant="outline"
-                      className="h-10 px-4"
+                      size="lg"
                       disabled={resetDelivery === "unavailable"}
                       onClick={openDialog("reset")}
                     >
@@ -412,7 +400,7 @@ export function UserDetail({ userId }: { userId: string }) {
                   title={t("user.signout.action")}
                   description={t("user.signout.summary")}
                   button={
-                    <Button variant="outline" className="h-10 px-4" onClick={openDialog("signout")}>
+                    <Button variant="outline" size="lg" onClick={openDialog("signout")}>
                       {t("user.signout.button")}
                     </Button>
                   }
@@ -423,7 +411,7 @@ export function UserDetail({ userId }: { userId: string }) {
                     title={t("user.mfa.action")}
                     description={t("user.mfa.summary")}
                     button={
-                      <Button variant="outline" className="h-10 px-4" onClick={openDialog("mfa")}>
+                      <Button variant="outline" size="lg" onClick={openDialog("mfa")}>
                         {t("user.mfa.button")}
                       </Button>
                     }
@@ -435,7 +423,7 @@ export function UserDetail({ userId }: { userId: string }) {
                     title={t("user.enable.action")}
                     description={t("user.enable.summary")}
                     button={
-                      <Button className="h-10 px-4 font-semibold" onClick={openDialog("enable")}>
+                      <Button size="lg" onClick={openDialog("enable")}>
                         {t("user.enable.button")}
                       </Button>
                     }
@@ -448,8 +436,8 @@ export function UserDetail({ userId }: { userId: string }) {
                     description={t("user.disable.summary")}
                     button={
                       <Button
-                        variant="outline"
-                        className="h-10 px-4 text-red-700 hover:bg-red-50 hover:text-red-800"
+                        variant="destructive"
+                        size="lg"
                         onClick={openDialog("disable")}
                       >
                         {t("user.disable.button")}
@@ -463,7 +451,7 @@ export function UserDetail({ userId }: { userId: string }) {
                     title={isAdminTarget ? t("user.role.demoteAction") : t("user.role.promoteAction")}
                     description={isAdminTarget ? t("user.role.demoteSummary") : t("user.role.promoteSummary")}
                     button={
-                      <Button variant="outline" className="h-10 px-4" onClick={openDialog("role")}>
+                      <Button variant="outline" size="lg" onClick={openDialog("role")}>
                         {isAdminTarget ? t("user.role.demoteButton") : t("user.role.promoteButton")}
                       </Button>
                     }
@@ -476,16 +464,14 @@ export function UserDetail({ userId }: { userId: string }) {
           {viewer.isSuperadmin && canAct && (
             <section
               aria-labelledby="user-danger-title"
-              className="space-y-4 rounded-2xl bg-surface-container-lowest p-5 shadow-ambient ring-1 ring-red-600/30"
+              className="space-y-4 rounded-xl bg-surface-container-lowest p-5 shadow-ambient"
             >
-              <h2 id="user-danger-title" className="font-headline text-base font-bold text-red-800">
+              <h2 id="user-danger-title" className="text-base font-semibold text-red-800">
                 {t("common.dangerZone")}
               </h2>
               <DeletionPreview plan={data.deletion} />
-              <Button className="h-10 w-full bg-red-700 px-4 font-semibold text-white hover:bg-red-800" onClick={openDialog("delete")}>
-                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                  delete_forever
-                </span>
+              <Button variant="destructive" size="lg" className="w-full" onClick={openDialog("delete")}>
+                <Icon name="delete_forever" className="size-4" />
                 {t("user.delete.action")}
               </Button>
             </section>

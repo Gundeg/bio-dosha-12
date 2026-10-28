@@ -258,7 +258,8 @@ export function IntakeForm({
     value: o.value,
     label: t(`positionOptions.${o.value}`),
   }));
-  const textareaClass = "w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm";
+  const textareaClass =
+    "w-full rounded-lg border border-input bg-surface-container-lowest px-3 py-2 text-base outline-none transition-colors focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15 md:text-sm";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -311,7 +312,7 @@ export function IntakeForm({
               id={fid("season")}
               value={form.season}
               onChange={(e) => set("season", e.target.value as Season)}
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2 text-sm"
+              className="h-10 w-full rounded-lg border border-input bg-surface-container-lowest px-3 text-base outline-none transition-colors focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15 md:text-sm"
             >
               {(["WINTER", "SPRING", "SUMMER", "AUTUMN"] as Season[]).map((s) => (
                 <option key={s} value={s}>
@@ -521,8 +522,8 @@ export function IntakeForm({
       </Card>
 
       {/* Sticks to the bottom while the form scrolls; on phones it stays above the bottom menu. */}
-      <div className="sticky bottom-24 md:bottom-4 z-30 flex items-center justify-end gap-2 rounded-2xl border border-outline-variant/20 bg-surface-container-low/95 px-4 py-3 shadow-ambient backdrop-blur">
-        <Button type="submit" size="lg" className="px-4" disabled={submitting}>
+      <div className="sticky bottom-24 md:bottom-4 z-30 flex items-center justify-end gap-2 rounded-xl bg-surface-container-lowest/95 px-4 py-3 shadow-ambient backdrop-blur">
+        <Button type="submit" size="lg" disabled={submitting}>
           {submitting ? t("saving") : isEdit ? t("update") : t("saveNew")}
         </Button>
       </div>
@@ -593,10 +594,10 @@ function RadioGroup({
               key={opt.value}
               type="button"
               onClick={() => onChange(opt.value)}
-              className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+              className={`min-h-9 rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 active
-                  ? "border-primary bg-primary/10 font-medium text-primary"
-                  : "border-input hover:bg-muted"
+                  ? "border-primary bg-primary/8 font-medium text-primary"
+                  : "border-input bg-surface-container-lowest hover:bg-surface-container-low"
               }`}
               aria-pressed={active}
               data-name={name}

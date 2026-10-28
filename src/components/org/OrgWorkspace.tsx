@@ -47,7 +47,7 @@ export function OrgSkeleton() {
     <div aria-busy="true">
       <Skeleton className="mb-3 h-4 w-32" />
       <Skeleton className="mb-8 h-9 w-72 max-w-full" />
-      <Skeleton className="mb-6 h-11" />
+      <Skeleton className="mb-6 h-10" />
       <OrgPanelSkeleton />
     </div>
   );
@@ -100,7 +100,7 @@ function Workspace({
   const items: PageTabItem<OrgTab>[] = [
     { value: "overview", label: t("tabs.overview"), icon: "space_dashboard" },
     { value: "members", label: t("tabs.members"), icon: "group" },
-    ...(canManage ? [{ value: "invites" as const, label: t("tabs.invites"), icon: "forward_to_inbox" }] : []),
+    ...(canManage ? [{ value: "invites" as const, label: t("tabs.invites"), icon: "forward_to_inbox" as const }] : []),
     { value: "settings", label: t("tabs.settings"), icon: "tune" },
   ];
 
@@ -138,7 +138,7 @@ function Workspace({
           className="mb-6"
           title={t("header.mfaTitle")}
           action={
-            <ButtonLink href={mfaSetupHref("/org")} className="h-10 px-4 font-semibold">
+            <ButtonLink href={mfaSetupHref("/org")} size="lg">
               {t("header.mfaAction")}
             </ButtonLink>
           }
@@ -231,8 +231,8 @@ function OrganizationSwitcher({
   }
 
   return (
-    <div className="mb-5 flex flex-col gap-2 rounded-2xl bg-surface-container-low p-4 ring-1 ring-outline-variant/20 sm:flex-row sm:items-center sm:gap-4">
-      <label htmlFor="org-switcher" className="shrink-0 text-sm font-semibold text-on-surface">
+    <div className="mb-5 flex flex-col gap-2 rounded-xl bg-surface-container-low p-4 sm:flex-row sm:items-center sm:gap-4">
+      <label htmlFor="org-switcher" className="shrink-0 text-sm font-medium text-on-surface">
         {t("label")}
       </label>
       <div className="min-w-0 flex-1 sm:max-w-md">

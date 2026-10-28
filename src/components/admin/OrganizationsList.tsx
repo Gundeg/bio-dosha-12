@@ -22,6 +22,7 @@ import { OrgStatusBadge, DateText } from "./badges";
 import { CreateOrganizationDialog } from "./CreateOrganizationDialog";
 import { useAdminLabels, usePageFor, useQueryParam } from "./hooks";
 import { PAGE_SIZE, type OrgStatus, type Paged, type PlanRef } from "./lib";
+import { Icon } from "@/components/ui/icon";
 
 interface OrgListItem {
   id: string;
@@ -119,14 +120,11 @@ export function OrganizationsList() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={t("orgs.eyebrow")}
         title={t("orgs.title")}
         description={t("orgs.description")}
         actions={
-          <Button className="h-10 px-4 font-semibold" onClick={() => setCreateOpen(true)}>
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              add_business
-            </span>
+          <Button size="lg" onClick={() => setCreateOpen(true)}>
+            <Icon name="add_business" className="size-4" />
             {t("orgs.add")}
           </Button>
         }
@@ -164,7 +162,7 @@ export function OrganizationsList() {
                   <p className="font-medium text-on-surface">{filtered ? t("orgs.emptyFiltered") : t("orgs.empty")}</p>
                   <p>{filtered ? t("orgs.emptyFilteredHint") : t("orgs.emptyHint")}</p>
                   {!filtered && (
-                    <Button variant="outline" className="h-10 px-4" onClick={() => setCreateOpen(true)}>
+                    <Button variant="outline" size="lg" onClick={() => setCreateOpen(true)}>
                       {t("orgs.add")}
                     </Button>
                   )}

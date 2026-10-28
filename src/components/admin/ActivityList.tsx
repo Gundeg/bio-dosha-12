@@ -4,8 +4,10 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useAdminLabels } from "./hooks";
 import { shortId, type ActivityItem } from "./lib";
+import type { IconName } from "@/components/ui/icon";
+import { IconTile } from "@/components/kit/layout";
 
-const GROUP_ICON: Record<string, string> = {
+const GROUP_ICON: Record<string, IconName> = {
   auth: "login",
   account: "person",
   admin: "shield_person",
@@ -31,15 +33,12 @@ export function ActivityList({ items, empty, className }: { items: ActivityItem[
         const failed = item.action === "auth.login.failure" || item.action === "auth.login.blocked";
         return (
           <li key={item.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-            <span
-              className={cn(
-                "material-symbols-outlined mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg text-[18px]",
-                failed ? "bg-amber-50 text-amber-700" : "bg-surface-container text-on-surface-variant"
-              )}
-              aria-hidden="true"
-            >
-              {failed ? "gpp_maybe" : (GROUP_ICON[group] ?? "history")}
-            </span>
+            <IconTile
+              name={failed ? "gpp_maybe" : (GROUP_ICON[group] ?? "history")}
+              tone={failed ? "warning" : "default"}
+              size="sm"
+              className="mt-0.5"
+            />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-on-surface">{labels.action(item.action)}</p>
               <p className="mt-0.5 break-words text-xs text-on-surface-variant">

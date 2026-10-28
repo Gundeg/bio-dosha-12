@@ -7,18 +7,20 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { EmptyState, ErrorState, PageLoading } from "@/components/states";
 import { Callout, PageHeader } from "@/components/kit/layout";
+import { FilterTabs, SearchInput } from "@/components/kit/DataTable";
+import { StatusBadge, type BadgeTone } from "@/components/kit/status";
 import { useApiQuery, useErrorMessage } from "@/components/kit/hooks";
 import { ClinicalAccessState, isClinicalAccessCode } from "@/components/clinical/ClinicalAccessState";
 import { useShell } from "@/components/shell/ShellProvider";
 import { apiFetch, ApiError } from "@/lib/api";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge } from "@/lib/bediEngine";
+import { Icon } from "@/components/ui/icon";
 
 /** GET /api/patients: the active organization's patients, newest first. */
 interface Patient {
@@ -39,17 +41,17 @@ interface Patient {
   };
 }
 
-const STATUS_CONFIG = {
-  khii_excess: { variant: "secondary" as const },
-  balanced: { variant: "default" as const },
-  shar_badgan_excess: { variant: "destructive" as const },
+const STATUS_TONE: Record<string, BadgeTone> = {
+  khii_excess: "primary",
+  balanced: "success",
+  shar_badgan_excess: "warning",
 };
 
 /** Darker shades for readable contrast on white. */
 const STATUS_TEXT: Record<string, string> = {
-  khii_excess: "text-blue-700",
+  khii_excess: "text-primary",
   balanced: "text-emerald-700",
-  shar_badgan_excess: "text-red-700",
+  shar_badgan_excess: "text-secondary",
 };
 
 const SEX_VALUES = ["MALE", "FEMALE"] as const;
@@ -150,7 +152,7 @@ function PatientList() {
         actions={
           patients ? (
             <Button size="lg" className="px-3" onClick={openAdd}>
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">person_add</span>
+              <Icon name="person_add" className="size-4" />
               {t("add")}
             </Button>
           ) : undefined
@@ -165,11 +167,11 @@ function PatientList() {
         )
       ) : patients.length === 0 ? (
         <EmptyState
-          icon={<span className="material-symbols-outlined text-[40px] text-primary">stethoscope</span>}
+          icon="stethoscope"
           title={t("emptyTitle")}
           body={t("emptyBody")}
           action={
-            <Button size="lg" className="px-3" onClick={openAdd}>
+            <Button variant="outline" size="lg" onClick={openAdd}>
               {t("add")}
             </Button>
           }
@@ -189,13 +191,12 @@ function PatientList() {
             </Callout>
           )}
 
-          <Input
-            type="search"
-            aria-label={t("searchLabel")}
+          <SearchInput
+            label={t("searchLabel")}
             placeholder={t("searchPlaceholder")}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-10 max-w-sm"
+            onChange={setSearch}
+            className="sm:max-w-sm"
           />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -203,7 +204,7 @@ function PatientList() {
               const latest = p.profile.bediRecords?.[0];
               const doshaKey =
                 p.profile.doshaType && p.profile.doshaType in DOSHA_MAP ? (p.profile.doshaType as DoshaKey) : null;
-              const sc = latest ? STATUS_CONFIG[latest.status as keyof typeof STATUS_CONFIG] : null;
+              const tone = latest ? STATUS_TONE[latest.status] : undefined;
 
               return (
                 <Card key={p.id}>
@@ -222,22 +223,28 @@ function PatientList() {
                           {t("ageSex", { age: calcAge(p.profile.birthDate), sex: ts(`sex.${p.profile.sex}`) })}
                         </p>
                       </div>
-                      {sc && latest && (
-                        <Badge variant={sc.variant} className="shrink-0 text-xs">
-                          {ts(`status.${latest.status}`)}
-                        </Badge>
+                      {tone && latest && (
+                        <StatusBadge tone={tone}>{ts(`status.${latest.status}`)}</StatusBadge>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {doshaKey ? (
-                      <div className="rounded-lg bg-surface-container-low p-2 text-sm">
-                        <span className="text-muted-foreground">{t("constitution")} </span>
-                        <span className="font-medium">{td(`${doshaKey}.label`)}</span>
-                        <span className="text-muted-foreground"> Kt={p.profile.ktScore}</span>
+                      <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-container-low px-3 py-2.5 text-sm">
+                        <span>
+                          <span className="text-on-surface-variant">{t("constitution")} </span>
+                          <span className="font-medium text-on-surface">{td(`${doshaKey}.label`)}</span>
+                        </span>
+                        {p.profile.ktScore != null && (
+                          <span className="shrink-0 text-xs tabular-nums text-on-surface-variant">
+                            Kt {p.profile.ktScore.toFixed(2)}
+                          </span>
+                        )}
                       </div>
                     ) : (
-                      <div className="rounded-lg bg-amber-50 p-2 text-sm text-amber-900">{t("notAssessed")}</div>
+                      <div className="rounded-lg bg-surface-container-low px-3 py-2.5 text-sm text-on-surface-variant">
+                        {t("notAssessed")}
+                      </div>
                     )}
 
                     {latest && (
@@ -252,16 +259,16 @@ function PatientList() {
 
                     {p.practitioner?.name && (
                       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">badge</span>
+                        <Icon name="badge" className="size-3.5" />
                         {t("registeredBy", { name: p.practitioner.name })}
                       </p>
                     )}
 
                     <div className="flex gap-2">
-                      <ButtonLink size="lg" className="flex-1" href={`/patients/${p.id}`}>
+                      <ButtonLink variant="outline" className="flex-1" href={`/patients/${p.id}`}>
                         {t("openCard")}
                       </ButtonLink>
-                      <ButtonLink size="lg" variant="outline" className="flex-1" href={`/calculator?profile=${p.profile.id}`}>
+                      <ButtonLink variant="ghost" className="flex-1" href={`/calculator?profile=${p.profile.id}`}>
                         {t("calculate")}
                       </ButtonLink>
                     </div>
@@ -325,23 +332,16 @@ function PatientList() {
               />
             </div>
             <div className="space-y-1">
-              <span id="new-patient-sex" className="text-sm font-medium leading-none">
+              <span className="block text-sm font-medium leading-none" aria-hidden="true">
                 {t("addDialog.sex")}
               </span>
-              <div role="group" aria-labelledby="new-patient-sex" className="grid grid-cols-2 gap-2">
-                {SEX_VALUES.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={form.sex === value}
-                    onClick={() => setForm({ ...form, sex: value })}
-                    className={`min-h-10 rounded-lg border p-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-primary ${
-                      form.sex === value ? "border-primary bg-primary/5 font-semibold" : "border-outline-variant/50"
-                    }`}
-                  >
-                    {ts(`sex.${value}`)}
-                  </button>
-                ))}
+              <div>
+                <FilterTabs
+                  label={t("addDialog.sex")}
+                  value={form.sex}
+                  onChange={(sex) => setForm({ ...form, sex })}
+                  options={SEX_VALUES.map((value) => ({ value, label: ts(`sex.${value}`) }))}
+                />
               </div>
             </div>
             <div className="space-y-1">
@@ -358,12 +358,10 @@ function PatientList() {
             </div>
 
             {/* Optional identity and contact details (stored encrypted). */}
-            <details className="group rounded-lg border border-outline-variant/40 p-3">
+            <details className="group rounded-lg border border-outline-variant p-3">
               <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium">
                 {t("addDialog.moreDetails")}
-                <span className="material-symbols-outlined text-[20px] transition-transform group-open:rotate-180" aria-hidden="true">
-                  expand_more
-                </span>
+                <Icon name="expand_more" className="size-5 transition-transform group-open:rotate-180" />
               </summary>
               <div className="mt-3 space-y-3">
                 <p className="text-xs text-on-surface-variant">{t("addDialog.moreDetailsHint")}</p>

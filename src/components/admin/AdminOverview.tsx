@@ -5,15 +5,17 @@ import { useTranslations } from "next-intl";
 import { ButtonLink } from "@/components/ui/button-link";
 import { EmptyState } from "@/components/states";
 import { PageHeader, Section, StatCard, StatusBadge, useApiQuery } from "@/components/kit";
+import { IconTile } from "@/components/kit/layout";
 import { formatNumber } from "@/lib/formatNumber";
 import { cn } from "@/lib/utils";
 import { ActivityChart, type DailyPoint } from "./ActivityChart";
 import { ActivityList } from "./ActivityList";
-import { EmptyIcon, LoadFailure, PageSkeleton, StaleNotice } from "./AdminStates";
+import { LoadFailure, PageSkeleton, StaleNotice } from "./AdminStates";
 import { useAdminViewer } from "./AdminViewer";
 import { DateText } from "./badges";
 import { useAdminLabels } from "./hooks";
 import type { ActivityItem, PlanAudience } from "./lib";
+import type { IconName } from "@/components/ui/icon";
 
 /** GET /api/admin/overview */
 interface OverviewResponse {
@@ -57,15 +59,9 @@ interface OverviewResponse {
 
 function SectionLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link
-      href={href}
-      className="inline-flex h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary"
-    >
+    <ButtonLink href={href} variant="link" className="px-2">
       {children}
-      <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-        arrow_forward
-      </span>
-    </Link>
+    </ButtonLink>
   );
 }
 
@@ -75,7 +71,7 @@ export function AdminOverview() {
   const labels = useAdminLabels();
   const { data, error, reload } = useApiQuery<OverviewResponse>("/api/admin/overview");
 
-  const header = <PageHeader eyebrow={t("overview.eyebrow")} title={t("overview.title")} description={t("overview.description")} />;
+  const header = <PageHeader title={t("overview.title")} description={t("overview.description")} />;
 
   if (!data) {
     if (error) {
@@ -94,7 +90,7 @@ export function AdminOverview() {
 
   const securityRows: {
     key: string;
-    icon: string;
+    icon: IconName;
     value: number;
     href?: string;
   }[] = [
@@ -198,7 +194,7 @@ export function AdminOverview() {
           {data.pendingOrganizations.length === 0 ? (
             <EmptyState
               className="border-none py-8"
-              icon={<EmptyIcon name="task_alt" />}
+              icon="task_alt"
               title={t("overview.attention.emptyTitle")}
               body={t("overview.attention.emptyBody")}
             />
@@ -218,7 +214,7 @@ export function AdminOverview() {
                       {org.owner ? `${org.owner.name} · ${org.owner.email}` : t("overview.attention.noOwner")}
                     </p>
                   </div>
-                  <ButtonLink href={`/admin/organizations/${org.id}`} className="h-10 shrink-0 px-4 font-semibold">
+                  <ButtonLink href={`/admin/organizations/${org.id}`} variant="outline" size="lg" className="shrink-0">
                     {t("overview.attention.review")}
                   </ButtonLink>
                 </li>
@@ -241,34 +237,26 @@ export function AdminOverview() {
               const warn = row.value > 0;
               const body = (
                 <>
-                  <span
-                    className={cn(
-                      "material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-xl text-[20px]",
-                      warn ? "bg-amber-50 text-amber-700" : "bg-surface-container text-on-surface-variant"
-                    )}
-                    aria-hidden="true"
-                  >
-                    {row.icon}
-                  </span>
+                  <IconTile name={row.icon} tone={warn ? "warning" : "default"} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium text-on-surface">{t(`overview.security.${row.key}`)}</span>
                     <span className="block text-xs text-on-surface-variant">{t(`overview.security.${row.key}Hint`)}</span>
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="font-headline text-lg font-bold tabular-nums text-on-surface">{formatNumber(row.value)}</span>
+                    <span className="text-lg font-semibold tabular-nums text-on-surface">{formatNumber(row.value)}</span>
                     <StatusBadge tone={warn ? "warning" : "success"}>
                       {warn ? t("overview.security.check") : t("overview.security.ok")}
                     </StatusBadge>
                   </span>
                 </>
               );
-              const rowClass = "flex items-center gap-3 rounded-xl px-3 py-2.5";
+              const rowClass = "flex items-center gap-3 rounded-lg px-3 py-2.5";
               return (
                 <li key={row.key}>
                   {row.href ? (
                     <Link
                       href={row.href}
-                      className={cn(rowClass, "hover:bg-surface-container-low focus-visible:outline-2 focus-visible:outline-primary")}
+                      className={cn(rowClass, "transition-colors hover:bg-surface-container-low focus-visible:outline-2 focus-visible:outline-primary")}
                     >
                       {body}
                     </Link>
@@ -302,7 +290,7 @@ export function AdminOverview() {
                 if (plans.length === 0) return null;
                 return (
                   <div key={audience}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+                    <h3 className="mb-2 text-xs font-semibold text-on-surface-variant">
                       {labels.audience(audience)}
                     </h3>
                     <ul className="divide-y divide-outline-variant/20">

@@ -11,6 +11,7 @@ import { Field, FormDialog, TextInput } from "@/components/settings/shared";
 import { CLINICAL_ROLES, type OrgRole } from "@/components/settings/types";
 import { RolePicker } from "./RolePicker";
 import { canReenable, rolesNeedingOwner, seatsLeft, type OrgDetail, type OrgMember } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 const TITLE_MAX = 100;
 
@@ -159,9 +160,7 @@ export function ManageMemberDialog({
       )}
 
       {note && (
-        <p role="status" className="rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-950 ring-1 ring-sky-600/20">
-          {note}
-        </p>
+        <Callout tone="info">{note}</Callout>
       )}
       {blockedBySeats && (
         <Callout tone="warning" title={t("noSeatTitle")}>
@@ -181,14 +180,14 @@ export function ManageMemberDialog({
         )}
       </Field>
 
-      <div className="space-y-3 border-t border-outline-variant/20 pt-4">
+      <div className="space-y-3 border-t border-outline-variant pt-4">
         <p className="text-sm font-semibold text-on-surface">{t("accessTitle")}</p>
         {self ? (
           <>
             <Button
               type="button"
-              variant="outline"
-              className="h-10 px-4 text-red-700 hover:bg-red-50 hover:text-red-800"
+              variant="destructive"
+              size="lg"
               disabled={busy || lastOwner}
               onClick={() => onRequest("leave")}
             >
@@ -202,40 +201,34 @@ export function ManageMemberDialog({
               {member.status === "ACTIVE" ? (
                 <Button
                   type="button"
-                  variant="outline"
-                  className="h-10 px-4 text-red-700 hover:bg-red-50 hover:text-red-800"
+                  variant="destructive"
+                  size="lg"
                   disabled={busy}
                   onClick={() => onRequest("disable")}
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                    block
-                  </span>
+                  <Icon name="block" className="size-4" />
                   {t("disable")}
                 </Button>
               ) : (
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-10 px-4"
+                  size="lg"
                   disabled={busy || enableBlockedByRole || enableBlockedBySeats}
                   onClick={enable}
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" className="size-4" />
                   {t("enable")}
                 </Button>
               )}
               <Button
                 type="button"
-                variant="ghost"
-                className="h-10 px-4 text-red-700 hover:bg-red-50 hover:text-red-800"
+                variant="destructive"
+                size="lg"
                 disabled={busy}
                 onClick={() => onRequest("remove")}
               >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                  person_remove
-                </span>
+                <Icon name="person_remove" className="size-4" />
                 {t("remove")}
               </Button>
             </div>

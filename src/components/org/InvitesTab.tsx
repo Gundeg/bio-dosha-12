@@ -23,6 +23,7 @@ import { CLINICAL_ROLES, type OrgRole } from "@/components/settings/types";
 import { RolePicker } from "./RolePicker";
 import { StepList } from "./StepList";
 import { rolesNeedingOwner, seatsLeft, type CreatedInvite, type InviteState, type OrgDetail, type OrgInvite } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 type Filter = "all" | InviteState;
 const FILTERS: Filter[] = ["all", "pending", "used", "revoked", "expired"];
@@ -85,8 +86,8 @@ export function InvitesTab({
       cell: (i) =>
         i.state === "pending" ? (
           <Button
-            variant="outline"
-            className="h-10 px-3 text-red-700 hover:bg-red-50 hover:text-red-800"
+            variant="destructive"
+            size="lg"
             aria-label={t("revokeAria", { email: i.email })}
             onClick={() => {
               setRevoking(i);
@@ -230,7 +231,7 @@ function InviteSection({
             note={t("linkNote", { date: formatDate(created.expiresAt, locale, "long") })}
           />
           <div>
-            <h3 className="mb-3 font-headline text-sm font-bold text-on-surface">{t("nextTitle")}</h3>
+            <h3 className="mb-3 text-sm font-semibold text-on-surface">{t("nextTitle")}</h3>
             <StepList
               steps={[
                 { title: t("next1Title"), body: t("next1Body") },
@@ -239,10 +240,8 @@ function InviteSection({
               ]}
             />
           </div>
-          <Button variant="outline" className="h-10 px-4" onClick={() => setCreated(null)}>
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              person_add
-            </span>
+          <Button variant="outline" size="lg" onClick={() => setCreated(null)}>
+            <Icon name="person_add" className="size-4" />
             {t("inviteAnother")}
           </Button>
         </div>
@@ -289,17 +288,13 @@ function InviteSection({
 
         {!isOwner && (
           <p className="flex items-start gap-1.5 text-sm text-on-surface-variant">
-            <span className="material-symbols-outlined mt-px text-[18px]" aria-hidden="true">
-              info
-            </span>
+            <Icon name="info" className="size-4 mt-0.5" />
             {t("managerHint")}
           </p>
         )}
         {isOwner && detail && limit !== null && limit !== undefined && (
           <p className="flex items-start gap-1.5 text-sm text-on-surface-variant">
-            <span className="material-symbols-outlined mt-px text-[18px]" aria-hidden="true">
-              info
-            </span>
+            <Icon name="info" className="size-4 mt-0.5" />
             {t("seatsNote", { used: detail.usage.practitioners, limit })}
           </p>
         )}
@@ -311,10 +306,8 @@ function InviteSection({
 
         {formError && <FormMessage>{formError}</FormMessage>}
 
-        <Button type="submit" className="h-10 px-5 font-semibold" disabled={busy || noSeat}>
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            send
-          </span>
+        <Button type="submit" size="lg" disabled={busy || noSeat}>
+          <Icon name="send" className="size-4" />
           {busy ? t("creating") : t("create")}
         </Button>
       </form>

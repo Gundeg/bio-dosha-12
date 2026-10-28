@@ -8,12 +8,13 @@ import { EmptyState } from "@/components/states";
 import { Callout, PageHeader, Section, StatusBadge, useApiQuery } from "@/components/kit";
 import { formatMnt, formatNumber } from "@/lib/formatNumber";
 import { cn } from "@/lib/utils";
-import { EmptyIcon, LoadFailure, PageSkeleton, StaleNotice } from "./AdminStates";
+import { LoadFailure, PageSkeleton, StaleNotice } from "./AdminStates";
 import { useAdminViewer } from "./AdminViewer";
 import { useAdminLabels } from "./hooks";
 import { hasPdfReports, limitOf, planOtherName, type AdminPlan, type PlanAudience } from "./lib";
 import { PlanFormDialog } from "./PlanFormDialog";
 import { AUDIENCE_LIMITS } from "./PlanUsage";
+import { Icon } from "@/components/ui/icon";
 
 function PlanCard({ plan, canEdit, onEdit }: { plan: AdminPlan; canEdit: boolean; onEdit: () => void }) {
   const t = useTranslations("admin");
@@ -26,14 +27,13 @@ function PlanCard({ plan, canEdit, onEdit }: { plan: AdminPlan; canEdit: boolean
     <article
       aria-labelledby={`plan-${plan.id}`}
       className={cn(
-        "flex flex-col rounded-2xl bg-surface-container-lowest p-5 shadow-ambient ring-1",
-        plan.isDefault ? "ring-primary/40" : "ring-outline-variant/20",
+        "flex flex-col rounded-xl bg-surface-container-lowest p-5 shadow-ambient",
         !plan.isActive && "bg-surface-container-low/60"
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 id={`plan-${plan.id}`} className="font-headline text-lg font-bold text-on-surface">
+          <h3 id={`plan-${plan.id}`} className="text-lg font-semibold text-on-surface">
             {labels.planName(plan)}
           </h3>
           <p className="text-xs text-on-surface-variant">
@@ -50,7 +50,7 @@ function PlanCard({ plan, canEdit, onEdit }: { plan: AdminPlan; canEdit: boolean
         </div>
       </div>
 
-      <p className="mt-3 font-headline text-2xl font-bold tabular-nums text-on-surface">
+      <p className="mt-3 text-2xl font-semibold tabular-nums text-on-surface">
         {price ? (
           <>
             {price}
@@ -86,10 +86,8 @@ function PlanCard({ plan, canEdit, onEdit }: { plan: AdminPlan; canEdit: boolean
           {plan.isDefault && <span className="block">{t("plans.plusDefaultUsers")}</span>}
         </p>
         {canEdit && (
-          <Button variant="outline" className="h-10 shrink-0 px-4" onClick={onEdit}>
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              edit
-            </span>
+          <Button variant="outline" size="lg" className="shrink-0" onClick={onEdit}>
+            <Icon name="edit" className="size-4" />
             {t("plans.edit")}
             <span className="sr-only">: {labels.planName(plan)}</span>
           </Button>
@@ -109,21 +107,18 @@ export function PlansOverview() {
 
   const header = (
     <PageHeader
-      eyebrow={t("plans.eyebrow")}
       title={t("plans.title")}
       description={t("plans.description")}
       actions={
         viewer.isSuperadmin ? (
           <Button
-            className="h-10 px-4 font-semibold"
+            size="lg"
             onClick={() => {
               setLastPlan(null);
               setDialog({ plan: null });
             }}
           >
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              add
-            </span>
+            <Icon name="add" className="size-4" />
             {t("plans.new")}
           </Button>
         ) : undefined
@@ -181,7 +176,7 @@ export function PlansOverview() {
             {plans.length === 0 ? (
               <EmptyState
                 className="border-none py-8"
-                icon={<EmptyIcon name="workspace_premium" />}
+                icon="workspace_premium"
                 title={t("plans.emptyGroup")}
                 body={viewer.isSuperadmin ? t("plans.emptyGroupHint") : undefined}
               />

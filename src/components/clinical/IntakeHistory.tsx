@@ -64,7 +64,7 @@ export function IntakeHistory({
                   {date(intake.admissionDate)}
                   {intake.dischargeDate && (
                     <span className="text-muted-foreground">
-                      {" → "}
+                      {" – "}
                       {date(intake.dischargeDate)}
                     </span>
                   )}

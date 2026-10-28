@@ -10,6 +10,7 @@ import { ApiError, apiFetch } from "@/lib/api";
 import { formatNumber } from "@/lib/formatNumber";
 import { Field, PasswordInput, QueryView, signOutTo } from "./shared";
 import type { Me } from "./types";
+import { Icon } from "@/components/ui/icon";
 
 /** GET /api/account (src/lib/accountLifecycle.ts#planAccountDeletion). */
 interface DeletionPlan {
@@ -17,14 +18,12 @@ interface DeletionPlan {
   organizationsToDelete: { organizationId: string; organizationName: string; patientCount: number }[];
 }
 
-const DANGER_SECTION = "ring-red-600/25";
-
 export function DeleteAccountSection({ me }: { me: Me }) {
   const t = useTranslations("settings.deleteAccount");
 
   if (me.isSuperadmin) {
     return (
-      <Section title={t("title")} className={DANGER_SECTION}>
+      <Section title={t("title")}>
         <Callout tone="info" icon="shield_person" title={t("superadminTitle")}>
           {t("superadminBody")}
         </Callout>
@@ -39,7 +38,7 @@ function DeleteAccountBody() {
   const preview = useApiQuery<DeletionPlan>("/api/account");
 
   return (
-    <Section title={t("title")} description={t("description")} className={DANGER_SECTION}>
+    <Section title={t("title")} description={t("description")}>
       <QueryView
         query={preview}
         skeleton={
@@ -98,12 +97,7 @@ function DeleteAccountContent({ plan, reload }: { plan: DeletionPlan; reload: ()
       <ul className="space-y-2 text-sm text-on-surface">
         {(["deletes1", "deletes2", "keeps"] as const).map((key) => (
           <li key={key} className="flex items-start gap-2">
-            <span
-              className={`material-symbols-outlined mt-px text-[18px] ${key === "keeps" ? "text-on-surface-variant" : "text-red-700"}`}
-              aria-hidden="true"
-            >
-              {key === "keeps" ? "inventory_2" : "delete_forever"}
-            </span>
+            <Icon name={key === "keeps" ? "inventory_2" : "delete_forever"} className={`mt-0.5 size-4 ${key === "keeps" ? "text-on-surface-variant" : "text-red-700"}`} />
             {t(key)}
           </li>
         ))}
@@ -114,7 +108,7 @@ function DeleteAccountContent({ plan, reload }: { plan: DeletionPlan; reload: ()
           tone="warning"
           title={t("blockedTitle")}
           action={
-            <ButtonLink href="/org?tab=members" variant="outline" className="h-10 bg-white px-4">
+            <ButtonLink href="/org?tab=members" variant="outline" size="lg">
               {t("blockedAction")}
             </ButtonLink>
           }
@@ -145,13 +139,12 @@ function DeleteAccountContent({ plan, reload }: { plan: DeletionPlan; reload: ()
       )}
 
       <Button
-        className="h-10 bg-red-700 px-5 font-semibold text-white hover:bg-red-800"
+        variant="destructive"
+        size="lg"
         disabled={blocked}
         onClick={() => changeOpen(true)}
       >
-        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-          person_remove
-        </span>
+        <Icon name="person_remove" className="size-4" />
         {t("button")}
       </Button>
       {blocked && <p className="text-sm text-on-surface-variant">{t("blockedHint")}</p>}

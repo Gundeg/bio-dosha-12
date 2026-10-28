@@ -87,14 +87,14 @@ export function GuardedConfirmDialog({
     >
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-headline text-lg font-bold">{title}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription className="text-sm leading-relaxed">{description}</DialogDescription>}
         </DialogHeader>
 
         {children}
 
         {checks.length > 0 && (
-          <fieldset className="space-y-1 rounded-xl bg-surface-container-low/60 p-2 ring-1 ring-outline-variant/30">
+          <fieldset className="space-y-1 rounded-lg bg-surface-container-low/60 p-2 ring-1 ring-outline-variant/30">
             {checksLabel && <legend className="px-2 pt-1 text-sm font-semibold text-on-surface">{checksLabel}</legend>}
             {checks.map((check, i) => {
               const id = `${baseId}-check-${i}`;
@@ -141,7 +141,7 @@ export function GuardedConfirmDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            className="h-10 px-4"
+            size="lg"
             disabled={busy}
             onClick={() => {
               reset();
@@ -151,10 +151,8 @@ export function GuardedConfirmDialog({
             {tk("cancel")}
           </Button>
           <Button
-            className={cn(
-              "h-10 px-4 font-semibold",
-              tone === "danger" && "bg-red-700 text-white hover:bg-red-800 [a]:hover:bg-red-800"
-            )}
+            size="lg"
+            className={cn(tone === "danger" && "bg-red-700 text-white hover:bg-red-800 [a]:hover:bg-red-800")}
             disabled={!ready}
             onClick={confirm}
           >

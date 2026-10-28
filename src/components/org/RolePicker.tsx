@@ -38,7 +38,7 @@ export function RolePicker({
             key={role}
             htmlFor={id}
             className={cn(
-              "flex items-start gap-3 rounded-xl px-4 py-3 ring-1 ring-outline-variant/50 transition",
+              "flex items-start gap-3 rounded-lg px-4 py-3 ring-1 ring-outline-variant transition",
               "has-checked:bg-primary/5 has-checked:ring-2 has-checked:ring-primary",
               "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary",
               reason || disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-surface-container-low"

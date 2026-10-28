@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { EmptyState, ErrorState, Skeleton } from "@/components/states";
 import { Callout, useErrorMessage } from "@/components/kit";
@@ -29,15 +30,6 @@ export function PageSkeleton({ cards = 0, sections = 2 }: { cards?: number; sect
   );
 }
 
-/** Material Symbols icon sized for EmptyState. */
-export function EmptyIcon({ name }: { name: string }) {
-  return (
-    <span className="material-symbols-outlined text-[40px] text-primary/70" aria-hidden="true">
-      {name}
-    </span>
-  );
-}
-
 /**
  * Load failure of a whole page: a dedicated message for records that no longer
  * exist, otherwise the error with a retry button.
@@ -60,12 +52,12 @@ export function LoadFailure({
   if (error.status === 404 && notFoundTitle) {
     return (
       <EmptyState
-        icon={<EmptyIcon name="search_off" />}
+        icon="search_off"
         title={notFoundTitle}
         body={t("common.notFoundBody")}
         action={
           backHref ? (
-            <ButtonLink href={backHref} variant="outline" className="h-10 px-4">
+            <ButtonLink href={backHref} variant="outline" size="lg">
               {backLabel}
             </ButtonLink>
           ) : undefined
@@ -87,13 +79,9 @@ export function StaleNotice({ error, onRetry }: { error: ApiError | null; onRetr
       tone="warning"
       title={t("common.refreshFailed")}
       action={
-        <button
-          type="button"
-          onClick={onRetry}
-          className="inline-flex h-10 items-center rounded-lg px-3 text-sm font-semibold text-amber-900 ring-1 ring-amber-600/30 hover:bg-amber-100"
-        >
+        <Button variant="outline" size="lg" onClick={onRetry}>
           {tk("retry")}
-        </button>
+        </Button>
       }
     >
       {describe(error)}
@@ -106,11 +94,11 @@ export function SuperadminOnly({ title, body }: { title: string; body: string })
   const t = useTranslations("admin");
   return (
     <EmptyState
-      icon={<EmptyIcon name="lock" />}
+      icon="lock"
       title={title}
       body={body}
       action={
-        <ButtonLink href="/admin" variant="outline" className="h-10 px-4">
+        <ButtonLink href="/admin" variant="outline" size="lg">
           {t("common.backToOverview")}
         </ButtonLink>
       }

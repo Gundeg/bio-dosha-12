@@ -49,7 +49,7 @@ export function OneTimeLinkDialog({
     <Dialog open={!!link} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-headline text-lg font-bold">
+          <DialogTitle>
             {emailedOnly ? (link.emailSent ? emailedTitle : t("link.notDeliveredTitle")) : title}
           </DialogTitle>
           {!emailedOnly && description && <DialogDescription className="text-sm leading-relaxed">{description}</DialogDescription>}
@@ -88,7 +88,7 @@ export function OneTimeLinkDialog({
           </div>
         )}
         <DialogFooter>
-          <Button className="h-10 px-4 font-semibold" onClick={onClose}>
+          <Button size="lg" onClick={onClose}>
             {t("common.done")}
           </Button>
         </DialogFooter>

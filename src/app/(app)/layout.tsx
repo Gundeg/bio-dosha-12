@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { EmergencyNote } from "@/components/shell/EmergencyNote";
 import { OrgStatusBanner } from "@/components/shell/OrgStatusBanner";
+import { SessionKeepAlive } from "@/components/shell/SessionKeepAlive";
 import { ShellProvider, type ShellUser } from "@/components/shell/ShellProvider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ShellProvider initialUser={initialUser}>
+      <SessionKeepAlive />
       <div className="min-h-screen bg-surface">
         {/* Desktop sidebar */}
         <Sidebar />

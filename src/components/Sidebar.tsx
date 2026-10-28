@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { LocaleToggle } from "@/components/LocaleToggle";
 import { OrgNavHint, useOrgSectionTitle } from "@/components/shell/OrgNavHint";
 import { OrgSwitcher } from "@/components/shell/OrgSwitcher";
 import { ACCOUNT_ITEMS, NAV_ITEMS, isActivePath, navSections } from "@/components/shell/nav";
 import { useRoleLabel, useShell } from "@/components/shell/ShellProvider";
+import { useSignOut } from "@/components/shell/useSignOut";
 import { cn } from "@/lib/utils";
 
 function NavItem({
@@ -58,6 +58,7 @@ function NavItem({
 export default function Sidebar() {
   const pathname = usePathname();
   const t = useTranslations("nav");
+  const { signOut, pending: signingOut } = useSignOut();
   const { user, access } = useShell();
   const roleLabel = useRoleLabel();
   const orgSectionTitle = useOrgSectionTitle();
@@ -147,7 +148,9 @@ export default function Sidebar() {
           <li>
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={() => void signOut()}
+              disabled={signingOut}
+              aria-busy={signingOut || undefined}
               className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-on-surface-variant transition-colors hover:bg-error/5 hover:text-error focus-visible:outline-2 focus-visible:outline-primary"
             >
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">logout</span>

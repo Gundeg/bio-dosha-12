@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, type UpdateSession } from "next-auth/react";
+import { signIn, signOut, type UpdateSession } from "next-auth/react";
 
 /** What a credentials sign-in attempt ended with (codes come from src/lib/auth.ts). */
 export type SignInOutcome =
@@ -15,6 +15,24 @@ export type SignInOutcome =
   | "unknown";
 
 const KNOWN_CODES = new Set<SignInOutcome>(["mfa_required", "mfa_invalid", "rate_limited", "account_disabled", "credentials"]);
+
+/**
+ * Ends the session in this browser and opens the sign-in page, where another
+ * account can sign in. Tries twice, because one request can reach a server
+ * that is still starting, and returns false if the session could not be ended
+ * so the caller can say so instead of leaving the person signed in silently.
+ */
+export async function signOutHere(): Promise<boolean> {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await signOut({ redirectTo: "/login?notice=signed_out_here" });
+      return true;
+    } catch {
+      // The sign-out request failed (server error or offline): try once more.
+    }
+  }
+  return false;
+}
 
 /**
  * Signs in with email + password (+ authenticator or recovery code) without

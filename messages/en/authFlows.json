@@ -58,7 +58,19 @@
     "password_reset": "Your password has been updated. Sign in with your new password.",
     "password_changed": "Your password was changed and you were signed out on every device. Please sign in again.",
     "signed_out": "You were signed out on every device.",
-    "account_created": "Your account has been created. Please sign in to continue."
+    "account_created": "Your account has been created. Please sign in to continue.",
+    "session_expired": "Your session has ended (30 minutes without activity, or you were signed out). Please sign in again to keep your data protected.",
+    "signed_out_here": "You are signed out. You can sign in with another account."
+  },
+  "signedIn": {
+    "title": "You're signed in",
+    "subtitle": "You are signed in as {email}.",
+    "subtitleNoEmail": "You are signed in on this device.",
+    "continue": "Continue",
+    "switch": "Sign out and use another account",
+    "switching": "Signing out…",
+    "signOutFailed": "Could not sign out. Please try again.",
+    "hint": "If several people share this computer, always sign out when you finish. You are signed out automatically after 30 minutes without activity."
   },
   "login": {
     "metaTitle": "Sign in",

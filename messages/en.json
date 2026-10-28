@@ -25,6 +25,7 @@
     "settings": "Settings",
     "help": "Help",
     "about": "About",
+    "logoutFailed": "Could not sign out. Please try again.",
     "logout": "Sign out",
     "more": "More",
     "menu": "Menu",

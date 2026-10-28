@@ -11,6 +11,9 @@ export interface SessionOrgClaim {
   orgStatus: "PENDING" | "ACTIVE" | "SUSPENDED";
 }
 
+/** Idle limit; the client keeps it alive while someone is working (SessionKeepAlive). */
+export const SESSION_IDLE_SECONDS = 30 * 60;
+
 // Edge-compatible auth config (no DB/prisma imports). The full config with the
 // database-backed jwt callback lives in src/lib/auth.ts.
 export const authConfig: NextAuthConfig = {
@@ -39,6 +42,10 @@ export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
   },
-  // Health data: keep sessions short. The token is refreshed hourly while in use.
-  session: { strategy: "jwt", maxAge: 12 * 60 * 60, updateAge: 60 * 60 },
+  // Health data on shared clinic computers: a session ends after 30 minutes
+  // without any request. Auth.js re-signs the token (and resets this expiry)
+  // on every request, so active use keeps it alive; closing the browser for
+  // longer, or leaving it idle, signs the person out. src/lib/auth.ts adds a
+  // 12-hour absolute limit on top.
+  session: { strategy: "jwt", maxAge: SESSION_IDLE_SECONDS },
 };

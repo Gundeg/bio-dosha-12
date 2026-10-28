@@ -237,7 +237,9 @@ export function LoginForm({ next, notice }: { next: string | null; notice: Login
       }
     >
       <form key="password" noValidate onSubmit={submitPassword} className="space-y-5">
-        {notice && !problem && <Callout tone="success">{t(`notices.${notice}`)}</Callout>}
+        {notice && !problem && (
+          <Callout tone={notice === "session_expired" ? "info" : "success"}>{t(`notices.${notice}`)}</Callout>
+        )}
 
         <TextField
           id={IDS.email}

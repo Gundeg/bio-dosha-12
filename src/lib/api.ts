@@ -40,9 +40,25 @@ export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     const { message, fieldErrors } = describeError(data, res.status);
     const code = typeof (data as { code?: unknown } | null)?.code === "string" ? (data as { code: string }).code : undefined;
+    if (res.status === 401 && code === "unauthorized") redirectToSignIn();
     throw new ApiError(res.status, message, fieldErrors, code);
   }
   return data as T;
+}
+
+/**
+ * The session ended (idle limit, sign-out elsewhere): send the person to sign
+ * in again and bring them back to this page afterwards, instead of leaving
+ * every panel on the page showing an error.
+ */
+function redirectToSignIn() {
+  if (typeof window === "undefined") return;
+  const here = window.location.pathname + window.location.search;
+  if (window.location.pathname === "/login") return;
+  // A full page load on purpose: it drops every piece of client state that
+  // belonged to the ended session (a client-side push would keep it).
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+  window.location.assign(`/login?next=${encodeURIComponent(here)}&notice=session_expired`);
 }
 
 /** Field names used by the API schemas, shown to the user in validation errors. */

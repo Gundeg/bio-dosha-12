@@ -38,7 +38,14 @@ export function firstParam(value: string | string[] | undefined): string | undef
 }
 
 /** Messages the sign-in page shows for `?notice=` (shared contract with settings and the control center). */
-export const LOGIN_NOTICES = ["password_reset", "password_changed", "signed_out", "account_created"] as const;
+export const LOGIN_NOTICES = [
+  "password_reset",
+  "password_changed",
+  "signed_out",
+  "account_created",
+  "session_expired",
+  "signed_out_here",
+] as const;
 export type LoginNotice = (typeof LOGIN_NOTICES)[number];
 
 export function parseLoginNotice(value: string | undefined): LoginNotice | null {

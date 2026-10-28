@@ -13,8 +13,9 @@ const { auth } = NextAuth(authConfig);
 const PUBLIC_EXACT = new Set(["/", "/login", "/register", "/privacy", "/forgot", "/about"]);
 const PUBLIC_PREFIXES = ["/invite/", "/reset/", "/api/auth", "/api/register", "/api/public"];
 
-// Pages a signed-in user may open before finishing the required 2-step setup.
-const MFA_SETUP_ALLOWED = ["/mfa-setup", "/privacy", "/about", "/invite/", "/reset/"];
+// Pages a signed-in user may open before finishing the required 2-step setup
+// (/login and /register offer to sign out and use another account).
+const MFA_SETUP_ALLOWED = ["/mfa-setup", "/privacy", "/about", "/invite/", "/reset/", "/login", "/register"];
 
 /** The path plus query string, so a redirect can bring the person back. */
 function returnPath(url: URL): string {
@@ -60,8 +61,9 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/settings?tab=security", req.url));
   }
 
-  // Signed-in visitors of the landing and auth pages go to their workspace.
-  if (pathname === "/" || pathname === "/login" || pathname === "/register" || pathname === "/forgot") {
+  // Signed-in visitors of the landing page go to their workspace. /login and
+  // /register stay open: they show "signed in as …" with a way to switch accounts.
+  if (pathname === "/" || pathname === "/forgot") {
     const home = isStaff ? "/admin" : isClinical ? "/patients" : org ? "/org" : "/dashboard";
     return NextResponse.redirect(new URL(home, req.url));
   }

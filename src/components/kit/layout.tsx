@@ -1,11 +1,45 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 /**
- * Page and panel building blocks for the control center, organization and
- * settings pages. They follow the app's "Clinical Sanctuary" look: white
- * panels on the tinted surface, Manrope headings, soft ambient shadow.
+ * Page and panel building blocks shared by every screen: white panels with a
+ * hairline on the neutral surface, 12px panel corners, 8px control corners,
+ * semibold headings, one icon set (src/components/ui/icon.tsx).
  */
+
+/** An icon centred in a tinted square: list rows, feature and stat cards. */
+export function IconTile({
+  name,
+  tone = "default",
+  size = "md",
+  className,
+}: {
+  name: IconName;
+  tone?: "default" | "primary" | "success" | "warning" | "danger";
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-lg",
+        size === "sm" ? "size-8" : size === "lg" ? "size-11" : "size-9",
+        {
+          default: "bg-surface-container-low text-on-surface-variant",
+          primary: "bg-primary/8 text-primary",
+          success: "bg-emerald-50 text-emerald-700",
+          warning: "bg-amber-50 text-amber-700",
+          danger: "bg-red-50 text-red-700",
+        }[tone],
+        className
+      )}
+      aria-hidden="true"
+    >
+      <Icon name={name} className={size === "lg" ? "size-5" : "size-[18px]"} />
+    </span>
+  );
+}
 
 export function PageHeader({
   eyebrow,
@@ -32,16 +66,12 @@ export function PageHeader({
             href={backHref}
             className="mb-3 inline-flex items-center gap-1 rounded-md text-sm font-medium text-on-surface-variant hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
           >
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              arrow_back
-            </span>
+            <Icon name="arrow_back" className="size-4.5" />
             {backLabel}
           </Link>
         )}
-        {eyebrow && (
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-primary">{eyebrow}</p>
-        )}
-        <h1 className="font-headline text-2xl font-bold text-on-surface md:text-3xl">{title}</h1>
+        {eyebrow && <p className="mb-1 text-sm text-on-surface-variant">{eyebrow}</p>}
+        <h1 className="text-2xl font-semibold tracking-tight text-on-surface md:text-[28px] md:leading-9">{title}</h1>
         {description && <p className="mt-1.5 max-w-2xl text-sm text-on-surface-variant">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
@@ -72,13 +102,13 @@ export function Section({
     <section
       id={id}
       aria-labelledby={title ? headingId : undefined}
-      className={cn("rounded-2xl bg-surface-container-lowest shadow-ambient ring-1 ring-outline-variant/20", className)}
+      className={cn("rounded-xl bg-surface-container-lowest shadow-ambient", className)}
     >
       {(title || actions) && (
-        <div className="flex flex-col gap-2 border-b border-outline-variant/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-b border-outline-variant px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             {title && (
-              <h2 id={headingId} className="font-headline text-base font-bold text-on-surface">
+              <h2 id={headingId} className="text-base font-semibold text-on-surface">
                 {title}
               </h2>
             )}
@@ -114,8 +144,8 @@ export function StatCard({
   label: React.ReactNode;
   value: React.ReactNode;
   hint?: React.ReactNode;
-  /** Material Symbols name, e.g. "domain". */
-  icon?: string;
+  /** Icon name from src/components/ui/icon.tsx, e.g. "domain". */
+  icon?: IconName;
   tone?: Tone;
   href?: string;
 }) {
@@ -125,22 +155,17 @@ export function StatCard({
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm font-medium text-on-surface-variant">{label}</p>
         {icon && (
-          <span
-            className={cn("material-symbols-outlined flex size-9 items-center justify-center rounded-xl text-[20px]", toneClass.icon)}
-            aria-hidden="true"
-          >
-            {icon}
-          </span>
+          <span className={cn("flex size-9 items-center justify-center rounded-lg", toneClass.icon)} aria-hidden="true"><Icon name={icon} className="size-[18px]" /></span>
         )}
       </div>
-      <p className="mt-2 font-headline text-3xl font-bold tabular-nums text-on-surface">{value}</p>
+      <p className="mt-2 text-2xl font-semibold tabular-nums text-on-surface">{value}</p>
       {hint && <p className="mt-1 text-xs text-on-surface-variant">{hint}</p>}
     </>
   );
   const className = cn(
-    "block rounded-2xl bg-surface-container-lowest p-5 shadow-ambient ring-1 transition",
+    "block rounded-xl bg-surface-container-lowest p-5 shadow-ambient ring-1 transition-colors",
     toneClass.ring,
-    href && "hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-primary"
+    href && "hover:bg-surface-container-low/60 focus-visible:outline-2 focus-visible:outline-primary"
   );
   return href ? (
     <Link href={href} className={className}>
@@ -166,7 +191,7 @@ export function DescriptionList({
         .filter((i) => !i.hidden)
         .map((item, idx) => (
           <div key={idx} className="min-w-0">
-            <dt className="text-xs font-medium uppercase tracking-wide text-on-surface-variant">{item.label}</dt>
+            <dt className="text-xs font-medium text-on-surface-variant">{item.label}</dt>
             <dd className="mt-1 break-words text-sm text-on-surface">{item.value}</dd>
           </div>
         ))}
@@ -187,23 +212,21 @@ export function Callout({
   title?: React.ReactNode;
   children?: React.ReactNode;
   action?: React.ReactNode;
-  icon?: string;
+  icon?: IconName;
   className?: string;
 }) {
-  const styles = {
+  const styles = ({
     info: { box: "bg-sky-50 ring-sky-600/20 text-sky-950", icon: "info", iconColor: "text-sky-700" },
     success: { box: "bg-emerald-50 ring-emerald-600/20 text-emerald-950", icon: "check_circle", iconColor: "text-emerald-700" },
     warning: { box: "bg-amber-50 ring-amber-600/25 text-amber-950", icon: "warning", iconColor: "text-amber-700" },
     danger: { box: "bg-red-50 ring-red-600/25 text-red-950", icon: "error", iconColor: "text-red-700" },
-  }[tone];
+  } satisfies Record<string, { box: string; icon: IconName; iconColor: string }>)[tone];
   return (
     <div
       role={tone === "danger" || tone === "warning" ? "alert" : "status"}
       className={cn("flex flex-col gap-3 rounded-xl p-4 ring-1 sm:flex-row sm:items-center", styles.box, className)}
     >
-      <span className={cn("material-symbols-outlined shrink-0 text-[22px]", styles.iconColor)} aria-hidden="true">
-        {icon ?? styles.icon}
-      </span>
+      <Icon name={icon ?? styles.icon} className={cn("size-5 shrink-0", styles.iconColor)} />
       <div className="min-w-0 flex-1 text-sm">
         {title && <p className="font-semibold">{title}</p>}
         {children && <div className={cn(title && "mt-0.5", "opacity-90")}>{children}</div>}

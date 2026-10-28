@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Icon, type IconName } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,13 +45,14 @@ export function PageLoading({ label }: { label?: string }) {
 }
 
 export function EmptyState({
-  icon = "🌿",
+  icon = "spa",
   title,
   body,
   action,
   className,
 }: {
-  icon?: React.ReactNode;
+  /** An icon name, or a custom node. */
+  icon?: IconName | React.ReactNode;
   title: string;
   body?: string;
   action?: React.ReactNode;
@@ -59,14 +61,18 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/60 px-6 py-16 text-center",
+        "flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-outline-variant px-6 py-14 text-center",
         className
       )}
     >
-      <span className="text-4xl" aria-hidden>
-        {icon}
-      </span>
-      <p className="font-semibold">{title}</p>
+      {typeof icon === "string" ? (
+        <span className="flex size-11 items-center justify-center rounded-lg bg-primary/8 text-primary" aria-hidden="true">
+          <Icon name={icon as IconName} className="size-5" />
+        </span>
+      ) : (
+        icon
+      )}
+      <p className="font-medium text-on-surface">{title}</p>
       {body && <p className="max-w-sm text-sm text-muted-foreground">{body}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
@@ -87,16 +93,16 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        "flex flex-col items-center justify-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-16 text-center",
+        "flex flex-col items-center justify-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-6 py-14 text-center",
         className
       )}
     >
-      <span className="text-4xl" aria-hidden>
-        ⚠️
+      <span className="flex size-11 items-center justify-center rounded-lg bg-red-50 text-red-700" aria-hidden="true">
+        <Icon name="error" className="size-5" />
       </span>
       <p className="max-w-sm text-sm text-foreground">{message || t("loadError")}</p>
       {onRetry && (
-        <Button variant="outline" className="h-10 px-4" onClick={onRetry}>
+        <Button variant="outline" onClick={onRetry}>
           {t("retry")}
         </Button>
       )}

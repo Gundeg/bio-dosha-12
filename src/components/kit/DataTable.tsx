@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/states";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 export interface Column<T> {
   key: string;
@@ -85,7 +86,7 @@ export function DataTable<T>({
                   key={c.key}
                   scope="col"
                   className={cn(
-                    "border-b border-outline-variant/30 px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-on-surface-variant",
+                    "border-b border-outline-variant/30 px-3 py-2.5 text-left text-xs font-semibold text-on-surface-variant",
                     c.align === "right" && "text-right",
                     c.headerClassName
                   )}
@@ -196,7 +197,7 @@ export function FilterTabs<V extends string>({
   label: string;
 }) {
   return (
-    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-1 rounded-xl bg-surface-container-low p-1">
+    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-1 rounded-lg bg-surface-container-low p-1">
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -206,7 +207,7 @@ export function FilterTabs<V extends string>({
             aria-pressed={active}
             onClick={() => onChange(o.value)}
             className={cn(
-              "inline-flex h-10 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-primary",
+              "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-primary",
               active ? "bg-surface-container-lowest text-primary shadow-sm" : "text-on-surface-variant hover:text-on-surface"
             )}
           >
@@ -244,19 +245,14 @@ export function SearchInput({
 }) {
   return (
     <div className={cn("relative w-full sm:max-w-xs", className)}>
-      <span
-        className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant"
-        aria-hidden="true"
-      >
-        search
-      </span>
+      <Icon name="search" className="size-4.5 pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
       <input
         type="search"
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-10 w-full rounded-xl border border-input bg-surface-container-lowest pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="h-10 w-full rounded-lg border border-input bg-surface-container-lowest pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15"
       />
     </div>
   );

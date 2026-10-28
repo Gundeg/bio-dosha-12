@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@/lib/formatDate";
 import RemedyPanel from "@/components/RemedyPanel";
@@ -9,8 +9,9 @@ import { calcAge, BEDIStatus } from "@/lib/bediEngine";
 import { DoshaKey } from "@/lib/ktMapping";
 import { RemedyResult } from "@/lib/remedyEngine";
 import { ButtonLink } from "@/components/ui/button-link";
-import { apiFetch, ApiError } from "@/lib/api";
+import { useApiQuery } from "@/components/kit/hooks";
 import { ErrorState, PageLoading } from "@/components/states";
+import { fullName } from "@/lib/person";
 
 interface StoredRecommendation {
   remedies: string[];
@@ -25,6 +26,7 @@ interface StoredRecommendation {
 interface Profile {
   id: string;
   name: string;
+  lastName?: string | null;
   relationship: string;
   birthDate: string;
   doshaType: string | null;
@@ -73,30 +75,16 @@ export default function RecommendationsPage() {
   const t = useTranslations("recommendations");
   const tShared = useTranslations("shared");
   const locale = useLocale();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [selectedId, setSelectedId] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoadError(null);
-    setLoading(true);
-    try {
-      const data = await apiFetch<Profile[]>("/api/profiles");
-      setProfiles(data);
-      const self = data.find((p) => p.relationship === "self") ?? data[0];
-      if (self) setSelectedId(self.id);
-    } catch (err) {
-      // An empty message lets ErrorState show its translated default text.
-      setLoadError(err instanceof ApiError ? err.message : "");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const query = useApiQuery<Profile[]>("/api/profiles");
+  const profiles = query.data ?? [];
+  const loading = query.loading && !query.data;
+  // An empty message lets ErrorState show its translated default text
+  // (network failures carry the browser's English text, so they use it too).
+  const loadError = query.error ? (query.error.status === 0 ? "" : query.error.message) : null;
+  // Until someone picks a profile, show their own (or the first one).
+  const [chosenId, setChosenId] = useState("");
+  const selectedId =
+    chosenId || ((profiles.find((p) => p.relationship === "self") ?? profiles[0])?.id ?? "");
 
   const profile = profiles.find((p) => p.id === selectedId);
   const latest = profile?.bediRecords?.[0];
@@ -159,14 +147,14 @@ export default function RecommendationsPage() {
                 type="button"
                 key={p.id}
                 aria-pressed={selectedId === p.id}
-                onClick={() => setSelectedId(p.id)}
+                onClick={() => setChosenId(p.id)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                   selectedId === p.id
                     ? "bg-primary text-on-primary shadow-ambient"
                     : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
                 }`}
               >
-                {p.name}
+                {fullName(p)}
               </button>
             ))}
           </div>
@@ -175,7 +163,7 @@ export default function RecommendationsPage() {
 
       {loadError !== null ? (
         /* ── Error state ── */
-        <ErrorState message={loadError} onRetry={load} />
+        <ErrorState message={loadError} onRetry={query.reload} />
       ) : !latest ? (
         /* ── Empty state ── */
         <div className="bg-surface-container-lowest rounded-3xl shadow-ambient text-center py-20 px-8">

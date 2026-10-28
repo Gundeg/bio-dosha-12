@@ -11,10 +11,12 @@ import { apiFetch, ApiError } from "@/lib/api";
 import { ErrorState, PageLoading } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { BEDI_THRESHOLDS } from "@/lib/bediConfig";
+import { fullName } from "@/lib/person";
 
 interface Profile {
   id: string;
   name: string;
+  lastName?: string | null;
   relationship: string;
 }
 
@@ -197,7 +199,7 @@ export default function HistoryPage() {
                       : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
                   }`}
                 >
-                  {p.name}
+                  {fullName(p)}
                 </button>
               ))}
             </div>

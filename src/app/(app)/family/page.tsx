@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -13,11 +14,13 @@ import { Callout } from "@/components/kit/layout";
 import { useApiQuery, useErrorMessage } from "@/components/kit/hooks";
 import { DOSHA_MAP, DoshaKey } from "@/lib/ktMapping";
 import { calcAge } from "@/lib/bediEngine";
+import { WEIGHT_MAX_KG, WEIGHT_MIN_KG, fullName, isValidWeight } from "@/lib/person";
 import { toast } from "sonner";
 
 interface Profile {
   id: string;
   name: string;
+  lastName: string | null;
   relationship: string;
   sex: "MALE" | "FEMALE";
   heightCm: number;
@@ -35,6 +38,10 @@ interface PlanUsage {
 
 /** Relationships a new member can have (labels: shared.relationship.<value>). */
 const MEMBER_RELATIONSHIPS = ["spouse", "child", "parent", "other"] as const;
+
+const EMPTY_MEMBER = {
+  lastName: "", name: "", birthDate: "", sex: "MALE", heightCm: "", weightKg: "", relationship: "spouse",
+};
 
 const DOSHA_DOT: Record<string, string> = {
   Khii: "bg-primary",
@@ -71,13 +78,15 @@ export default function FamilyPage() {
   const tDosha = useTranslations("dosha");
   const relationshipLabel = (rel: string) =>
     tShared.has(`relationship.${rel}`) ? tShared(`relationship.${rel}`) : rel;
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const router = useRouter();
+  const list = useApiQuery<Profile[]>("/api/profiles");
+  const profiles = Array.isArray(list.data) ? list.data : [];
+  const loading = list.loading && !list.data;
+  // An empty message lets ErrorState show its translated default text
+  // (network failures carry the browser's English text, so they use it too).
+  const loadError = list.error ? (list.error.status === 0 ? "" : list.error.message) : null;
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({
-    name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "spouse",
-  });
+  const [form, setForm] = useState(EMPTY_MEMBER);
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -90,20 +99,11 @@ export default function FamilyPage() {
   const planName = me.data ? (locale === "mn" ? me.data.plan.nameMn : me.data.plan.nameEn) : "";
   const atProfileLimit = profileLimit !== null && (me.data?.usage.profiles ?? 0) >= profileLimit;
 
-  const loadProfiles = useCallback(async () => {
-    setLoadError(null);
-    try {
-      const data = await apiFetch<Profile[]>("/api/profiles");
-      setProfiles(Array.isArray(data) ? data : []);
-    } catch (err) {
-      // An empty message lets ErrorState show its translated default text.
-      setLoadError(err instanceof ApiError ? err.message : "");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { loadProfiles(); }, [loadProfiles]);
+  // Weight is optional here: it changes over time, so every calculation asks
+  // for it. When given, the next step (assessment, then calculation) opens with it filled in.
+  const weightValue = parseFloat(form.weightKg);
+  const weightGiven = form.weightKg.trim() !== "";
+  const weightValid = !weightGiven || isValidWeight(weightValue);
 
   function openAdd() {
     setLimitError(null);
@@ -112,12 +112,14 @@ export default function FamilyPage() {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
+    if (!weightValid) return;
     setSubmitting(true);
     setLimitError(null);
     try {
-      await apiFetch("/api/profiles", {
+      const created = await apiFetch<{ id: string }>("/api/profiles", {
         method: "POST",
         body: JSON.stringify({
+          lastName: form.lastName.trim(),
           name: form.name,
           birthDate: form.birthDate,
           sex: form.sex,
@@ -127,9 +129,13 @@ export default function FamilyPage() {
       });
       toast.success(t("toast.added"));
       setShowAdd(false);
-      setForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "spouse" });
+      setForm(EMPTY_MEMBER);
       me.reload();
-      await loadProfiles();
+      if (weightGiven) {
+        router.push(`/calculator?profile=${created.id}&weight=${weightValue}`);
+        return;
+      }
+      list.reload();
     } catch (err) {
       if (err instanceof ApiError && err.code === "plan_limit") {
         // Shown in the dialog with what to do next (see below).
@@ -150,7 +156,7 @@ export default function FamilyPage() {
       toast.success(t("toast.deleted"));
       setDeleteTarget(null);
       me.reload();
-      await loadProfiles();
+      list.reload();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : t("toast.deleteError"));
     } finally {
@@ -192,7 +198,7 @@ export default function FamilyPage() {
 
       {/* ── Profile grid ── */}
       {loadError !== null ? (
-        <ErrorState message={loadError} onRetry={loadProfiles} />
+        <ErrorState message={loadError} onRetry={list.reload} />
       ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {profiles.map((p) => {
@@ -214,7 +220,7 @@ export default function FamilyPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-headline font-bold text-on-surface text-base truncate">{p.name}</p>
+                      <p className="font-headline font-bold text-on-surface text-base truncate">{fullName(p)}</p>
                       {p.relationship === "self" && (
                         <span className="text-[10px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary rounded-full shrink-0">{t("selfBadge")}</span>
                       )}
@@ -277,7 +283,7 @@ export default function FamilyPage() {
                       size="sm"
                       variant="ghost"
                       className="text-error hover:text-error hover:bg-error/5"
-                      aria-label={t("deleteAria", { name: p.name })}
+                      aria-label={t("deleteAria", { name: fullName(p) })}
                       onClick={() => setDeleteTarget(p)}
                     >
                       <span className="material-symbols-outlined text-[16px]" aria-hidden="true">delete</span>
@@ -314,6 +320,18 @@ export default function FamilyPage() {
             <DialogTitle className="font-headline">{t("addDialog.title")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4 pt-2">
+            {/* Овог first, as Mongolian names are written; it tells apart people with the same name. */}
+            <div className="space-y-1.5">
+              <Label htmlFor="family-member-last-name" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.lastName")}</Label>
+              <Input
+                id="family-member-last-name"
+                required
+                maxLength={100}
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                placeholder={t("addDialog.lastNamePlaceholder")}
+              />
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="family-member-name" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.name")}</Label>
               <Input
@@ -366,6 +384,27 @@ export default function FamilyPage() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="family-member-weight" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.weight")}</Label>
+              <Input
+                id="family-member-weight"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                min={WEIGHT_MIN_KG}
+                max={WEIGHT_MAX_KG}
+                value={form.weightKg}
+                onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
+                placeholder="60"
+                aria-invalid={!weightValid}
+                aria-describedby="family-member-weight-hint"
+              />
+              <p id="family-member-weight-hint" className={`text-xs ${weightValid ? "text-on-surface-variant" : "text-error"}`}>
+                {weightValid
+                  ? t("addDialog.weightHint")
+                  : t("addDialog.weightRange", { min: WEIGHT_MIN_KG, max: WEIGHT_MAX_KG })}
+              </p>
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="family-member-relationship" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.relationship")}</Label>
               <select
                 id="family-member-relationship"
@@ -388,8 +427,10 @@ export default function FamilyPage() {
               <Button type="button" variant="outline" className="flex-1" onClick={() => setShowAdd(false)}>
                 {t("addDialog.cancel")}
               </Button>
-              <Button type="submit" className="flex-1" disabled={submitting}>
-                {submitting ? t("addDialog.submitting") : t("addDialog.submit")}
+              <Button type="submit" className="flex-1" disabled={submitting || !weightValid}>
+                {submitting
+                  ? t("addDialog.submitting")
+                  : weightGiven ? t("addDialog.submitAndAssess") : t("addDialog.submit")}
               </Button>
             </div>
           </form>
@@ -404,7 +445,7 @@ export default function FamilyPage() {
           </DialogHeader>
           <p className="text-sm text-on-surface-variant pt-2">
             {t.rich("deleteDialog.body", {
-              name: deleteTarget?.name ?? "",
+              name: deleteTarget ? fullName(deleteTarget) : "",
               strong: (chunks) => <span className="font-semibold text-on-surface">{chunks}</span>,
             })}
           </p>

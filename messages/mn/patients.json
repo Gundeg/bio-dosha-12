@@ -35,6 +35,7 @@
     "moreDetails": "Нэмэлт мэдээлэл (заавал биш)",
     "moreDetailsHint": "Регистрийн дугаар, утас, хаягийг шифрлэж хадгална.",
     "lastName": "Овог",
+    "lastNamePlaceholder": "Эцэг (эх)-ийн нэр",
     "registerNumber": "Регистрийн дугаар",
     "phone": "Утас",
     "address": "Хаяг",

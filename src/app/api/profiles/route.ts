@@ -35,6 +35,7 @@ export const POST = handle(async (req: NextRequest) => {
       data: {
         userId: ctx.userId,
         name: data.name,
+        lastName: data.lastName || null,
         birthDate: new Date(data.birthDate),
         sex: data.sex,
         heightCm: data.heightCm,

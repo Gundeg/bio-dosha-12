@@ -55,7 +55,7 @@ const STATUS_TEXT: Record<string, string> = {
 const SEX_VALUES = ["MALE", "FEMALE"] as const;
 
 /** Optional details the API accepts; register number, phone and address are encrypted at rest. */
-const OPTIONAL_FIELDS = ["lastName", "registerNumber", "phone", "address", "occupation"] as const;
+const OPTIONAL_FIELDS = ["registerNumber", "phone", "address", "occupation"] as const;
 
 const EMPTY_FORM = {
   name: "",
@@ -119,6 +119,7 @@ function PatientList() {
       await apiFetch("/api/patients", {
         method: "POST",
         body: JSON.stringify({
+          lastName: form.lastName.trim(),
           name: form.name,
           birthDate: form.birthDate,
           sex: form.sex,
@@ -290,6 +291,19 @@ function PatientList() {
             <DialogTitle>{t("addDialog.title")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4">
+            {/* Овог first, as Mongolian names are written; it tells apart patients with the same name. */}
+            <div className="space-y-1">
+              <Label htmlFor="new-patient-lastName">{t("addDialog.lastName")}</Label>
+              <Input
+                id="new-patient-lastName"
+                required
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                placeholder={t("addDialog.lastNamePlaceholder")}
+                autoComplete="off"
+                maxLength={100}
+              />
+            </div>
             <div className="space-y-1">
               <Label htmlFor="new-patient-name">{t("addDialog.name")}</Label>
               <Input
@@ -362,7 +376,7 @@ function PatientList() {
                       onChange={(e) => setForm({ ...form, [field]: e.target.value })}
                       autoComplete="off"
                       inputMode={field === "phone" ? "tel" : undefined}
-                      maxLength={field === "address" ? 500 : field === "occupation" ? 200 : field === "lastName" ? 100 : 50}
+                      maxLength={field === "address" ? 500 : field === "occupation" ? 200 : 50}
                     />
                   </div>
                 ))}

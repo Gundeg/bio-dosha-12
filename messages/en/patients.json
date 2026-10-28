@@ -35,6 +35,7 @@
     "moreDetails": "More details (optional)",
     "moreDetailsHint": "Register number, phone and address are stored encrypted.",
     "lastName": "Last name",
+    "lastNamePlaceholder": "Father's or mother's name",
     "registerNumber": "National register number",
     "phone": "Phone",
     "address": "Address",

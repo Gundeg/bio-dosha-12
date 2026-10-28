@@ -13,10 +13,12 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { InfoItem } from "@/components/InfoPanel";
 import { DoshaKey } from "@/lib/ktMapping";
 import { BEDI_THRESHOLDS } from "@/lib/bediConfig";
+import { fullName } from "@/lib/person";
 
 interface Profile {
   id: string;
   name: string;
+  lastName?: string | null;
   relationship: string;
   doshaType: string | null;
   ktScore: number | null;
@@ -185,7 +187,7 @@ export default function DashboardPage() {
                       : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
                   }`}
                 >
-                  {p.name}
+                  {fullName(p)}
                 </button>
               ))}
             </div>

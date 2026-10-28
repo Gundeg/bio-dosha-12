@@ -21,6 +21,7 @@ import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
 import { QUESTION_HELP } from "@/lib/questionHelp";
 import { QuestionHelpButton } from "@/components/help/QuestionHelpDialog";
 import { HelpIllustration } from "@/components/help/illustrations";
+import { WEIGHT_MAX_KG, WEIGHT_MIN_KG, fullName, isValidWeight } from "@/lib/person";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ import { toast } from "sonner";
 interface Profile {
   id: string;
   name: string;
+  lastName?: string | null;
   sex: "MALE" | "FEMALE";
   heightCm: number;
   ktScore: number | null;
@@ -40,12 +42,24 @@ type Tab = "calc" | "assessment";
 type AssessmentStep = "profile-select" | "info" | "questions" | "result";
 
 interface ProfileForm {
+  lastName: string;
   name: string;
   birthDate: string;
   sex: "MALE" | "FEMALE";
   heightCm: string;
+  /** Carried to the measurement step, which needs it for the calculation. */
+  weightKg: string;
   relationship: string;
 }
+
+/** What loading the profile list produced; applied to state in one place. */
+type ProfilesLoad =
+  | { ok: true; list: Profile[]; deepLinked?: Profile; deepLinkMissing: boolean }
+  | { ok: false; error: string };
+
+const EMPTY_PROFILE_FORM: ProfileForm = {
+  lastName: "", name: "", birthDate: "", sex: "MALE", heightCm: "", weightKg: "", relationship: "self",
+};
 
 const SEASONS: { key: SeasonKey; icon: string }[] = [
   { key: "WINTER", icon: "❄" },
@@ -62,10 +76,6 @@ const SEX_OPTIONS: { value: "MALE" | "FEMALE"; icon: string }[] = [
   { value: "MALE", icon: "♂" },
   { value: "FEMALE", icon: "♀" },
 ];
-
-/** Same bounds as bediCreateSchema in src/lib/apiSchemas.ts */
-const WEIGHT_MIN_KG = 1;
-const WEIGHT_MAX_KG = 500;
 
 const STATUS_STYLE: Record<BEDIResult["status"], { text: string; bg: string; badge: string; dot: string }> = {
   khii_excess: {
@@ -119,6 +129,10 @@ function CalculatorInner() {
   const requestedTab  = searchParams.get("tab");
   const requestedProfile = searchParams.get("profile");
   const newParam      = searchParams.get("new");
+  // A weight entered when the person was added (family page) fills the measurement step.
+  const requestedWeight = searchParams.get("weight");
+  const initialWeight =
+    requestedWeight && isValidWeight(parseFloat(requestedWeight)) ? requestedWeight : "";
 
   // Хэрэв тодорхой ?tab=calc эсвэл ?profile=X эсвэл ?new=1 байхгүй бол
   // үргэлж 1-р алхам (Махбодын үнэлгээ) -аас эхлүүлнэ
@@ -136,7 +150,7 @@ function CalculatorInner() {
 
   // ── Calculator state ──
   const [selectedProfileId, setSelectedProfileId] = useState("");
-  const [weightKg, setWeightKg]   = useState("");
+  const [weightKg, setWeightKg]   = useState(initialWeight);
   const [season, setSeason]       = useState<SeasonKey>(getCurrentSeason());
   const [notes, setNotes]         = useState("");
   const [calcResult, setCalcResult]     = useState<BEDIResult | null>(null);
@@ -148,9 +162,7 @@ function CalculatorInner() {
   // ── Assessment state ──
   const [assessStep, setAssessStep]         = useState<AssessmentStep>("profile-select");
   const [assessProfileId, setAssessProfileId] = useState("__new__");
-  const [profileForm, setProfileForm]       = useState<ProfileForm>({
-    name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "self",
-  });
+  const [profileForm, setProfileForm]       = useState<ProfileForm>(EMPTY_PROFILE_FORM);
   const [currentQ, setCurrentQ]   = useState(0);
   const [answers, setAnswers]     = useState<Record<number, DominantType>>({});
   const [ktResult, setKtResult]   = useState<ReturnType<typeof scoreQuestionnaire> | null>(null);
@@ -167,9 +179,9 @@ function CalculatorInner() {
   }, [t]);
 
   // ── Load profiles ──
-  const load = useCallback(async () => {
-    setLoadError(null);
-    setLoadingProfiles(true);
+  // Fetching sets no state, so the mount effect can apply the result in a
+  // callback and ignore it once the deep link changes (see the effect below).
+  const fetchProfiles = useCallback(async (): Promise<ProfilesLoad> => {
     try {
       const data = await apiFetch<Profile[]>("/api/profiles");
       let list = Array.isArray(data) ? data : [];
@@ -178,6 +190,7 @@ function CalculatorInner() {
       // profile list leaves out. Load it directly instead of silently falling
       // back to the practitioner's own profile.
       let deepLinked: Profile | undefined;
+      let deepLinkMissing = false;
       if (requestedProfile) {
         deepLinked = list.find((p) => p.id === requestedProfile);
         if (!deepLinked) {
@@ -185,48 +198,70 @@ function CalculatorInner() {
             deepLinked = await apiFetch<Profile>(`/api/profiles/${requestedProfile}`);
             list = [...list, deepLinked];
           } catch {
-            toast.error(tRef.current("toast.profileNotFound"));
+            deepLinkMissing = true;
           }
         }
       }
-
-      setAllProfiles(list);
-      const withKt = list.filter((p) => p.ktScore);
-
-      if (deepLinked && !deepLinked.ktScore) {
-        // The linked person has no assessment yet → start it for them.
-        setSelectedProfileId(deepLinked.id);
-        setAssessProfileId(deepLinked.id);
-        setCurrentQ(0);
-        setAnswers({});
-        setKtResult(null);
-        setActiveTab("assessment");
-        setAssessStep("questions");
-      } else if (withKt.length === 0) {
-        setActiveTab("assessment");
-        setAssessStep(list.length > 0 ? "profile-select" : "info");
-      } else {
-        // With a deep link, select only that profile; never substitute another one.
-        const initial = requestedProfile ? deepLinked : withKt[0];
-        setSelectedProfileId(initial?.id ?? "");
-
-        if (goDirectlyToCalc) {
-          setActiveTab("calc");
-        } else {
-          setActiveTab("assessment");
-          setAssessStep("profile-select");
-        }
-      }
+      return { ok: true, list, deepLinked, deepLinkMissing };
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : tRef.current("loadError"));
-    } finally {
-      setLoadingProfiles(false);
+      return { ok: false, error: err instanceof ApiError ? err.message : tRef.current("loadError") };
+    }
+  }, [requestedProfile]);
+
+  const applyProfiles = useCallback((result: ProfilesLoad) => {
+    setLoadingProfiles(false);
+    if (!result.ok) {
+      setLoadError(result.error);
+      return;
+    }
+    setLoadError(null);
+    const { list, deepLinked } = result;
+    if (result.deepLinkMissing) toast.error(tRef.current("toast.profileNotFound"));
+
+    setAllProfiles(list);
+    const withKt = list.filter((p) => p.ktScore);
+
+    if (deepLinked && !deepLinked.ktScore) {
+      // The linked person has no assessment yet → start it for them.
+      setSelectedProfileId(deepLinked.id);
+      setAssessProfileId(deepLinked.id);
+      setCurrentQ(0);
+      setAnswers({});
+      setKtResult(null);
+      setActiveTab("assessment");
+      setAssessStep("questions");
+    } else if (withKt.length === 0) {
+      setActiveTab("assessment");
+      setAssessStep(list.length > 0 ? "profile-select" : "info");
+    } else {
+      // With a deep link, select only that profile; never substitute another one.
+      const initial = requestedProfile ? deepLinked : withKt[0];
+      setSelectedProfileId(initial?.id ?? "");
+
+      if (goDirectlyToCalc) {
+        setActiveTab("calc");
+      } else {
+        setActiveTab("assessment");
+        setAssessStep("profile-select");
+      }
     }
   }, [requestedProfile, goDirectlyToCalc]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    fetchProfiles().then((result) => {
+      if (!cancelled) applyProfiles(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchProfiles, applyProfiles]);
+
+  function retryLoad() {
+    setLoadError(null);
+    setLoadingProfiles(true);
+    void fetchProfiles().then(applyProfiles);
+  }
 
   useEffect(() => {
     if (assessStep === "questions") questionHeadingRef.current?.focus();
@@ -234,8 +269,9 @@ function CalculatorInner() {
 
   const selectedProfile = profiles.find((p) => p.id === selectedProfileId);
   const weightValue = parseFloat(weightKg);
-  const weightValid =
-    Number.isFinite(weightValue) && weightValue >= WEIGHT_MIN_KG && weightValue <= WEIGHT_MAX_KG;
+  const weightValid = isValidWeight(weightValue);
+  // The new-person form asks for the weight too, so the measurement step opens with it.
+  const infoWeightValid = isValidWeight(parseFloat(profileForm.weightKg));
 
   // ── BEDI calculate ──
   function handleCalculate() {
@@ -307,6 +343,7 @@ function CalculatorInner() {
         savedProfile = await apiFetch<Profile>("/api/profiles", {
           method: "POST",
           body: JSON.stringify({
+            lastName: profileForm.lastName.trim(),
             name: profileForm.name,
             birthDate: profileForm.birthDate,
             sex: profileForm.sex,
@@ -317,7 +354,7 @@ function CalculatorInner() {
           }),
         });
         setAllProfiles((prev) => [...prev, savedProfile]);
-        toast.success(t("toast.profileCreated", { name: savedProfile.name }));
+        toast.success(t("toast.profileCreated", { name: fullName(savedProfile) }));
       } else {
         const updated = await apiFetch<Profile>(`/api/profiles/${assessProfileId}`, {
           method: "PATCH",
@@ -331,13 +368,14 @@ function CalculatorInner() {
       setSelectedProfileId(savedProfile.id);
       setCalcResult(null);
       setRemedyResult(null);
-      setWeightKg("");
+      // Keep a weight entered with the new person (or carried in from the family page).
+      setWeightKg((current) => profileForm.weightKg || current);
       setActiveTab("calc");
       setAssessStep("profile-select");
       setCurrentQ(0);
       setAnswers({});
       setKtResult(null);
-      setProfileForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "self" });
+      setProfileForm(EMPTY_PROFILE_FORM);
       setAssessProfileId("__new__");
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : t("toast.saveError"));
@@ -505,7 +543,7 @@ function CalculatorInner() {
         ══════════════════════════════════════════════════════════════ */}
         {loadError && (
           <div className="max-w-xl">
-            <ErrorState message={loadError} onRetry={load} />
+            <ErrorState message={loadError} onRetry={retryLoad} />
           </div>
         )}
 
@@ -528,7 +566,7 @@ function CalculatorInner() {
                       className="flex items-center justify-between bg-surface-container-low rounded-2xl p-4 hover:bg-surface-container transition-colors text-left"
                     >
                       <div>
-                        <p className="font-semibold text-on-surface">{p.name}</p>
+                        <p className="font-semibold text-on-surface">{fullName(p)}</p>
                         <p className="text-xs text-on-surface-variant">
                           {relationshipLabel(p.relationship)}
                           {p.doshaType && ` · ${doshaLabel(p.doshaType)} · Kt ${p.ktScore?.toFixed(2)}`}
@@ -559,7 +597,19 @@ function CalculatorInner() {
             {assessStep === "info" && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 space-y-1.5">
+                  {/* Овог first, as Mongolian names are written; it tells apart people with the same name. */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="assess-last-name" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.lastName")}</Label>
+                    <Input
+                      id="assess-last-name"
+                      value={profileForm.lastName}
+                      onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                      placeholder={t("form.lastNamePlaceholder")}
+                      maxLength={100}
+                      className="bg-surface-container-low border-none h-12 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
                     <Label htmlFor="assess-name" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.name")}</Label>
                     <Input
                       id="assess-name"
@@ -590,6 +640,31 @@ function CalculatorInner() {
                       min="100" max="250"
                       className="bg-surface-container-low border-none h-12 rounded-xl"
                     />
+                  </div>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label htmlFor="assess-weight" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("form.weight")}</Label>
+                    <Input
+                      id="assess-weight"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.1"
+                      min={WEIGHT_MIN_KG}
+                      max={WEIGHT_MAX_KG}
+                      value={profileForm.weightKg}
+                      onChange={(e) => setProfileForm({ ...profileForm, weightKg: e.target.value })}
+                      placeholder="60"
+                      aria-invalid={profileForm.weightKg !== "" && !infoWeightValid}
+                      aria-describedby="assess-weight-hint"
+                      className="bg-surface-container-low border-none h-12 rounded-xl"
+                    />
+                    <p
+                      id="assess-weight-hint"
+                      className={`text-xs ${profileForm.weightKg !== "" && !infoWeightValid ? "text-error" : "text-on-surface-variant"}`}
+                    >
+                      {profileForm.weightKg !== "" && !infoWeightValid
+                        ? t("calc.weightRange", { min: WEIGHT_MIN_KG, max: WEIGHT_MAX_KG })
+                        : t("form.weightHint")}
+                    </p>
                   </div>
                 </div>
 
@@ -636,7 +711,10 @@ function CalculatorInner() {
                   )}
                   <Button
                     className="flex-1 h-12 font-bold"
-                    disabled={!profileForm.name || !profileForm.birthDate || !profileForm.heightCm}
+                    disabled={
+                      !profileForm.lastName.trim() || !profileForm.name.trim() || !profileForm.birthDate ||
+                      !profileForm.heightCm || !infoWeightValid
+                    }
                     onClick={() => setAssessStep("questions")}
                   >
                     {t("form.startQuestions")}<span aria-hidden="true"> →</span>
@@ -830,7 +908,7 @@ function CalculatorInner() {
                             : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
                         }`}
                       >
-                        {p.name}
+                        {fullName(p)}
                         {p.relationship === "patient" && (
                           <span className="ml-1.5 text-[10px] font-bold opacity-80">· {tShared("relationship.patient")}</span>
                         )}

@@ -17,6 +17,12 @@
   "deleteAria": "Delete the profile of {name}",
   "addDialog": {
     "title": "Add a family member",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Father's or mother's name",
+    "weight": "Current weight (kg), optional",
+    "weightHint": "Weight changes, so each calculation asks for it. Enter it now to go straight to the assessment after adding.",
+    "weightRange": "Enter a weight between {min} and {max} kg.",
+    "submitAndAssess": "Add and assess",
     "name": "Name",
     "namePlaceholder": "Member name",
     "birthDate": "Date of birth",

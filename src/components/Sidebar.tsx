@@ -33,6 +33,7 @@ function NavItem({
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={`group flex items-center gap-3 pl-4 pr-5 py-2.5 text-sm font-medium transition-all duration-150 rounded-l-[9999px] relative ${
         active
           ? "bg-surface-container-lowest text-primary font-semibold shadow-sm"
@@ -42,7 +43,10 @@ function NavItem({
       {active && (
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
       )}
-      <span className={`material-symbols-outlined text-[20px] transition-colors ${active ? "icon-filled text-primary" : "group-hover:text-on-surface"}`}>
+      <span
+        className={`material-symbols-outlined text-[20px] transition-colors ${active ? "icon-filled text-primary" : "group-hover:text-on-surface"}`}
+        aria-hidden="true"
+      >
         {icon}
       </span>
       <span className="truncate">{label}</span>
@@ -59,7 +63,7 @@ export default function Sidebar() {
   const initial = session?.user?.name?.[0]?.toUpperCase() ?? "B";
 
   return (
-    <aside className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low z-40 border-r border-outline-variant/10">
+    <aside className="hidden md:flex print:hidden flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low z-40 border-r border-outline-variant/10">
       {/* Top spacer — clears the fixed navbar (h-16) */}
       <div className="h-16 shrink-0" />
 
@@ -91,7 +95,7 @@ export default function Sidebar() {
 
         <div className="space-y-0.5">
           {NAV_LINKS.map((link) => (
-            <NavItem key={link.href} href={link.href} label={t(link.key)} icon={link.icon} active={pathname === link.href} />
+            <NavItem key={link.href} href={link.href} label={t(link.key)} icon={link.icon} active={pathname === link.href || pathname.startsWith(`${link.href}/`)} />
           ))}
         </div>
 
@@ -103,7 +107,7 @@ export default function Sidebar() {
             </p>
             <div className="space-y-0.5">
               {PRACTITIONER_LINKS.map((link) => (
-                <NavItem key={link.href} href={link.href} label={t(link.key)} icon={link.icon} active={pathname === link.href} />
+                <NavItem key={link.href} href={link.href} label={t(link.key)} icon={link.icon} active={pathname === link.href || pathname.startsWith(`${link.href}/`)} />
               ))}
             </div>
           </>
@@ -116,7 +120,7 @@ export default function Sidebar() {
               {t("adminSection")}
             </p>
             <div className="space-y-0.5">
-              <NavItem href="/admin" label={t("admin")} icon="admin_panel_settings" active={pathname === "/admin"} />
+              <NavItem href="/admin" label={t("admin")} icon="admin_panel_settings" active={pathname === "/admin" || pathname.startsWith("/admin/")} />
             </div>
           </>
         )}
@@ -128,7 +132,7 @@ export default function Sidebar() {
           href="/calculator?new=1"
           className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-on-primary text-sm font-semibold transition-all hover:opacity-90 active:scale-95 shadow-sm"
         >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
+          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add_circle</span>
           {t("newCalculation")}
         </Link>
 
@@ -137,7 +141,7 @@ export default function Sidebar() {
             href="/help"
             className="flex items-center gap-2.5 px-3 py-2 text-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg transition-all"
           >
-            <span className="material-symbols-outlined text-[16px]">contact_support</span>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">contact_support</span>
             {t("help")}
           </Link>
           <button
@@ -145,7 +149,7 @@ export default function Sidebar() {
             onClick={() => signOut({ callbackUrl: "/" })}
             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-on-surface-variant hover:text-error hover:bg-error/5 rounded-lg transition-all"
           >
-            <span className="material-symbols-outlined text-[16px]">logout</span>
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">logout</span>
             {t("logout")}
           </button>
           <div className="px-3 pt-2">

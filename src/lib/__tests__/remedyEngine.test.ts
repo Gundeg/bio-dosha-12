@@ -39,6 +39,38 @@ describe("getRemedies — composition", () => {
     expect(ok?.status).toBe("OK");
   });
 
+  it("never lists the same food twice", () => {
+    for (const status of ["khii_excess", "balanced", "shar_badgan_excess"] as const) {
+      for (const dosha of ["Khii", "Shar", "Badgan", "Tentsveertei"] as const) {
+        const r = getRemedies(status, 30, dosha, 0.4);
+        const keys = r.remedies.map((x) => x.split("(")[0].trim().toLowerCase());
+        expect(new Set(keys).size, `${status}/${dosha}: ${r.remedies.join(" | ")}`).toBe(keys.length);
+      }
+    }
+  });
+
+  it("drops constitution foods that the current status says to avoid", () => {
+    // Хий constitution in Шар/Бадган excess: oily ghee conflicts with "Тослог" on the avoid list
+    const khii = getRemedies("shar_badgan_excess", 30, "Khii", 0.4);
+    expect(khii.avoidFoods.some((x) => x.includes("Тослог"))).toBe(true);
+    expect(khii.remedies.some((x) => x.toLowerCase().includes("тослог"))).toBe(false);
+
+    // Бадган constitution in Хий excess: dry food conflicts with "хуурай хоол" on the avoid list
+    const badgan = getRemedies("khii_excess", 30, "Badgan", -0.4);
+    expect(badgan.remedies.some((x) => x.toLowerCase().includes("хуурай хоол"))).toBe(false);
+    expect(badgan.lifestyle.some((x) => x.toLowerCase().includes("мацаг"))).toBe(false);
+
+    // Шар constitution in Хий excess: cold vegetables conflict with "Хүйтэн" on the avoid list
+    const shar = getRemedies("khii_excess", 30, "Shar", -0.4);
+    expect(shar.remedies.some((x) => x.toLowerCase().includes("хүйтэн"))).toBe(false);
+  });
+
+  it("keeps the status remedies and the plan's age rules", () => {
+    const r = getRemedies("khii_excess", 30, "Shar", -0.4);
+    expect(r.remedies).toContain("Шар тос (Тослог цөцгийн тос)");
+    expect(r.remedies.some((x) => x.startsWith("Мөсөн чихэр"))).toBe(true);
+  });
+
   it("always returns non-empty remedies, avoid list and risk factors", () => {
     for (const status of ["khii_excess", "balanced", "shar_badgan_excess"] as const) {
       const r = getRemedies(status, 30);

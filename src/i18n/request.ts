@@ -1,6 +1,40 @@
 import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale } from "./config";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from "./config";
+
+/**
+ * Page and content namespaces, one file per namespace and locale:
+ * messages/<locale>/<namespace>.json. Core chrome (common, nav, auth, legal,
+ * locale) stays in messages/<locale>.json. Splitting keeps each file small
+ * enough to review and lets pages be translated independently.
+ */
+export const NAMESPACES = [
+  "shared",
+  "dosha",
+  "questionnaire",
+  "questionHelp",
+  "landing",
+  "help",
+  "calculator",
+  "dashboard",
+  "history",
+  "recommendations",
+  "family",
+  "remedy",
+  "states",
+  "patients",
+  "reports",
+  "admin",
+  "clinical",
+] as const;
+
+export async function loadMessages(locale: Locale) {
+  const core = (await import(`../../messages/${locale}.json`)).default;
+  const pages = await Promise.all(
+    NAMESPACES.map(async (ns) => [ns, (await import(`../../messages/${locale}/${ns}.json`)).default] as const)
+  );
+  return { ...core, ...Object.fromEntries(pages) };
+}
 
 /**
  * Cookie-д суурилсан локал (URL prefix-гүй): апп SEO-д тулгуурладаггүй тул
@@ -13,6 +47,6 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    messages: await loadMessages(locale),
   };
 });

@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { DoshaKey } from "@/lib/ktMapping";
 import { BEDI_THRESHOLDS } from "@/lib/bediConfig";
+import type { BEDIStatus } from "@/lib/bediEngine";
 
 // Constitutional component proportions [Хий%, Шар%, Бадган%]
 // Based on traditional Mongolian medicine dosha theory
@@ -18,21 +20,38 @@ const BASE_SCORES: Record<DoshaKey, [number, number, number]> = {
   Badgan:       [ 8, 10, 82],
 };
 
+/** Falls back to the configured band only when the caller has no stored status. */
+function statusFromDeviation(deviation: number): BEDIStatus {
+  return deviation < BEDI_THRESHOLDS.khiiBelow
+    ? "khii_excess"
+    : deviation > BEDI_THRESHOLDS.sharBadganAbove
+    ? "shar_badgan_excess"
+    : "balanced";
+}
+
+// Status labels come from the "shared" namespace (shared.status.<status>).
+const STATUS_VISUAL: Record<BEDIStatus, { color: string; badge: string }> = {
+  khii_excess: { color: "#3b82f6", badge: "bg-blue-600" },
+  balanced: { color: "#10b981", badge: "bg-emerald-700" },
+  shar_badgan_excess: { color: "#f87171", badge: "bg-red-600" },
+};
+
 function applyDeviation(
   base: [number, number, number],
-  deviation: number
+  deviation: number,
+  status: BEDIStatus
 ): [number, number, number] {
   const [k, s, b] = base;
   const intensity = Math.min(28, Math.abs(deviation) * 32);
 
-  if (deviation < BEDI_THRESHOLDS.khiiBelow) {
+  if (status === "khii_excess") {
     // Хий arvidsan — wind excess pushes Хий axis out
     return [
       Math.min(97, k + intensity),
       Math.max(5, s - intensity * 0.55),
       Math.max(5, b - intensity * 0.45),
     ];
-  } else if (deviation > BEDI_THRESHOLDS.sharBadganAbove) {
+  } else if (status === "shar_badgan_excess") {
     // Шар/Бадган arvidsan — boost whichever is dominant in constitution
     if (s >= b) {
       return [Math.max(5, k - intensity * 0.5), Math.min(97, s + intensity), Math.max(5, b - intensity * 0.5)];
@@ -53,8 +72,11 @@ const LR = R + 30; // label radius
 
 // Equilateral triangle: Хий=top, Шар=bottom-right, Бадган=bottom-left
 const ANGLES = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6] as const;
-const AXIS_LABELS = ["Хий", "Шар", "Бадган"] as const;
+const AXIS_KEYS = ["H", "S", "B"] as const; // calculator.radar.axis.<key>
 const AXIS_COLORS = ["#3b82f6", "#f59e0b", "#8b5cf6"] as const; // blue, amber, violet
+// Darker shades of the axis colours for text, so labels keep ≥ 4.5:1 contrast on white.
+const AXIS_TEXT_COLORS = ["#1d4ed8", "#b45309", "#6d28d9"] as const; // blue-700, amber-700, violet-700
+const AXIS_TEXT_CLASSES = ["text-blue-700", "text-amber-700", "text-violet-700"] as const;
 const GRID_LEVELS = [25, 50, 75, 100];
 
 function pt(angle: number, value: number, radius = R): [number, number] {
@@ -71,21 +93,27 @@ function toPolygonPoints(scores: [number, number, number]): string {
 interface DoshaRadarProps {
   doshaKey: DoshaKey;
   deviation: number;
+  /** The engine's classification. Pass it whenever it is known so the chart matches the status badge. */
+  status?: BEDIStatus | string;
   size?: number;
   /** Hide the status badge, legend, and axis score summary below the SVG */
   compact?: boolean;
 }
 
-export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = false }: DoshaRadarProps) {
-  const base    = BASE_SCORES[doshaKey] ?? BASE_SCORES.Tentsveertei;
-  const current = applyDeviation(base, deviation);
+function isStatus(value: unknown): value is BEDIStatus {
+  return value === "khii_excess" || value === "balanced" || value === "shar_badgan_excess";
+}
 
-  const statusColor =
-    deviation < BEDI_THRESHOLDS.khiiBelow ? "#3b82f6" : deviation > BEDI_THRESHOLDS.sharBadganAbove ? "#f87171" : "#10b981";
-  const statusLabel =
-    deviation < BEDI_THRESHOLDS.khiiBelow ? "Хий арвидсан" : deviation > BEDI_THRESHOLDS.sharBadganAbove ? "Шар/Бадган арвидсан" : "Тэнцвэртэй";
-  const statusBadgeClass =
-    deviation < BEDI_THRESHOLDS.khiiBelow ? "bg-blue-500" : deviation > BEDI_THRESHOLDS.sharBadganAbove ? "bg-red-400" : "bg-emerald-500";
+export default function DoshaRadar({ doshaKey, deviation, status, size = 260, compact = false }: DoshaRadarProps) {
+  const t = useTranslations("calculator.radar");
+  const tShared = useTranslations("shared");
+  const resolved: BEDIStatus = isStatus(status) ? status : statusFromDeviation(deviation);
+  const base    = BASE_SCORES[doshaKey] ?? BASE_SCORES.Tentsveertei;
+  const current = applyDeviation(base, deviation, resolved);
+
+  const { color: statusColor, badge: statusBadgeClass } = STATUS_VISUAL[resolved];
+  const statusLabel = tShared(`status.${resolved}`);
+  const axisLabels = AXIS_KEYS.map((key) => t(`axis.${key}`));
 
   const svgH = Math.round(size * (VH / VW));
 
@@ -95,7 +123,13 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = 
         width={size}
         height={svgH}
         viewBox={`0 0 ${VW} ${VH}`}
-        aria-label="Доша радар диаграм"
+        role="img"
+        aria-label={t("ariaLabel", {
+          status: statusLabel,
+          h: Math.round(current[0]),
+          s: Math.round(current[1]),
+          b: Math.round(current[2]),
+        })}
       >
         {/* Grid rings */}
         {GRID_LEVELS.map((lvl) => (
@@ -112,7 +146,7 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = 
         {[25, 50, 75].map((lvl) => {
           const [x, y] = pt(-Math.PI / 2, lvl);
           return (
-            <text key={lvl} x={x + 4} y={y} fontSize="8" fill="#cbd5e1" dominantBaseline="central">
+            <text key={lvl} x={x + 4} y={y} fontSize="8" fill="#64748b" dominantBaseline="central">
               {lvl}
             </text>
           );
@@ -161,18 +195,18 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = 
         <circle cx={CX} cy={CY} r={3} fill="#94a3b8" />
 
         {/* Axis labels */}
-        {AXIS_LABELS.map((label, i) => {
+        {axisLabels.map((label, i) => {
           const [lx, ly] = pt(ANGLES[i], 100, LR);
           return (
             <text
-              key={label}
+              key={AXIS_KEYS[i]}
               x={lx}
               y={ly}
               textAnchor="middle"
               dominantBaseline="central"
               fontSize="13"
               fontWeight="700"
-              fill={AXIS_COLORS[i]}
+              fill={AXIS_TEXT_COLORS[i]}
             >
               {label}
             </text>
@@ -219,13 +253,13 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = 
               <svg width="20" height="6" aria-hidden="true">
                 <line x1="0" y1="3" x2="20" y2="3" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="5 3" />
               </svg>
-              Үндсэн
+              {t("legendBase")}
             </span>
             <span className="flex items-center gap-1.5">
               <svg width="20" height="6" aria-hidden="true">
                 <line x1="0" y1="3" x2="20" y2="3" stroke={statusColor} strokeWidth="2.5" />
               </svg>
-              Одоогийн
+              {t("legendCurrent")}
             </span>
           </div>
         </>
@@ -233,15 +267,12 @@ export default function DoshaRadar({ doshaKey, deviation, size = 260, compact = 
 
       {!compact && (
         <div className="flex gap-4 mt-1">
-          {AXIS_LABELS.map((label, i) => {
-            const textClass = i === 0 ? "text-blue-500" : i === 1 ? "text-amber-500" : "text-violet-500";
-            return (
-              <div key={label} className="flex flex-col items-center">
-                <span className={`text-xs font-semibold ${textClass}`}>{label}</span>
-                <span className="text-base font-bold text-slate-700">{Math.round(current[i])}</span>
-              </div>
-            );
-          })}
+          {axisLabels.map((label, i) => (
+            <div key={AXIS_KEYS[i]} className="flex flex-col items-center">
+              <span className={`text-xs font-semibold ${AXIS_TEXT_CLASSES[i]}`}>{label}</span>
+              <span className="text-base font-bold text-slate-700">{Math.round(current[i])}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { HelpIllustration } from "@/components/help/illustrations";
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { DOSHA_COLOR, DOSHA_LETTER } from "@/lib/doshaUi";
+import { DOSHA_COLOR } from "@/lib/doshaUi";
 import { DominantType, Question } from "@/lib/questionnaireEngine";
 
 /** Панелийн дэвсгэр — махбодын туяа (Х/Ш/Б өнгөний код). */
@@ -28,10 +29,13 @@ const PANEL_BG: Record<DominantType, string> = {
  * хөдөлгөөнт зураг эргэлдэж, хариулт дээр дарвал царцана.
  */
 export function QuestionHelpButton({ question }: { question: Question }) {
-  const help = QUESTION_HELP[question.id];
+  const t = useTranslations("help.dialog");
+  const tHelp = useTranslations("questionHelp");
+  const tShared = useTranslations("shared");
   const [variant, setVariant] = useState<DominantType | undefined>(undefined);
 
-  if (!help) return null;
+  if (!QUESTION_HELP[question.id]) return null;
+  const qKey = `q${question.id}`;
 
   return (
     <Dialog
@@ -44,19 +48,19 @@ export function QuestionHelpButton({ question }: { question: Question }) {
           <Button variant="ghost" size="sm" className="mt-2 -ml-2.5 text-primary" />
         }
       >
-        <span className="material-symbols-outlined text-[16px]">help</span>
-        Хэрхэн тодорхойлох вэ?
+        <span aria-hidden="true" className="material-symbols-outlined text-[16px]">help</span>
+        {t("trigger")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="pr-8">{help.title}</DialogTitle>
-          <DialogDescription>{help.instruction}</DialogDescription>
+          <DialogTitle className="pr-8">{tHelp(`${qKey}.title`)}</DialogTitle>
+          <DialogDescription>{tHelp(`${qKey}.instruction`)}</DialogDescription>
         </DialogHeader>
 
         {/* Өргөн дэлгэц: 3 хариултыг зэрэгцүүлсэн харьцуулалт */}
         <div className="hidden sm:grid sm:grid-cols-3 gap-2.5">
           {question.options.map((opt) => {
-            const outcome = help.outcomes[opt.value];
+            const doshaName = tShared(`dosha3.${opt.value}`);
             return (
               <div
                 key={opt.value}
@@ -71,16 +75,18 @@ export function QuestionHelpButton({ question }: { question: Question }) {
                 </div>
                 <div className="flex items-start gap-2">
                   <div
+                    aria-hidden="true"
                     className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-black text-[11px] bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
                   >
-                    {DOSHA_LETTER[opt.value]}
+                    {doshaName.charAt(0)}
                   </div>
                   <div className="min-w-0">
                     <p className={`font-bold text-xs leading-tight ${DOSHA_COLOR[opt.value]}`}>
-                      {outcome.label}
+                      <span className="sr-only">{doshaName}: </span>
+                      {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
                     </p>
                     <p className="text-[11px] text-on-surface-variant mt-0.5 leading-relaxed">
-                      {outcome.description}
+                      {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
                     </p>
                   </div>
                 </div>
@@ -100,24 +106,22 @@ export function QuestionHelpButton({ question }: { question: Question }) {
           </div>
 
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-on-surface-variant">
-              Хариулт дээр дарж тухайн төлөвийг харна уу
-            </p>
+            <p className="text-xs text-on-surface-variant">{t("hint")}</p>
             {variant && (
               <button
                 type="button"
                 onClick={() => setVariant(undefined)}
                 className="shrink-0 text-xs font-bold text-primary hover:underline"
               >
-                ▶ Автомат
+                <span aria-hidden="true">▶</span> {t("auto")}
               </button>
             )}
           </div>
 
           <div className="space-y-2">
             {question.options.map((opt) => {
-              const outcome = help.outcomes[opt.value];
               const selected = variant === opt.value;
+              const doshaName = tShared(`dosha3.${opt.value}`);
               return (
                 <button
                   key={opt.value}
@@ -126,22 +130,24 @@ export function QuestionHelpButton({ question }: { question: Question }) {
                   onClick={() =>
                     setVariant((v) => (v === opt.value ? undefined : opt.value))
                   }
-                  className={`w-full text-left rounded-2xl p-3 transition-all ${PANEL_BG[opt.value]} ${
+                  className={`w-full text-left rounded-2xl p-3 motion-safe:transition-all ${PANEL_BG[opt.value]} ${
                     selected ? "ring-2 ring-primary/40" : "hover:shadow-ambient"
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <div
+                      aria-hidden="true"
                       className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs bg-surface-container-lowest ${DOSHA_COLOR[opt.value]}`}
                     >
-                      {DOSHA_LETTER[opt.value]}
+                      {doshaName.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-bold text-sm ${DOSHA_COLOR[opt.value]}`}>
-                        {outcome.label}
+                        <span className="sr-only">{doshaName}: </span>
+                        {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
                       </p>
                       <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                        {outcome.description}
+                        {tHelp(`${qKey}.outcomes.${opt.value}.description`)}
                       </p>
                     </div>
                   </div>

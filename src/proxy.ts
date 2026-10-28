@@ -9,7 +9,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const role = req.auth?.user?.role;
 
-  const publicPrefixes = ["/login", "/register", "/api/auth", "/api/register"];
+  const publicPrefixes = ["/login", "/register", "/privacy", "/api/auth", "/api/register"];
   const isPublic = pathname === "/" || publicPrefixes.some((r) => pathname.startsWith(r));
   // API routes authenticate in their own handlers and return 401 JSON. Redirecting
   // them to the HTML login page breaks apiFetch (it would parse HTML as JSON), so

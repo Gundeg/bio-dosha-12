@@ -32,7 +32,7 @@ export default function Navbar() {
   return (
     <>
       {/* Desktop: brand strip — sidebar handles nav, this is just identity + user */}
-      <header className="hidden md:flex fixed top-0 left-0 right-0 z-50 items-center justify-between px-6 py-3.5 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/15 h-16">
+      <header className="hidden md:flex print:hidden fixed top-0 left-0 right-0 z-50 items-center justify-between px-6 py-3.5 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/15 h-16">
         {/* Brand */}
         <div className="flex items-center gap-3 pl-64">
           <div className="w-7 h-7 bg-linear-to-br from-primary to-primary-container rounded-lg flex items-center justify-center text-on-primary text-[11px] font-black select-none">
@@ -54,7 +54,7 @@ export default function Navbar() {
             title={t("help")}
             className="w-8 h-8 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all"
           >
-            <span className="material-symbols-outlined text-[20px]">help_outline</span>
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">help_outline</span>
             <span className="sr-only">{t("help")}</span>
           </Link>
 
@@ -77,18 +77,19 @@ export default function Navbar() {
       {/* Mobile: glass bottom tray */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-2 pb-6 pt-2 bg-surface-container-lowest/92 backdrop-blur-2xl z-50 rounded-t-3xl shadow-2xl border-t border-outline-variant/20">
         {MOBILE_NAV.map(({ href, key, icon }) => {
-          const active = pathname === href;
+          const active = pathname === href || pathname.startsWith(`${href}/`);
           return (
             <Link
               key={href}
               href={href}
+              aria-current={active ? "page" : undefined}
               className={`flex flex-col items-center justify-center rounded-2xl px-3 py-2 transition-all ${
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-on-surface-variant"
               }`}
             >
-              <span className={`material-symbols-outlined text-[22px] ${active ? "icon-filled" : ""}`}>
+              <span className={`material-symbols-outlined text-[22px] ${active ? "icon-filled" : ""}`} aria-hidden="true">
                 {icon}
               </span>
               <span className="text-[10px] font-medium mt-0.5">{t(key)}</span>

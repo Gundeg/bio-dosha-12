@@ -20,7 +20,7 @@ export default function LoginPage() {
     const res = await signIn("credentials", { ...form, redirect: false });
     setLoading(false);
     if (res?.error) {
-      toast.error(t("invalidCredentials"));
+      toast.error(res.code === "rate_limited" ? t("rateLimited") : t("invalidCredentials"));
     } else {
       window.location.href = "/dashboard";
     }

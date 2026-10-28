@@ -1,0 +1,230 @@
+{
+  "q1": {
+    "title": "Wrist test",
+    "instruction": "Grasp one wrist — where the palm meets the forearm — with your other hand. Watch how the thumb and index finger of the grasping hand meet.",
+    "ariaLabel": "Wrist test: an animation of grasping one wrist (where the palm meets the forearm) with the other hand and judging bone size by how the thumb and index finger meet",
+    "outcomes": {
+      "H": {
+        "label": "Fingers overlap",
+        "description": "The thumb and index finger of the grasping hand overlap each other — small, slender bones."
+      },
+      "S": {
+        "label": "Tips just touch",
+        "description": "The two fingertips meet exactly, with no gap or overlap — medium bones."
+      },
+      "B": {
+        "label": "Tips don't touch",
+        "description": "The fingertips cannot reach each other — large, broad bones."
+      }
+    }
+  },
+  "q2": {
+    "title": "Recall your weight history",
+    "instruction": "Think back over your weight for the last 1–2 years. How does your weight change when you eat more or less?",
+    "ariaLabel": "Weight test: an animation showing how stable your weight is by the way the scale needle moves",
+    "outcomes": {
+      "H": {
+        "label": "Doesn't go up",
+        "description": "Weight doesn't increase even when eating a lot, and drops easily."
+      },
+      "S": {
+        "label": "Stable",
+        "description": "Weight adjusts easily to how much you eat."
+      },
+      "B": {
+        "label": "Doesn't come down",
+        "description": "Weight goes up easily even when eating little, and is slow to lose."
+      }
+    }
+  },
+  "q3": {
+    "title": "Skin pinch test",
+    "instruction": "Gently pinch and stroke the skin of your forearm. Notice its dryness, warmth and moisture.",
+    "ariaLabel": "Skin test: an animation of pinching the forearm skin to judge its quality",
+    "outcomes": {
+      "H": {
+        "label": "Dry, rough",
+        "description": "Feels dry; flaky bits may be visible."
+      },
+      "S": {
+        "label": "Warm, reddens",
+        "description": "Feels warm, and the pinched spot reddens easily."
+      },
+      "B": {
+        "label": "Soft, moist",
+        "description": "Feels cool, soft and moist; the skin is thick and smooth."
+      }
+    }
+  },
+  "q4": {
+    "title": "Weather test",
+    "instruction": "Picture a cold winter, a hot summer and a damp, rainy day. Which one bothers you most?",
+    "ariaLabel": "Weather test: an animation comparing which of snow, sun and rain bothers you most",
+    "outcomes": {
+      "H": {
+        "label": "Cold",
+        "description": "Suffers most in the cold — prefers warm places and sunshine."
+      },
+      "S": {
+        "label": "Heat",
+        "description": "Suffers most in the heat — likes a cool breeze and shade."
+      },
+      "B": {
+        "label": "Damp, wet",
+        "description": "Suffers most in humid weather — prefers dry warmth."
+      }
+    }
+  },
+  "q5": {
+    "title": "A week of sleep observation",
+    "instruction": "Think back over your sleep last week: how many hours did you sleep, did you wake at night, and how did you feel getting up in the morning?",
+    "ariaLabel": "Sleep test: an animation showing the hours slept and waking during the night",
+    "outcomes": {
+      "H": {
+        "label": "Light, short",
+        "description": "5–6 hours is enough; wakes several times a night."
+      },
+      "S": {
+        "label": "Regular",
+        "description": "A regular 7–8 hours; easy to fall asleep and easy to get up."
+      },
+      "B": {
+        "label": "Deep, long",
+        "description": "Sleeps deeply for 9+ hours; hard to get up in the morning."
+      }
+    }
+  },
+  "q6": {
+    "title": "Skipped meal test",
+    "instruction": "Recall what your body feels when you skip lunch.",
+    "ariaLabel": "Digestion test: an animation showing how the flame of hunger changes when a meal is skipped",
+    "outcomes": {
+      "H": {
+        "label": "Irregular",
+        "description": "Sometimes not hungry at all, sometimes suddenly hungry."
+      },
+      "S": {
+        "label": "Gets hungry fast",
+        "description": "Gets hungry fast, becomes irritable and can't focus on work."
+      },
+      "B": {
+        "label": "Barely notices",
+        "description": "Feels nothing in particular — can go a long time without getting hungry."
+      }
+    }
+  },
+  "q7": {
+    "title": "Observe your walk and speech",
+    "instruction": "Recall who leads when you walk with someone, and how fast you speak.",
+    "ariaLabel": "Pace test: an animation showing walking speed changing",
+    "outcomes": {
+      "H": {
+        "label": "Fast",
+        "description": "Walks fast and talks a lot; jumps from topic to topic."
+      },
+      "S": {
+        "label": "Decisive",
+        "description": "Walks with purpose and speaks clearly and sharply."
+      },
+      "B": {
+        "label": "Calm",
+        "description": "Walks slowly and calmly; thinks first and speaks in few words."
+      }
+    }
+  },
+  "q8": {
+    "title": "Learn–forget test",
+    "instruction": "Recall whether you can still remember a new name or number a week after learning it.",
+    "ariaLabel": "Memory test: an animation showing the memory level filling up and fading",
+    "outcomes": {
+      "H": {
+        "label": "Learns fast, forgets",
+        "description": "Picks it up on the spot but has forgotten it a week later."
+      },
+      "S": {
+        "label": "Learns fast, remembers",
+        "description": "Picks it up quickly and remembers it well for a long time."
+      },
+      "B": {
+        "label": "Learns slowly, doesn't forget",
+        "description": "Slow to pick up, but once learned never forgets."
+      }
+    }
+  },
+  "q9": {
+    "title": "Stress test",
+    "instruction": "Recall your very first reaction when a sudden problem comes up.",
+    "ariaLabel": "Emotion test: an animation showing a facial expression changing",
+    "outcomes": {
+      "H": {
+        "label": "Anxious",
+        "description": "Worries, gets anxious and keeps changing decisions."
+      },
+      "S": {
+        "label": "Sharp",
+        "description": "Quick to anger but takes decisive action."
+      },
+      "B": {
+        "label": "Calm",
+        "description": "Takes it calmly and steadily, but sometimes becomes sluggish."
+      }
+    }
+  },
+  "q10": {
+    "title": "Warmth test",
+    "instruction": "Place your palm on your neck or cheek and feel whether it is warm or cold.",
+    "ariaLabel": "Hands and feet test: an animation of placing a palm on the cheek to feel its warmth",
+    "outcomes": {
+      "H": {
+        "label": "Cold, dry",
+        "description": "The hand feels cold and dry — especially in winter."
+      },
+      "S": {
+        "label": "Hot, sweaty",
+        "description": "The hand is warm, even hot; the palm sweats easily."
+      },
+      "B": {
+        "label": "Cool, moist",
+        "description": "The hand feels cool and softly moist."
+      }
+    }
+  },
+  "q11": {
+    "title": "Stairs test",
+    "instruction": "Recall how your body feels after climbing three flights of stairs or walking briskly for 30 minutes.",
+    "ariaLabel": "Stamina test: an animation showing how energy drops while climbing stairs",
+    "outcomes": {
+      "H": {
+        "label": "Tires quickly",
+        "description": "Fast at first, but soon tired and out of breath."
+      },
+      "S": {
+        "label": "Average",
+        "description": "Handles moderate effort steadily and well."
+      },
+      "B": {
+        "label": "Very enduring",
+        "description": "Handles long effort easily, without tiring."
+      }
+    }
+  },
+  "q12": {
+    "title": "Bowel rhythm and stool observation",
+    "instruction": "Recall how regular your bowel movements were last week and what your stools were like.",
+    "ariaLabel": "Bowel test: an animation showing how regular the weekly rhythm is and the shape of the stools",
+    "outcomes": {
+      "H": {
+        "label": "Irregular, hard",
+        "description": "An irregular rhythm; stools are hard and lumpy (pellet-like)."
+      },
+      "S": {
+        "label": "Regular, soft",
+        "description": "Regular every day; stools are soft and normally formed."
+      },
+      "B": {
+        "label": "Slow, bulky",
+        "description": "Once every two days but large; stools are thick, with a bloated feeling."
+      }
+    }
+  }
+}

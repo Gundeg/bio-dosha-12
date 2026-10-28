@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import {
+  PULSE_COL_KEYS,
   PULSE_ROW_KEYS,
-  PULSE_ROW_LABELS,
   type PulseColKey,
   type PulseRowKey,
 } from "@/lib/clinicalConstants";
@@ -16,6 +17,8 @@ interface PulseTableProps {
 }
 
 export function PulseTable({ value, onChange, disabled }: PulseTableProps) {
+  const t = useTranslations("clinical.pulse");
+
   function update(row: PulseRowKey, col: PulseColKey, next: string) {
     onChange({
       ...value,
@@ -28,35 +31,35 @@ export function PulseTable({ value, onChange, disabled }: PulseTableProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-muted text-muted-foreground">
-            <th className="w-24 px-3 py-2 text-left font-medium" rowSpan={2}>
-              Хуруу
+            <th scope="col" className="w-24 px-3 py-2 text-left font-medium" rowSpan={2}>
+              {t("finger")}
             </th>
-            <th className="px-3 py-2 text-center font-medium" colSpan={2}>
-              Эмчлүүлэгчийн баруун гар
+            <th scope="colgroup" className="px-3 py-2 text-center font-medium" colSpan={2}>
+              {t("rightHand")}
             </th>
-            <th className="px-3 py-2 text-center font-medium" colSpan={2}>
-              Эмчлүүлэгчийн зүүн гар
+            <th scope="colgroup" className="px-3 py-2 text-center font-medium" colSpan={2}>
+              {t("leftHand")}
             </th>
           </tr>
           <tr className="bg-muted/50 text-muted-foreground">
-            <th className="px-3 py-2 text-center font-normal">Дээр</th>
-            <th className="px-3 py-2 text-center font-normal">Доор</th>
-            <th className="px-3 py-2 text-center font-normal">Дээр</th>
-            <th className="px-3 py-2 text-center font-normal">Доор</th>
+            <th scope="col" className="px-3 py-2 text-center font-normal">{t("upper")}</th>
+            <th scope="col" className="px-3 py-2 text-center font-normal">{t("lower")}</th>
+            <th scope="col" className="px-3 py-2 text-center font-normal">{t("upper")}</th>
+            <th scope="col" className="px-3 py-2 text-center font-normal">{t("lower")}</th>
           </tr>
         </thead>
         <tbody>
           {PULSE_ROW_KEYS.map((row) => (
             <tr key={row} className="border-t border-input">
-              <td className="px-3 py-2 font-medium">{PULSE_ROW_LABELS[row]}</td>
-              {(["rightTop", "rightBottom", "leftTop", "leftBottom"] as const).map((col) => (
+              <th scope="row" className="px-3 py-2 text-left font-medium">{t(`rows.${row}`)}</th>
+              {PULSE_COL_KEYS.map((col) => (
                 <td key={col} className="px-2 py-1">
                   <Input
                     value={value[row][col] ?? ""}
                     onChange={(e) => update(row, col, e.target.value)}
                     disabled={disabled}
                     className="h-8 text-sm"
-                    aria-label={`${PULSE_ROW_LABELS[row]} ${col}`}
+                    aria-label={t("cellLabel", { finger: t(`rows.${row}`), position: t(`cols.${col}`) })}
                   />
                 </td>
               ))}

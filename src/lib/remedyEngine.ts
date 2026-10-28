@@ -109,6 +109,38 @@ const AGE_REMEDIES: Record<string, { extra: string[]; avoidExtra: string[]; note
   },
 };
 
+/**
+ * Words from each status's avoid list. A constitution food or habit that
+ * contains one of them would contradict the avoid list shown next to it, so it
+ * is left out. Only the constitution (potencyEngine) items are filtered; the
+ * status remedies and the plan's age rules are always kept.
+ */
+const STATUS_CONFLICT_WORDS: Record<BEDIStatus, string[]> = {
+  khii_excess: ["хүйтэн", "хөлдөөсөн", "хуурай хоол", "мацаг"],
+  balanced: [],
+  shar_badgan_excess: ["тослог", "халуун ногоо", "халуун амт", "архи"],
+};
+
+function conflictsWithStatus(item: string, status: BEDIStatus): boolean {
+  const text = item.toLowerCase();
+  return STATUS_CONFLICT_WORDS[status].some((word) => text.includes(word));
+}
+
+/** "Шар тос (Тослог цөцгийн тос)" and "Шар тос (тослог…)" are the same food. */
+function foodKey(item: string): string {
+  return item.split("(")[0].trim().toLowerCase();
+}
+
+function uniqueFoods(items: string[]): string[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = foodKey(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export function getRemedies(status: BEDIStatus, age: number, doshaKey?: DoshaKey, deviation?: number): RemedyResult {
   const ageGroup = getAgeGroup(age);
   const base = BASE_REMEDIES[status];
@@ -118,9 +150,11 @@ export function getRemedies(status: BEDIStatus, age: number, doshaKey?: DoshaKey
   // potencyEngine-с доша-д тохирсон идээ болон амьдралын хэв маягийн зөвлөмж авах
   const therapy = doshaKey ? getTherapy(doshaKey) : null;
 
-  // potencyEngine-ийн идээг нэгтгэх (давхардлаас зайлсхийх)
-  const therapyFoods = therapy ? therapy.foods : [];
-  let remedies = [...base.remedies, ...therapyFoods, ...ageData.extra];
+  // potencyEngine-ийн идээг нэгтгэх: одоогийн төлөвийн хоригтой зөрчилдөхийг
+  // хасаж, давхардлыг арилгана.
+  const therapyFoods = therapy ? therapy.foods.filter((f) => !conflictsWithStatus(f, status)) : [];
+  const lifestyle = therapy ? therapy.lifestyle.filter((l) => !conflictsWithStatus(l, status)) : [];
+  let remedies = uniqueFoods([...base.remedies, ...therapyFoods, ...ageData.extra]);
 
   // Children: зөгийн бал огт хориглоно
   if (ageGroup === "child") {
@@ -138,7 +172,7 @@ export function getRemedies(status: BEDIStatus, age: number, doshaKey?: DoshaKey
     avoidFoods: [...base.avoidFoods, ...ageData.avoidExtra],
     riskFactors: risks,
     ageNote: ageData.note,
-    lifestyle: therapy ? therapy.lifestyle : [],
+    lifestyle,
     validation,
   };
 }

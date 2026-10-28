@@ -1,0 +1,84 @@
+{
+  "metaTitle": "Help",
+  "eyebrow": "Help",
+  "title": "How does it work?",
+  "intro": "Bio-Dosha-12 is a body-balance monitor that combines the constitution theory of traditional medicine with modern calculation methods.",
+  "steps": {
+    "s1": {
+      "title": "1. Find your constitution",
+      "body": "Answer 12 simple questions once to set your inborn body type (constitution) and your base number, Kt. The “How can I tell?” button on each question shows, with an animation, a practical way to check your answer."
+    },
+    "s2": {
+      "title": "2. Measure for 30 seconds a day",
+      "body": "Just enter your weight — the season is applied automatically and your BEDI balance index appears straight away."
+    },
+    "s3": {
+      "title": "3. Follow your remedies",
+      "body": "Food and lifestyle remedies that match your deviation are suggested automatically. Age-specific needs (children, older adults) are taken into account as well."
+    }
+  },
+  "glossaryTitle": "Glossary",
+  "faqTitle": "Frequently asked questions",
+  "faq": {
+    "q1": {
+      "q": "How do I answer the questions correctly?",
+      "a": "Press the “How can I tell?” button under each question to see an animation of a practical way to check that trait. For example, bone size is found with the wrist test: grasp one wrist with the other hand — if the thumb and index finger overlap, your bones are small; if the tips just touch, medium; if they don't touch, large. The animation cycles through the three outcomes, and tapping an answer freezes it on that state."
+    },
+    "q2": {
+      "q": "How often should I take the assessment?",
+      "a": "Just once. Your constitution is inborn, so it does not change. Instead, enter your weight every day or every week to track your balance. If you think you answered wrongly, you can retake the assessment at any time."
+    },
+    "q3": {
+      "q": "What does “Balanced” mean?",
+      "a": "It means your weight is within the normal range for your constitution and height. The closer your deviation is to 0, the better."
+    },
+    "q4": {
+      "q": "Why are my results different in winter and summer?",
+      "a": "Each season affects the body differently: winter adds heaviness towards Badgan (Earth), and summer adds lightness towards Khii (Wind). This is a natural fluctuation, so the calculation accounts for it automatically."
+    },
+    "q5": {
+      "q": "How do I track my family members?",
+      "a": "Add a member in the “Family” section and take the assessment for them. Then enter each member's weight separately to track them."
+    },
+    "q6": {
+      "q": "What is different for children?",
+      "a": "Honey is strictly forbidden for children under 13 — the system filters it out automatically and gives only age-appropriate recommendations."
+    },
+    "q7": {
+      "q": "How do I get practitioner (Tb Otoch) access?",
+      "a": "When you register, choose the “Practitioner” (Tb Otoch) account type and a request is sent to the admin. After the admin approves it, sign in again and the practitioner menu (Patients, Reports) opens."
+    }
+  },
+  "methodology": {
+    "title": "Research basis",
+    "body": "The BEDI method was validated by a study of <strong>400 medical records</strong> carried out in 2023–2025 at the Tumurbaatar Otoch traditional medicine clinic. The statistical deviation thresholds, calculated from the relationship of age, height and weight (based on the standard deviation), <strong>matched the practitioner's actual diagnosis exactly in 81% of cases</strong>, a statistically highly significant relationship (p < 0.01).",
+    "citation": "V. Tumurbaatar, “Determining individual body variation from the relationship of age, height and weight”, Tumurbaatar Otoch clinic."
+  },
+  "disclaimer": "This system does not replace a doctor's examination or diagnosis. Consult a qualified practitioner before following any recommendation. If a serious health problem appears, seek medical care.",
+  "contact": "Send questions and feedback from the <link>dashboard</link>, or ask your registered practitioner.",
+  "dialog": {
+    "trigger": "How can I tell?",
+    "hint": "Tap an answer to see that state",
+    "auto": "Auto"
+  },
+  "term": {
+    "more": "Learn more"
+  },
+  "doshaCard": {
+    "kt": "Kt coefficient",
+    "qualities": "Qualities",
+    "risks": "Risk factors",
+    "altLabel": {
+      "Khii": "Хий",
+      "Khii_Shar": "Хий-Шар",
+      "Khii_Badgan": "Хий-Бадган",
+      "Shar_Khii": "Шар-Хий",
+      "Shar": "Шар",
+      "Tentsveertei": "Тэнцвэртэй",
+      "Shar_Badgan": "Шар-Бадган",
+      "Badgan_Khii": "Бадган-Хий",
+      "Badgan_Shar": "Бадган-Шар",
+      "Badgan": "Бадган"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "eyebrow": "Admin",
+  "title": "Practitioner access requests",
+  "summary": "{pending, plural, one {# pending request} other {# pending requests}} · {practitioners, plural, one {# practitioner} other {# practitioners}} in total",
+  "practitionersHeading": "Users with practitioner access",
+  "requests": {
+    "error": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please try again.",
+    "approved": "Practitioner access granted. The doctor menu appears once the user refreshes the page.",
+    "rejected": "Request rejected.",
+    "empty": "No pending requests. New requests will appear here.",
+    "requestedAt": "Requested: {date}",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "access": {
+    "revoked": "Practitioner access revoked for {name}.",
+    "error": "Something went wrong. Please try again.",
+    "empty": "No users have practitioner access.",
+    "approvedAt": "Approved: {date}",
+    "revoke": "Revoke access",
+    "confirmTitle": "Revoke practitioner access?",
+    "confirmBody": "{name} will lose access to their patients' records within a minute. Patient records are not deleted. The request returns to the “Pending” list, so it can be approved again.",
+    "cancel": "Cancel",
+    "revoking": "Revoking..."
+  }
+}

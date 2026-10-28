@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -24,13 +25,8 @@ interface Profile {
   bediRecords: Array<{ deviation: number; status: string; date: string }>;
 }
 
-const RELATIONSHIP_LABELS: Record<string, string> = {
-  self: "Өөрийнхөө",
-  spouse: "Эхнэр/Нөхөр",
-  child: "Хүүхэд",
-  parent: "Эцэг эх",
-  other: "Бусад",
-};
+/** Relationships a new member can have (labels: shared.relationship.<value>). */
+const MEMBER_RELATIONSHIPS = ["spouse", "child", "parent", "other"] as const;
 
 const DOSHA_DOT: Record<string, string> = {
   Khii: "bg-primary",
@@ -45,22 +41,28 @@ const DOSHA_DOT: Record<string, string> = {
   Badgan: "bg-tertiary-container",
 };
 
-// Avatar color based on relationship
+// Avatar colour (and a readable initial colour) based on relationship
 const AVATAR_GRADIENT: Record<string, string> = {
-  self:   "from-primary to-primary-container",
-  spouse: "from-secondary to-secondary-container",
-  child:  "from-tertiary to-tertiary-container",
-  parent: "from-primary-container to-tertiary",
-  other:  "from-surface-container-high to-surface-container-highest",
+  self:   "from-primary to-primary-container text-on-primary",
+  spouse: "from-secondary to-secondary-container text-on-primary",
+  child:  "from-tertiary to-tertiary-container text-on-primary",
+  parent: "from-primary-container to-tertiary text-on-primary",
+  other:  "from-surface-container-high to-surface-container-highest text-on-surface",
 };
 
-const STATUS_DISPLAY: Record<string, { label: string; bg: string; text: string }> = {
-  balanced:           { label: "Тэнцвэртэй",          bg: "bg-primary/10",   text: "text-primary"   },
-  khii_excess:        { label: "Хий арвидсан",         bg: "bg-primary/10",   text: "text-primary"   },
-  shar_badgan_excess: { label: "Шар/Бадган арвидсан",  bg: "bg-secondary/10", text: "text-secondary" },
+/** Colours per status; the label is shared.status.<key>. */
+const STATUS_DISPLAY: Record<string, { bg: string; text: string }> = {
+  balanced:           { bg: "bg-emerald-500/10", text: "text-emerald-800" },
+  khii_excess:        { bg: "bg-primary/10",     text: "text-primary"     },
+  shar_badgan_excess: { bg: "bg-secondary/10",   text: "text-secondary"   },
 };
 
 export default function FamilyPage() {
+  const t = useTranslations("family");
+  const tShared = useTranslations("shared");
+  const tDosha = useTranslations("dosha");
+  const relationshipLabel = (rel: string) =>
+    tShared.has(`relationship.${rel}`) ? tShared(`relationship.${rel}`) : rel;
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -78,9 +80,8 @@ export default function FamilyPage() {
       const data = await apiFetch<Profile[]>("/api/profiles");
       setProfiles(Array.isArray(data) ? data : []);
     } catch (err) {
-      setLoadError(
-        err instanceof ApiError ? err.message : "Мэдээлэл ачаалахад алдаа гарлаа."
-      );
+      // An empty message lets ErrorState show its translated default text.
+      setLoadError(err instanceof ApiError ? err.message : "");
     } finally {
       setLoading(false);
     }
@@ -102,12 +103,12 @@ export default function FamilyPage() {
           relationship: form.relationship,
         }),
       });
-      toast.success("Гэр бүлийн гишүүн нэмэгдлээ!");
+      toast.success(t("toast.added"));
       setShowAdd(false);
       setForm({ name: "", birthDate: "", sex: "MALE", heightCm: "", relationship: "spouse" });
       await loadProfiles();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Нэмэх явцад алдаа гарлаа.");
+      toast.error(err instanceof ApiError ? err.message : t("toast.addError"));
     } finally {
       setSubmitting(false);
     }
@@ -118,11 +119,11 @@ export default function FamilyPage() {
     setDeleting(true);
     try {
       await apiFetch(`/api/profiles/${deleteTarget.id}`, { method: "DELETE" });
-      toast.success("Устгагдлаа.");
+      toast.success(t("toast.deleted"));
       setDeleteTarget(null);
       await loadProfiles();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Устгах явцад алдаа гарлаа.");
+      toast.error(err instanceof ApiError ? err.message : t("toast.deleteError"));
     } finally {
       setDeleting(false);
     }
@@ -138,24 +139,24 @@ export default function FamilyPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant/60 mb-1">
-            BEDI протокол · Гэр бүл
+          <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">
+            {t("eyebrow")}
           </p>
-          <h1 className="font-headline text-3xl font-black text-on-surface tracking-tight">
-            Гэр бүлийн Хяналт
+          <h1 className="font-headline text-2xl sm:text-3xl font-black text-on-surface tracking-tight">
+            {t("title")}
           </h1>
           <p className="text-on-surface-variant text-sm mt-0.5">
-            {profiles.length} гишүүний BEDI индекс хяналтад байна
+            {t("subtitle", { count: profiles.length })}
           </p>
         </div>
         <Button onClick={() => setShowAdd(true)} className="shrink-0">
-          <span className="material-symbols-outlined text-[18px] mr-1.5">person_add</span>
-          Гишүүн нэмэх
+          <span className="material-symbols-outlined text-[18px] mr-1.5" aria-hidden="true">person_add</span>
+          {t("addMember")}
         </Button>
       </div>
 
       {/* ── Profile grid ── */}
-      {loadError ? (
+      {loadError !== null ? (
         <ErrorState message={loadError} onRetry={loadProfiles} />
       ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -173,27 +174,27 @@ export default function FamilyPage() {
               {/* Card header */}
               <div className="bg-surface-container-low px-5 py-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-11 h-11 rounded-2xl bg-linear-to-br ${avatarGrad} flex items-center justify-center text-on-primary text-base font-bold shrink-0`}>
+                  <div className={`w-11 h-11 rounded-2xl bg-linear-to-br ${avatarGrad} flex items-center justify-center text-base font-bold shrink-0`} aria-hidden="true">
                     {initial}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-headline font-bold text-on-surface text-base truncate">{p.name}</p>
                       {p.relationship === "self" && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary rounded-full shrink-0">ӨӨРИЙНХ</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary rounded-full shrink-0">{t("selfBadge")}</span>
                       )}
                     </div>
                     <p className="text-xs text-on-surface-variant mt-0.5">
-                      {RELATIONSHIP_LABELS[p.relationship] ?? p.relationship}
-                      <span className="mx-1.5 text-outline-variant">·</span>
-                      {age} нас
-                      <span className="mx-1.5 text-outline-variant">·</span>
-                      {p.sex === "MALE" ? "Эр" : "Эм"} {p.heightCm} см
+                      {relationshipLabel(p.relationship)}
+                      <span className="mx-1.5 text-outline-variant" aria-hidden="true">·</span>
+                      {t("ageValue", { age })}
+                      <span className="mx-1.5 text-outline-variant" aria-hidden="true">·</span>
+                      {t(p.sex === "MALE" ? "sexShort.MALE" : "sexShort.FEMALE")} {t("heightValue", { height: p.heightCm })}
                     </p>
                   </div>
-                  {status && (
+                  {status && latest && (
                     <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${status.bg} ${status.text}`}>
-                      {status.label}
+                      {tShared(`status.${latest.status}`)}
                     </span>
                   )}
                 </div>
@@ -205,10 +206,9 @@ export default function FamilyPage() {
                 {/* Dosha */}
                 {dosha ? (
                   <div className="flex items-center gap-2.5 bg-surface-container-low rounded-xl px-3 py-2.5">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${p.doshaType ? (DOSHA_DOT[p.doshaType] ?? "bg-primary") : "bg-primary"}`} />
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${p.doshaType ? (DOSHA_DOT[p.doshaType] ?? "bg-primary") : "bg-primary"}`} aria-hidden="true" />
                     <div className="flex-1 min-w-0">
-                      <span className="text-xs font-semibold text-on-surface">{dosha.label}</span>
-                      <span className="text-on-surface-variant text-xs ml-2">({dosha.labelEn})</span>
+                      <span className="text-xs font-semibold text-on-surface">{tDosha(`${dosha.key}.label`)}</span>
                     </div>
                     <span className="text-[10px] font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
                       Kt {p.ktScore?.toFixed(2)}
@@ -216,18 +216,16 @@ export default function FamilyPage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2.5 bg-surface-container-high rounded-xl px-3 py-2.5">
-                    <span className="w-2 h-2 rounded-full bg-outline-variant shrink-0" />
-                    <span className="text-xs text-on-surface-variant">Үнэлгээ хийгдээгүй байна</span>
+                    <span className="w-2 h-2 rounded-full bg-outline-variant shrink-0" aria-hidden="true" />
+                    <span className="text-xs text-on-surface-variant">{t("notAssessed")}</span>
                   </div>
                 )}
 
                 {/* Latest BEDI deviation */}
                 {latest && (
                   <div className="flex items-center justify-between bg-surface-container-low rounded-xl px-3 py-2.5">
-                    <span className="text-xs text-on-surface-variant">Сүүлийн хазайлт</span>
-                    <span className={`font-headline text-base font-bold ${
-                      latest.status === "shar_badgan_excess" ? "text-secondary" : "text-primary"
-                    }`}>
+                    <span className="text-xs text-on-surface-variant">{t("latestDeviation")}</span>
+                    <span className={`font-headline text-base font-bold ${status?.text ?? "text-on-surface"}`}>
                       {latest.deviation >= 0 ? "+" : ""}{latest.deviation.toFixed(2)}
                     </span>
                   </div>
@@ -235,22 +233,19 @@ export default function FamilyPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-1">
+                  {/* The calculator starts this member's own assessment when they have no Kt yet. */}
                   <ButtonLink size="sm" variant="outline" className="flex-1" href={`/calculator?profile=${p.id}`}>
-                    Тооцоолох
+                    {p.ktScore ? t("calculate") : t("assess")}
                   </ButtonLink>
-                  {!p.doshaType && (
-                    <ButtonLink size="sm" variant="outline" className="flex-1" href="/calculator?tab=assessment">
-                      Үнэлгээ
-                    </ButtonLink>
-                  )}
                   {p.relationship !== "self" && (
                     <Button
                       size="sm"
                       variant="ghost"
                       className="text-error hover:text-error hover:bg-error/5"
+                      aria-label={t("deleteAria", { name: p.name })}
                       onClick={() => setDeleteTarget(p)}
                     >
-                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">delete</span>
                     </Button>
                   )}
                 </div>
@@ -265,8 +260,8 @@ export default function FamilyPage() {
           onClick={() => setShowAdd(true)}
           className="border-2 border-dashed border-outline-variant/40 rounded-3xl flex flex-col items-center justify-center py-14 gap-3 text-on-surface-variant hover:border-primary/40 hover:text-primary hover:bg-primary/3 transition-all duration-200 group"
         >
-          <span className="material-symbols-outlined text-[32px] transition-transform group-hover:scale-110">add_circle</span>
-          <p className="text-sm font-semibold">Гишүүн нэмэх</p>
+          <span className="material-symbols-outlined text-[32px] transition-transform motion-safe:group-hover:scale-110" aria-hidden="true">add_circle</span>
+          <p className="text-sm font-semibold">{t("addMember")}</p>
         </button>
       </div>
       )}
@@ -275,21 +270,23 @@ export default function FamilyPage() {
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-headline">Гэр бүлийн гишүүн нэмэх</DialogTitle>
+            <DialogTitle className="font-headline">{t("addDialog.title")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Нэр</Label>
+              <Label htmlFor="family-member-name" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.name")}</Label>
               <Input
+                id="family-member-name"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Гишүүний нэр"
+                placeholder={t("addDialog.namePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Төрсөн огноо</Label>
+              <Label htmlFor="family-member-birth-date" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.birthDate")}</Label>
               <Input
+                id="family-member-birth-date"
                 type="date"
                 required
                 value={form.birthDate}
@@ -297,12 +294,13 @@ export default function FamilyPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Хүйс</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {[{ value: "MALE", label: "Эрэгтэй" }, { value: "FEMALE", label: "Эмэгтэй" }].map(({ value, label }) => (
+              <Label id="family-member-sex-label" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.sex")}</Label>
+              <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="family-member-sex-label">
+                {(["MALE", "FEMALE"] as const).map((value) => (
                   <button
                     key={value}
                     type="button"
+                    aria-pressed={form.sex === value}
                     onClick={() => setForm({ ...form, sex: value })}
                     className={`rounded-xl p-2.5 text-sm font-medium transition-all ${
                       form.sex === value
@@ -310,14 +308,15 @@ export default function FamilyPage() {
                         : "bg-surface-container-high text-on-surface-variant border-2 border-transparent"
                     }`}
                   >
-                    {label}
+                    {tShared(`sex.${value}`)}
                   </button>
                 ))}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Өндөр (см)</Label>
+              <Label htmlFor="family-member-height" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.height")}</Label>
               <Input
+                id="family-member-height"
                 type="number"
                 required
                 value={form.heightCm}
@@ -326,25 +325,24 @@ export default function FamilyPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">Хамаарал</Label>
+              <Label htmlFor="family-member-relationship" className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{t("addDialog.relationship")}</Label>
               <select
-                aria-label="Хамаарал сонгох"
+                id="family-member-relationship"
                 className="w-full bg-surface-container-low rounded-xl px-3 py-2.5 text-sm text-on-surface focus:outline-none border border-outline-variant/20"
                 value={form.relationship}
                 onChange={(e) => setForm({ ...form, relationship: e.target.value })}
               >
-                <option value="spouse">Эхнэр/Нөхөр</option>
-                <option value="child">Хүүхэд</option>
-                <option value="parent">Эцэг эх</option>
-                <option value="other">Бусад</option>
+                {MEMBER_RELATIONSHIPS.map((rel) => (
+                  <option key={rel} value={rel}>{tShared(`relationship.${rel}`)}</option>
+                ))}
               </select>
             </div>
             <div className="flex gap-2 pt-2">
               <Button type="button" variant="outline" className="flex-1" onClick={() => setShowAdd(false)}>
-                Болих
+                {t("addDialog.cancel")}
               </Button>
               <Button type="submit" className="flex-1" disabled={submitting}>
-                {submitting ? "Нэмж байна..." : "Нэмэх"}
+                {submitting ? t("addDialog.submitting") : t("addDialog.submit")}
               </Button>
             </div>
           </form>
@@ -355,18 +353,20 @@ export default function FamilyPage() {
       <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-headline">Гишүүн устгах</DialogTitle>
+            <DialogTitle className="font-headline">{t("deleteDialog.title")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-on-surface-variant pt-2">
-            <span className="font-semibold text-on-surface">{deleteTarget?.name}</span>
-            {" "}гишүүнийг устгах уу? Гишүүний бүх хэмжилтийн түүх хамт устана.
+            {t.rich("deleteDialog.body", {
+              name: deleteTarget?.name ?? "",
+              strong: (chunks) => <span className="font-semibold text-on-surface">{chunks}</span>,
+            })}
           </p>
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)}>
-              Болих
+              {t("deleteDialog.cancel")}
             </Button>
             <Button type="button" variant="destructive" className="flex-1" onClick={handleDelete} disabled={deleting}>
-              {deleting ? "Устгаж байна..." : "Устгах"}
+              {deleting ? t("deleteDialog.deleting") : t("deleteDialog.confirm")}
             </Button>
           </div>
         </DialogContent>

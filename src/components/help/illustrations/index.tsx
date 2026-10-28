@@ -1,4 +1,4 @@
-import { QUESTION_HELP } from "@/lib/questionHelp";
+import { useTranslations } from "next-intl";
 import type { HelpIllustrationComponent, HelpIllustrationProps } from "./shared";
 import { Q01BoneWrist } from "./Q01BoneWrist";
 import { Q02WeightScale } from "./Q02WeightScale";
@@ -32,9 +32,11 @@ export function HelpIllustration({
   questionId,
   ...props
 }: HelpIllustrationProps & { questionId: number }) {
+  const t = useTranslations("questionHelp");
   const Illustration = HELP_ILLUSTRATIONS[questionId];
   if (!Illustration) return null;
+  const labelKey = `q${questionId}.ariaLabel`;
   return (
-    <Illustration ariaLabel={QUESTION_HELP[questionId]?.ariaLabel} {...props} />
+    <Illustration ariaLabel={t.has(labelKey) ? t(labelKey) : undefined} {...props} />
   );
 }

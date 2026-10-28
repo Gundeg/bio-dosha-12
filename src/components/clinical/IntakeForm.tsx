@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +13,6 @@ import {
   CONDITION_OPTIONS,
   MENTAL_STATE_OPTIONS,
   POSITION_OPTIONS,
-  SEASON_LABELS,
-  SEX_LABELS,
 } from "@/lib/clinicalConstants";
 import { emptyPulseTable, type PulseTable as PulseTableValue } from "@/lib/apiSchemas";
 import { PulseTable } from "./PulseTable";
@@ -125,6 +124,10 @@ export function IntakeForm({
   defaultWeightKg,
   doctorName,
 }: IntakeFormProps) {
+  const t = useTranslations("clinical.intake");
+  const ts = useTranslations("shared");
+  const uid = useId();
+  const fid = (name: string) => `${uid}-${name}`;
   const router = useRouter();
   const isEdit = !!initial?.id;
 
@@ -201,7 +204,7 @@ export function IntakeForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.weightKg || !form.heightCm) {
-      toast.error("Биеийн жин болон өндөр шаардлагатай.");
+      toast.error(t("weightHeightRequired"));
       return;
     }
 
@@ -219,42 +222,59 @@ export function IntakeForm({
       if (!res.ok) throw new Error(await res.text());
 
       const saved = await res.json();
-      toast.success(isEdit ? "Шинэчлэгдлээ" : "Шинэ үзлэг хадгалагдлаа");
+      toast.success(isEdit ? t("updated") : t("saved"));
       router.refresh();
 
       if (!isEdit && saved?.id) {
         router.push(`/patients/${patientId}?tab=intake&intake=${saved.id}`);
       }
     } catch {
-      toast.error("Хадгалах явцад алдаа гарлаа.");
+      toast.error(t("saveError"));
     } finally {
       setSubmitting(false);
     }
   }
 
+  const conditionOptions = CONDITION_OPTIONS.map((o) => ({
+    value: o.value,
+    label: t(`conditionOptions.${o.value}`),
+  }));
+  const mentalStateOptions = MENTAL_STATE_OPTIONS.map((o) => ({
+    value: o.value,
+    label: t(`mentalStateOptions.${o.value}`),
+  }));
+  const positionOptions = POSITION_OPTIONS.map((o) => ({
+    value: o.value,
+    label: t(`positionOptions.${o.value}`),
+  }));
+  const textareaClass = "w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pb-24">
       <Card>
         <CardHeader>
-          <CardTitle>Үндсэн мэдээлэл</CardTitle>
+          <CardTitle>{t("basicInfo")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <ReadOnlyField label="Овог" value={profile.lastName ?? "—"} />
-          <ReadOnlyField label="Нэр" value={profile.name} />
-          <ReadOnlyField label="Нас" value={`${age} нас`} />
-          <ReadOnlyField label="Хүйс" value={SEX_LABELS[profile.sex]} />
+          <ReadOnlyField id={fid("lastName")} label={t("lastName")} value={profile.lastName ?? "—"} />
+          <ReadOnlyField id={fid("name")} label={t("name")} value={profile.name} />
+          <ReadOnlyField id={fid("age")} label={t("age")} value={t("ageValue", { age })} />
+          <ReadOnlyField id={fid("sex")} label={t("sex")} value={ts(`sex.${profile.sex}`)} />
           <ReadOnlyField
-            label="Төрсөн жил"
+            id={fid("birthDate")}
+            label={t("birthYear")}
             value={profile.birthDate.slice(0, 10)}
           />
           <ReadOnlyField
-            label="Регистрийн дугаар"
+            id={fid("registerNumber")}
+            label={t("registerNumber")}
             value={profile.registerNumber ?? "—"}
           />
-          <ReadOnlyField label="Утас" value={profile.phone ?? "—"} />
-          <ReadOnlyField label="Хаяг" value={profile.address ?? "—"} />
+          <ReadOnlyField id={fid("phone")} label={t("phone")} value={profile.phone ?? "—"} />
+          <ReadOnlyField id={fid("address")} label={t("address")} value={profile.address ?? "—"} />
           <ReadOnlyField
-            label="Мэргэжил, ажлын нөхцөл"
+            id={fid("occupation")}
+            label={t("occupation")}
             value={profile.occupation ?? "—"}
             className="md:col-span-2"
           />
@@ -263,32 +283,35 @@ export function IntakeForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Үзлэг ба хэмжилт</CardTitle>
+          <CardTitle>{t("examination")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Field label="Үзлэгт ирсэн өдөр">
+          <Field label={t("admissionDate")} htmlFor={fid("admissionDate")}>
             <Input
+              id={fid("admissionDate")}
               type="date"
               value={form.admissionDate}
               onChange={(e) => set("admissionDate", e.target.value)}
               required
             />
           </Field>
-          <Field label="Улирал">
+          <Field label={t("season")} htmlFor={fid("season")}>
             <select
+              id={fid("season")}
               value={form.season}
               onChange={(e) => set("season", e.target.value as Season)}
               className="h-8 w-full rounded-lg border border-input bg-transparent px-2 text-sm"
             >
               {(["WINTER", "SPRING", "SUMMER", "AUTUMN"] as Season[]).map((s) => (
                 <option key={s} value={s}>
-                  {SEASON_LABELS[s]}
+                  {ts(`season.${s}`)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Биеийн жин (кг)">
+          <Field label={t("weight")} htmlFor={fid("weightKg")}>
             <Input
+              id={fid("weightKg")}
               type="number"
               step="0.1"
               value={form.weightKg}
@@ -296,8 +319,9 @@ export function IntakeForm({
               required
             />
           </Field>
-          <Field label="Өндөр (см)">
+          <Field label={t("height")} htmlFor={fid("heightCm")}>
             <Input
+              id={fid("heightCm")}
               type="number"
               step="0.1"
               value={form.heightCm}
@@ -305,11 +329,12 @@ export function IntakeForm({
               required
             />
           </Field>
-          <Field label="Хэл" className="md:col-span-2">
-            <Input value={form.tongue} onChange={(e) => set("tongue", e.target.value)} />
+          <Field label={t("tongue")} htmlFor={fid("tongue")} className="md:col-span-2">
+            <Input id={fid("tongue")} value={form.tongue} onChange={(e) => set("tongue", e.target.value)} />
           </Field>
-          <Field label="Судал (тайлбар)" className="md:col-span-2">
+          <Field label={t("pulseSummary")} htmlFor={fid("pulseSummary")} className="md:col-span-2">
             <Input
+              id={fid("pulseSummary")}
               value={form.pulseSummary}
               onChange={(e) => set("pulseSummary", e.target.value)}
             />
@@ -319,7 +344,7 @@ export function IntakeForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Судасны үзлэг</CardTitle>
+          <CardTitle>{t("pulseExam")}</CardTitle>
         </CardHeader>
         <CardContent>
           <PulseTable
@@ -331,60 +356,62 @@ export function IntakeForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Эмнэл зүйн үнэлгээ</CardTitle>
+          <CardTitle>{t("clinicalAssessment")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Field label="Ирэх үеийн зовиур">
+          <Field label={t("complaintAtArrival")} htmlFor={fid("complaintAtArrival")}>
             <textarea
+              id={fid("complaintAtArrival")}
               rows={2}
               value={form.complaintAtArrival}
               onChange={(e) => set("complaintAtArrival", e.target.value)}
-              className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm"
+              className={textareaClass}
             />
           </Field>
 
           <RadioGroup
-            label="Эмчлүүлэгчийн биеийн байдал"
+            label={t("condition")}
             name="condition"
             value={form.condition}
-            options={CONDITION_OPTIONS}
+            options={conditionOptions}
             onChange={(v) => set("condition", v as Condition)}
           />
           <RadioGroup
-            label="Ухаан санаа"
+            label={t("mentalState")}
             name="mentalState"
             value={form.mentalState}
-            options={MENTAL_STATE_OPTIONS}
+            options={mentalStateOptions}
             onChange={(v) => set("mentalState", v as MentalState)}
           />
           <RadioGroup
-            label="Байрлал"
+            label={t("position")}
             name="position"
             value={form.position}
-            options={POSITION_OPTIONS}
+            options={positionOptions}
             onChange={(v) => set("position", v as Position)}
           />
 
-          <Field label="Зурхай">
-            <Input value={form.zurkhai} onChange={(e) => set("zurkhai", e.target.value)} />
+          <Field label={t("zurkhai")} htmlFor={fid("zurkhai")}>
+            <Input id={fid("zurkhai")} value={form.zurkhai} onChange={(e) => set("zurkhai", e.target.value)} />
           </Field>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Онош ба эмчилгээний төлөвлөгөө</CardTitle>
+          <CardTitle>{t("diagnosisPlan")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Field label="Онош">
-            <Input value={form.diagnosis} onChange={(e) => set("diagnosis", e.target.value)} />
+          <Field label={t("diagnosis")} htmlFor={fid("diagnosis")}>
+            <Input id={fid("diagnosis")} value={form.diagnosis} onChange={(e) => set("diagnosis", e.target.value)} />
           </Field>
-          <Field label="Эмчилгээ">
+          <Field label={t("treatmentPlan")} htmlFor={fid("treatmentPlan")}>
             <textarea
+              id={fid("treatmentPlan")}
               rows={3}
               value={form.treatmentPlan}
               onChange={(e) => set("treatmentPlan", e.target.value)}
-              className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm"
+              className={textareaClass}
             />
           </Field>
         </CardContent>
@@ -392,41 +419,47 @@ export function IntakeForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Нэмэлт мэдээлэл</CardTitle>
+          <CardTitle>{t("additionalInfo")}</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Field label="1. Ковид туссан эсэх">
+          <Field label={t("covidHistory")} htmlFor={fid("covidHistory")}>
             <Input
+              id={fid("covidHistory")}
               value={form.covidHistory}
               onChange={(e) => set("covidHistory", e.target.value)}
             />
           </Field>
-          <Field label="2. Мэс засал хийлгэсэн эсэх">
+          <Field label={t("surgeryHistory")} htmlFor={fid("surgeryHistory")}>
             <Input
+              id={fid("surgeryHistory")}
               value={form.surgeryHistory}
               onChange={(e) => set("surgeryHistory", e.target.value)}
             />
           </Field>
-          <Field label="3. Архаг өвчин">
+          <Field label={t("chronicDisease")} htmlFor={fid("chronicDisease")}>
             <Input
+              id={fid("chronicDisease")}
               value={form.chronicDisease}
               onChange={(e) => set("chronicDisease", e.target.value)}
             />
           </Field>
-          <Field label="4. Гэмтэл бэртэл">
+          <Field label={t("traumaHistory")} htmlFor={fid("traumaHistory")}>
             <Input
+              id={fid("traumaHistory")}
               value={form.traumaHistory}
               onChange={(e) => set("traumaHistory", e.target.value)}
             />
           </Field>
-          <Field label="5. Даралт">
+          <Field label={t("bloodPressure")} htmlFor={fid("bloodPressure")}>
             <Input
+              id={fid("bloodPressure")}
               value={form.bloodPressure}
               onChange={(e) => set("bloodPressure", e.target.value)}
             />
           </Field>
-          <Field label="Судасны цохилтын тоо">
+          <Field label={t("heartRate")} htmlFor={fid("heartRate")}>
             <Input
+              id={fid("heartRate")}
               value={form.heartRate}
               onChange={(e) => set("heartRate", e.target.value)}
             />
@@ -437,30 +470,33 @@ export function IntakeForm({
       {isEdit && (
         <Card>
           <CardHeader>
-            <CardTitle>Эмчилгээний төгсгөл</CardTitle>
+            <CardTitle>{t("discharge")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Эмчилгээ дууссан өдөр">
+            <Field label={t("dischargeDate")} htmlFor={fid("dischargeDate")}>
               <Input
+                id={fid("dischargeDate")}
                 type="date"
                 value={form.dischargeDate}
                 onChange={(e) => set("dischargeDate", e.target.value)}
               />
             </Field>
-            <Field label="Гарах үеийн зовиур">
+            <Field label={t("complaintAtDischarge")} htmlFor={fid("complaintAtDischarge")}>
               <textarea
+                id={fid("complaintAtDischarge")}
                 rows={2}
                 value={form.complaintAtDischarge}
                 onChange={(e) => set("complaintAtDischarge", e.target.value)}
-                className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm"
+                className={textareaClass}
               />
             </Field>
-            <Field label="Зөвлөмж">
+            <Field label={t("recommendations")} htmlFor={fid("recommendations")}>
               <textarea
+                id={fid("recommendations")}
                 rows={3}
                 value={form.recommendations}
                 onChange={(e) => set("recommendations", e.target.value)}
-                className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm"
+                className={textareaClass}
               />
             </Field>
           </CardContent>
@@ -469,13 +505,13 @@ export function IntakeForm({
 
       <Card>
         <CardContent className="py-3 flex items-center justify-between text-sm text-muted-foreground">
-          <span>Эмчлэгч эмч: <span className="font-medium text-foreground">{doctorName}</span></span>
+          <span>{t("doctor")} <span className="font-medium text-foreground">{doctorName}</span></span>
         </CardContent>
       </Card>
 
       <div className="fixed bottom-0 left-0 right-0 md:left-64 z-30 bg-surface-container-low border-t border-outline-variant/20 px-6 py-3 flex items-center justify-end gap-2 backdrop-blur">
         <Button type="submit" disabled={submitting}>
-          {submitting ? "Хадгалж байна..." : isEdit ? "Шинэчлэх" : "Шинэ үзлэг хадгалах"}
+          {submitting ? t("saving") : isEdit ? t("update") : t("saveNew")}
         </Button>
       </div>
     </form>
@@ -484,36 +520,38 @@ export function IntakeForm({
 
 function Field({
   label,
+  htmlFor,
   children,
   className,
 }: {
   label: string;
+  htmlFor: string;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <div className={`space-y-1 ${className ?? ""}`}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Label htmlFor={htmlFor} className="text-xs text-muted-foreground">{label}</Label>
       {children}
     </div>
   );
 }
 
 function ReadOnlyField({
+  id,
   label,
   value,
   className,
 }: {
+  id: string;
   label: string;
   value: string;
   className?: string;
 }) {
   return (
     <div className={`space-y-1 ${className ?? ""}`}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      <div className="h-8 rounded-lg border border-input bg-muted/40 px-2.5 py-1 text-sm flex items-center">
-        {value}
-      </div>
+      <Label htmlFor={id} className="text-xs text-muted-foreground">{label}</Label>
+      <Input id={id} readOnly value={value} className="bg-muted/40 text-sm" />
     </div>
   );
 }
@@ -531,10 +569,11 @@ function RadioGroup({
   options: ReadonlyArray<{ value: string; label: string }>;
   onChange: (v: string) => void;
 }) {
+  const labelId = useId();
   return (
     <div className="space-y-2">
-      <Label className="text-sm">{label}</Label>
-      <div className="flex flex-wrap gap-2">
+      <span id={labelId} className="block text-sm leading-none font-medium">{label}</span>
+      <div role="group" aria-labelledby={labelId} className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const active = value === opt.value;
           return (

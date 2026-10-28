@@ -85,6 +85,8 @@ export async function GET(
     headers: {
       "content-type": "application/pdf",
       "content-disposition": `inline; filename="intake-${intakeId}.pdf"`,
+      // Contains patient identifiers and diagnosis: never store in shared caches.
+      "cache-control": "private, no-store",
     },
   });
 }

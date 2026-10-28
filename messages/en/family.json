@@ -1,0 +1,43 @@
+{
+  "eyebrow": "BEDI protocol · Family",
+  "title": "Family monitoring",
+  "subtitle": "Tracking the BEDI index of {count, plural, one {# member} other {# members}}",
+  "addMember": "Add member",
+  "selfBadge": "YOU",
+  "ageValue": "age {age}",
+  "heightValue": "{height} cm",
+  "sexShort": {
+    "MALE": "Male",
+    "FEMALE": "Female"
+  },
+  "notAssessed": "Not assessed yet",
+  "latestDeviation": "Latest deviation",
+  "calculate": "Calculate",
+  "assess": "Take assessment",
+  "deleteAria": "Delete the profile of {name}",
+  "addDialog": {
+    "title": "Add a family member",
+    "name": "Name",
+    "namePlaceholder": "Member name",
+    "birthDate": "Date of birth",
+    "sex": "Sex",
+    "height": "Height (cm)",
+    "relationship": "Relationship",
+    "cancel": "Cancel",
+    "submit": "Add",
+    "submitting": "Adding..."
+  },
+  "deleteDialog": {
+    "title": "Delete member",
+    "body": "Delete <strong>{name}</strong>? All of this member’s measurement history is deleted too.",
+    "cancel": "Cancel",
+    "confirm": "Delete",
+    "deleting": "Deleting..."
+  },
+  "toast": {
+    "added": "Family member added!",
+    "addError": "Could not add the member.",
+    "deleted": "Deleted.",
+    "deleteError": "Could not delete the member."
+  }
+}

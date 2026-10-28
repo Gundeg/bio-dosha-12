@@ -16,11 +16,11 @@ export function InfoItem({ iconBg, iconColor, icon, title, body }: InfoItemData)
   return (
     <div className="p-4 bg-surface-container-lowest rounded-xl hover:shadow-ambient transition-all duration-200">
       <div className="flex items-start gap-3">
-        <div className={`${iconBg} p-2 rounded-lg ${iconColor} shrink-0 text-base leading-none`}>
+        <div aria-hidden="true" className={`${iconBg} p-2 rounded-lg ${iconColor} shrink-0 text-base leading-none`}>
           {icon}
         </div>
         <div>
-          <h4 className="font-bold text-xs text-on-surface mb-0.5">{title}</h4>
+          <h3 className="font-bold text-xs text-on-surface mb-0.5">{title}</h3>
           <p className="text-[11px] text-on-surface-variant leading-snug">{body}</p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export function InfoPanel({ badge, title, description, items, footer, children }
         <div className="bg-surface-container-low rounded-2xl p-6 border border-primary/5">
           {badge && (
             <div className="flex items-center gap-1.5 text-secondary mb-3">
-              <span className="text-xs">✦</span>
+              <span aria-hidden="true" className="text-xs">✦</span>
               <span className="font-bold text-[10px] uppercase tracking-wider">{badge}</span>
             </div>
           )}
@@ -59,7 +59,7 @@ export function InfoPanel({ badge, title, description, items, footer, children }
             {children}
           </div>
           {footer && (
-            <p className="text-[10px] text-on-surface-variant/60 mt-4 italic leading-relaxed border-t border-surface-container-high pt-3">
+            <p className="text-[10px] text-on-surface-variant mt-4 italic leading-relaxed border-t border-surface-container-high pt-3">
               {footer}
             </p>
           )}

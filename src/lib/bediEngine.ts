@@ -1,12 +1,5 @@
 import { SEASON_COEFFICIENTS, SeasonKey } from "./seasonFactors";
-import {
-  BEDI_THRESHOLDS,
-  KT_WEIGHT_EXPONENT,
-  MEAN_SEASON_COEFFICIENT,
-  REFERENCE_BMI,
-  SEASON_TILT_EXPONENT,
-  roundBedi,
-} from "./bediConfig";
+import { BEDI_THRESHOLDS, roundBedi } from "./bediConfig";
 
 export type BEDIStatus = "khii_excess" | "balanced" | "shar_badgan_excess";
 
@@ -26,8 +19,6 @@ export interface BEDIResult {
   status: BEDIStatus;
   statusLabel: { mn: string; en: string };
   deviationPercent: number;
-  /** Тухайн хүний хувьд байх ёстой хэвийн жин (кг) */
-  expectedWeightKg: number;
 }
 
 const STATUS_LABELS: Record<BEDIStatus, { mn: string; en: string }> = {
@@ -37,14 +28,12 @@ const STATUS_LABELS: Record<BEDIStatus, { mn: string; en: string }> = {
 };
 
 /**
- * Байх ёстой хэвийн жин: лавлагаа BMI · өндөр², махбодийн Kt-ээр зөөлөн
- * жинлэгдэнэ (Бадган төрөлх хүнд, Хий төрөлх хөнгөн байдгийг тусгана).
+ * BEDI — анхны веб хувилбарын (commit 25e015a) томьёо, эзэмшигч 2026-10-26-нд баталсан:
+ *   BEDI = (W · Kg · Ks · Kc) / (H · Age · Kt)
+ *   Δ    = BEDI − 1
+ *   Δ < −0.3 → Хий арвидсан · Δ > +0.3 → Шар/Бадган арвидсан · бусад → Тэнцвэртэй
+ * Эзэмшигчийн зөвшөөрөлгүйгээр өөрчлөхгүй (lessons.md).
  */
-export function expectedWeight(heightCm: number, kt: number): number {
-  const heightM = Math.max(heightCm, 50) / 100;
-  return REFERENCE_BMI * heightM * heightM * Math.pow(kt, KT_WEIGHT_EXPONENT);
-}
-
 export function calculateBEDI(input: BEDIInput): BEDIResult {
   const {
     weightKg,
@@ -56,26 +45,16 @@ export function calculateBEDI(input: BEDIInput): BEDIResult {
     culturalFactor = 1.0,
   } = input;
 
-  const heightM = Math.max(heightCm, 50) / 100;
+  const heightM = heightCm / 100;
   const genderCoeff = sex === "MALE" ? 1.1 : 1.0;
   const seasonCoeff = SEASON_COEFFICIENTS[season];
-  const safeAge = Math.max(age, 1);
+  const safeAge = Math.max(age, 1); // age 0 would divide by zero
 
-  // BEDI индекс — үндсэн (патентын) томьёо, өөрчлөгдөөгүй.
   const bedi =
     (weightKg * genderCoeff * seasonCoeff * culturalFactor) /
     (heightM * safeAge * kt);
 
-  // Хазайлт — судалгааны загварын дагуу бодит жинг байх ёстой хэвийн
-  // жинтэй харьцуулж, улирлын илчийг жилийн дундажтай нь харьцуулсан
-  // налуугаар тусгана. (Өмнөх `bedi - 1` суурь нь насанд хүрэгчдэд
-  // "Тэнцвэртэй" бүсэд хүрэх боломжгүй утга өгч байсан.)
-  const weightRatio = weightKg / expectedWeight(heightCm, kt);
-  const seasonTilt = Math.pow(
-    seasonCoeff / MEAN_SEASON_COEFFICIENT,
-    SEASON_TILT_EXPONENT
-  );
-  const deviation = weightRatio * seasonTilt - 1;
+  const deviation = bedi / 1.0 - 1;
 
   const status: BEDIStatus =
     deviation < BEDI_THRESHOLDS.khiiBelow
@@ -90,7 +69,6 @@ export function calculateBEDI(input: BEDIInput): BEDIResult {
     status,
     statusLabel: STATUS_LABELS[status],
     deviationPercent: Math.round(deviation * 100),
-    expectedWeightKg: roundBedi(expectedWeight(heightCm, kt)),
   };
 }
 

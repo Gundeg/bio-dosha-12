@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 /**
  * Эмчийн эрхийн хүсэлт хүлээгдэж байгаа хэрэглэгчид самбар дээр нь
@@ -11,6 +12,7 @@ import { useSession } from "next-auth/react";
 export function PendingPractitionerBanner() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const t = useTranslations("dashboard.practitionerBanner");
   const [state, setState] = useState<"pending" | "approved" | null>(null);
 
   const isIndividual = session?.user?.role === "INDIVIDUAL";
@@ -46,17 +48,8 @@ export function PendingPractitionerBanner() {
           : "border-amber-300/60 bg-amber-50 text-amber-900"
       }`}
     >
-      {state === "approved" ? (
-        <>
-          ✅ Таны эмчийн эрх баталгаажлаа. Эмчийн цэсийг идэвхжүүлэхийн тулд
-          гарч, дахин нэвтэрнэ үү.
-        </>
-      ) : (
-        <>
-          ⏳ Эмчийн эрхийн хүсэлт админд хүлээгдэж байна. Батлагдмагц энд
-          мэдэгдэнэ — энэ хооронд бүх энгийн боломж нээлттэй.
-        </>
-      )}
+      <span aria-hidden="true">{state === "approved" ? "✅" : "⏳"}</span>{" "}
+      {t(state === "approved" ? "approved" : "pending")}
     </div>
   );
 }

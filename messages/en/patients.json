@@ -1,0 +1,29 @@
+{
+  "title": "Patients",
+  "total": "{count, plural, one {# patient} other {# patients}} in total",
+  "add": "Add patient",
+  "searchLabel": "Search patients by name",
+  "searchPlaceholder": "Search by name...",
+  "loading": "Loading...",
+  "loadError": "Failed to load data.",
+  "ageSex": "Age {age} • {sex}",
+  "constitution": "Constitution:",
+  "notAssessed": "Not assessed yet",
+  "latestDelta": "Latest Δ:",
+  "openCard": "Intake card",
+  "calculate": "Calculate",
+  "empty": "No patients found.",
+  "addDialog": {
+    "title": "Add a new patient",
+    "name": "Name",
+    "namePlaceholder": "Patient's name",
+    "birthDate": "Date of birth",
+    "sex": "Sex",
+    "height": "Height (cm)",
+    "cancel": "Cancel",
+    "submit": "Add",
+    "submitting": "Adding...",
+    "success": "Patient added!",
+    "error": "Could not add the patient."
+  }
+}

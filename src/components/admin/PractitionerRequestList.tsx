@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatDate } from "@/lib/formatDate";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +19,8 @@ export function PractitionerRequestList({
 }: {
   initialRequests: RequestItem[];
 }) {
+  const t = useTranslations("admin.requests");
+  const locale = useLocale();
   const [requests, setRequests] = useState(initialRequests);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -30,17 +34,15 @@ export function PractitionerRequestList({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        toast.error(data.error ?? "Алдаа гарлаа. Дахин оролдоно уу.");
+        toast.error(data.error ?? t("error"));
         return;
       }
       setRequests((prev) => prev.filter((r) => r.id !== id));
       toast.success(
-        action === "approve"
-          ? "Эмчийн эрх нээгдлээ. Хэрэглэгч дахин нэвтэрснээр эмчийн цэс идэвхжинэ."
-          : "Хүсэлтийг татгалзлаа."
+        action === "approve" ? t("approved") : t("rejected")
       );
     } catch {
-      toast.error("Сүлжээний алдаа гарлаа. Дахин оролдоно уу.");
+      toast.error(t("networkError"));
     } finally {
       setBusyId(null);
     }
@@ -50,7 +52,7 @@ export function PractitionerRequestList({
     return (
       <Card>
         <CardContent className="py-12 text-center text-sm text-muted-foreground">
-          Хүлээгдэж буй хүсэлт алга. Шинэ хүсэлт ирэхэд энд харагдана.
+          {t("empty")}
         </CardContent>
       </Card>
     );
@@ -65,7 +67,7 @@ export function PractitionerRequestList({
               <p className="font-semibold">{r.name}</p>
               <p className="text-sm text-muted-foreground">{r.email}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Хүсэлт илгээсэн: {new Date(r.requestedAt).toLocaleDateString("mn-MN")}
+                {t("requestedAt", { date: formatDate(r.requestedAt, locale) })}
               </p>
             </div>
             <div className="flex gap-2">
@@ -74,7 +76,7 @@ export function PractitionerRequestList({
                 disabled={busyId === r.id}
                 onClick={() => act(r.id, "approve")}
               >
-                Батлах
+                {t("approve")}
               </Button>
               <Button
                 size="sm"
@@ -82,7 +84,7 @@ export function PractitionerRequestList({
                 disabled={busyId === r.id}
                 onClick={() => act(r.id, "reject")}
               >
-                Татгалзах
+                {t("reject")}
               </Button>
             </div>
           </CardContent>

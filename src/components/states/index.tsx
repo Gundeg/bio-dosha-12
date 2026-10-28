@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -10,12 +11,13 @@ import { cn } from "@/lib/utils";
  */
 
 export function Spinner({ className }: { className?: string }) {
+  const t = useTranslations("states");
   return (
     <span
       role="status"
-      aria-label="Ачааллаж байна"
+      aria-label={t("loadingLabel")}
       className={cn(
-        "inline-block size-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary",
+        "inline-block size-5 motion-safe:animate-spin rounded-full border-2 border-primary/30 border-t-primary",
         className
       )}
     />
@@ -26,16 +28,17 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       aria-hidden
-      className={cn("animate-pulse rounded-xl bg-muted/60", className)}
+      className={cn("motion-safe:animate-pulse rounded-xl bg-muted/60", className)}
     />
   );
 }
 
-export function PageLoading({ label = "Ачааллаж байна..." }: { label?: string }) {
+export function PageLoading({ label }: { label?: string }) {
+  const t = useTranslations("states");
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-24 text-muted-foreground">
       <Spinner className="size-7" />
-      <p className="text-sm">{label}</p>
+      <p className="text-sm">{label ?? t("loading")}</p>
     </div>
   );
 }
@@ -71,7 +74,7 @@ export function EmptyState({
 }
 
 export function ErrorState({
-  message = "Мэдээлэл ачаалахад алдаа гарлаа.",
+  message,
   onRetry,
   className,
 }: {
@@ -79,6 +82,7 @@ export function ErrorState({
   onRetry?: () => void;
   className?: string;
 }) {
+  const t = useTranslations("states");
   return (
     <div
       role="alert"
@@ -90,10 +94,10 @@ export function ErrorState({
       <span className="text-4xl" aria-hidden>
         ⚠️
       </span>
-      <p className="max-w-sm text-sm text-foreground">{message}</p>
+      <p className="max-w-sm text-sm text-foreground">{message || t("loadError")}</p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
-          Дахин оролдох
+          {t("retry")}
         </Button>
       )}
     </div>

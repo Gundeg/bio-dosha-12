@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { THERAPY_GROUPS, TREATMENT_MAX_SESSIONS, ALL_THERAPY_KEYS } from "@/lib/clinicalConstants";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ function buildEmptyCounts(): TreatmentCounts {
 }
 
 export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLogProps) {
+  const t = useTranslations("clinical.treatment");
   const [counts, setCounts] = useState<TreatmentCounts>(() => ({
     ...buildEmptyCounts(),
     ...initialCounts,
@@ -42,7 +44,7 @@ export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLo
         if (!r.ok) throw new Error();
       })
       .catch(() => {
-        toast.error("Хадгалах амжилтгүй боллоо.");
+        toast.error(t("saveError"));
       })
       .finally(() => setSaving(false));
   }
@@ -62,37 +64,41 @@ export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLo
   }, []);
 
   function setCellCount(key: string, n: number) {
-    setCounts((prev) => {
-      const current = prev[key] ?? 0;
-      const nextValue = current === n ? n - 1 : n;
-      const safe = Math.max(0, Math.min(TREATMENT_MAX_SESSIONS, nextValue));
-      const next = { ...prev, [key]: safe };
-      scheduleSave({ [key]: safe });
-      return next;
-    });
+    // Compute from the rendered state and schedule the save outside the state
+    // updater: updaters must stay pure, and StrictMode runs them twice.
+    const current = counts[key] ?? 0;
+    const nextValue = current === n ? n - 1 : n;
+    const safe = Math.max(0, Math.min(TREATMENT_MAX_SESSIONS, nextValue));
+    setCounts((prev) => ({ ...prev, [key]: safe }));
+    scheduleSave({ [key]: safe });
   }
 
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle>Эмчилгээний хуваарь</CardTitle>
-        <span className="text-xs text-muted-foreground">
-          {saving ? "Хадгалж байна..." : "Автоматаар хадгалагдана"}
+        <CardTitle>{t("title")}</CardTitle>
+        <span className="text-xs text-muted-foreground" aria-live="polite">
+          {saving ? t("saving") : t("autoSave")}
         </span>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="border-b border-input text-muted-foreground">
-              <th className="w-10 px-2 py-2 text-left font-medium">№</th>
-              <th className="w-48 px-2 py-2 text-left font-medium">Эмчилгээний нэрс</th>
-              <th className="w-40 px-2 py-2 text-left font-medium"></th>
-              <th className="px-2 py-2 text-left font-medium">Сесс (1–10)</th>
-              <th className="w-16 px-2 py-2 text-right font-medium">Нийт</th>
+              <th scope="col" className="w-10 px-2 py-2 text-left font-medium">{t("number")}</th>
+              <th scope="col" className="w-48 px-2 py-2 text-left font-medium">{t("therapyNames")}</th>
+              <th scope="col" className="w-40 px-2 py-2 text-left font-medium">
+                <span className="sr-only">{t("subtype")}</span>
+              </th>
+              <th scope="col" className="px-2 py-2 text-left font-medium">
+                {t("sessions", { max: TREATMENT_MAX_SESSIONS })}
+              </th>
+              <th scope="col" className="w-16 px-2 py-2 text-right font-medium">{t("total")}</th>
             </tr>
           </thead>
           <tbody>
             {THERAPY_GROUPS.map((group) => {
+              const groupLabel = t(`groups.group${group.number}`);
               const groupTotal = group.leaves.reduce(
                 (sum, leaf) => sum + (counts[leaf.key] ?? 0),
                 0
@@ -100,6 +106,9 @@ export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLo
               return group.leaves.map((leaf, idx) => {
                 const value = counts[leaf.key] ?? 0;
                 const showGroupHeader = idx === 0;
+                const isSingle = group.leaves.length === 1 && leaf.label === group.label;
+                const leafLabel = t(`leaves.${leaf.key}`);
+                const therapyName = isSingle ? groupLabel : `${groupLabel} — ${leafLabel}`;
                 return (
                   <tr key={leaf.key} className="border-b border-input/50">
                     {showGroupHeader && (
@@ -115,20 +124,24 @@ export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLo
                         className="px-2 py-2 align-top font-medium"
                         rowSpan={group.leaves.length}
                       >
-                        {group.label}
+                        {groupLabel}
                       </td>
                     )}
                     <td className="px-2 py-2 text-muted-foreground">
-                      {group.leaves.length === 1 && leaf.label === group.label ? "" : leaf.label}
+                      {isSingle ? "" : leafLabel}
                     </td>
                     <td className="px-2 py-2">
-                      <CounterCells value={value} onSet={(n) => setCellCount(leaf.key, n)} />
+                      <CounterCells
+                        value={value}
+                        onSet={(n) => setCellCount(leaf.key, n)}
+                        labelFor={(n) => t("sessionButton", { therapy: therapyName, n })}
+                      />
                     </td>
                     <td className="px-2 py-2 text-right tabular-nums">
                       {showGroupHeader && group.leaves.length > 1 ? (
                         <span className="text-xs text-muted-foreground">
                           {value}{" "}
-                          <span className="opacity-60">/ {groupTotal}</span>
+                          <span>/ {groupTotal}</span>
                         </span>
                       ) : (
                         <span className="text-xs">{value}</span>
@@ -145,7 +158,15 @@ export function TreatmentLog({ patientId, intakeId, initialCounts }: TreatmentLo
   );
 }
 
-function CounterCells({ value, onSet }: { value: number; onSet: (n: number) => void }) {
+function CounterCells({
+  value,
+  onSet,
+  labelFor,
+}: {
+  value: number;
+  onSet: (n: number) => void;
+  labelFor: (n: number) => string;
+}) {
   return (
     <div className="flex gap-1">
       {Array.from({ length: TREATMENT_MAX_SESSIONS }, (_, i) => {
@@ -156,7 +177,8 @@ function CounterCells({ value, onSet }: { value: number; onSet: (n: number) => v
             key={n}
             type="button"
             onClick={() => onSet(n)}
-            aria-label={`Сесс ${n}`}
+            aria-label={labelFor(n)}
+            aria-pressed={filled}
             className={`w-6 h-6 rounded text-[10px] border transition-colors ${
               filled
                 ? "bg-primary text-on-primary border-primary"

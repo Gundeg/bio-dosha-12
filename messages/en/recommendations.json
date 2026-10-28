@@ -1,0 +1,34 @@
+{
+  "eyebrow": "BEDI protocol · Remedies",
+  "title": "Remedies & advice",
+  "subtitle": "Golden remedies based on your deviation and constitution",
+  "profilesLabel": "Choose a profile",
+  "emptyTitle": "No calculation yet",
+  "emptyBody": "Run a BEDI calculation first and your remedies will appear automatically",
+  "doCalculation": "Run a calculation",
+  "currentDeviation": "Current BEDI deviation",
+  "statusSub": {
+    "balanced": "Khii, Shar and Badgan are in balance. Keep up your current routine.",
+    "khii_excess": "Khii (Wind) is dominant. Warmth and rest are needed.",
+    "shar_badgan_excess": "Shar (Fire) or Badgan (Earth) is dominant. A diet plan and cooling exercise are needed."
+  },
+  "age": "Age",
+  "date": "Date",
+  "noRemedyTitle": "No remedies yet",
+  "noRemedyBody": "A new calculation creates remedies automatically",
+  "context": {
+    "khii": {
+      "title": "When Khii (Wind) is dominant",
+      "body": "Warm food, clear oil and rest are essential. Stay away from cold, dry surroundings."
+    },
+    "balanced": {
+      "title": "When balanced",
+      "body": "Keep up your current routine. Make small adjustments as the seasons change."
+    },
+    "sharBadgan": {
+      "title": "When Shar/Badgan is dominant",
+      "body": "Eat light food and exercise; avoid heavy, moist food."
+    }
+  },
+  "disclaimer": "Consult a qualified practitioner before following these recommendations."
+}

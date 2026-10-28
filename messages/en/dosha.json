@@ -1,0 +1,127 @@
+{
+  "Khii": {
+    "label": "Khii (Wind)",
+    "description": "A person with a dominant Khii constitution is light, cold and rough in nature.",
+    "qualities": [
+      "Light",
+      "Cold",
+      "Rough"
+    ],
+    "risks": [
+      "Nervous exhaustion",
+      "Insomnia",
+      "Anxiety"
+    ]
+  },
+  "Khii_Shar": {
+    "label": "Khii-Shar (Wind-Fire)",
+    "description": "A mixed Khii and Shar constitution. A sharp mind and a light build.",
+    "qualities": [
+      "Light",
+      "Sharp"
+    ],
+    "risks": [
+      "Nervous stress",
+      "Liver tension"
+    ]
+  },
+  "Khii_Badgan": {
+    "label": "Khii-Badgan (Wind-Earth)",
+    "description": "A mixed Khii and Badgan constitution. Cold and unsettled traits predominate.",
+    "qualities": [
+      "Cold",
+      "Unsettled"
+    ],
+    "risks": [
+      "Digestive problems",
+      "Low mood"
+    ]
+  },
+  "Shar_Khii": {
+    "label": "Shar-Khii (Fire-Wind)",
+    "description": "A mixed Shar and Khii constitution. Hot and quick-moving.",
+    "qualities": [
+      "Hot",
+      "Mobile"
+    ],
+    "risks": [
+      "Blood pressure",
+      "Anger"
+    ]
+  },
+  "Shar": {
+    "label": "Shar (Fire)",
+    "description": "A dominant Shar constitution. Hot, sharp and quick-thinking.",
+    "qualities": [
+      "Hot",
+      "Sharp",
+      "Light"
+    ],
+    "risks": [
+      "Liver inflammation",
+      "Gallbladder problems",
+      "Overheating"
+    ]
+  },
+  "Tentsveertei": {
+    "label": "Balanced",
+    "description": "All three constitutional forces are in balance. The healthiest state.",
+    "qualities": [
+      "Balanced",
+      "All qualities even"
+    ],
+    "risks": [
+      "Weakened immunity (from overexertion)"
+    ]
+  },
+  "Shar_Badgan": {
+    "label": "Shar-Badgan (Fire-Earth)",
+    "description": "A mixed Shar and Badgan constitution. Hot and oily traits predominate.",
+    "qualities": [
+      "Hot",
+      "Oily"
+    ],
+    "risks": [
+      "Diabetes",
+      "Skin inflammation"
+    ]
+  },
+  "Badgan_Khii": {
+    "label": "Badgan-Khii (Earth-Wind)",
+    "description": "A mixed Badgan and Khii constitution. Heavy and cold traits predominate.",
+    "qualities": [
+      "Heavy",
+      "Cold"
+    ],
+    "risks": [
+      "Respiratory problems",
+      "Swelling (oedema)"
+    ]
+  },
+  "Badgan_Shar": {
+    "label": "Badgan-Shar (Earth-Fire)",
+    "description": "A mixed Badgan and Shar constitution. A heavy build with strong inner warmth.",
+    "qualities": [
+      "Heavy",
+      "Hot"
+    ],
+    "risks": [
+      "Diabetes",
+      "Obesity"
+    ]
+  },
+  "Badgan": {
+    "label": "Badgan (Earth)",
+    "description": "A dominant Badgan constitution. Heavy, slow and steady in nature.",
+    "qualities": [
+      "Heavy",
+      "Dull",
+      "Sticky"
+    ],
+    "risks": [
+      "Obesity",
+      "Diabetes",
+      "Thickened blood"
+    ]
+  }
+}

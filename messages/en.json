@@ -1,7 +1,7 @@
 {
   "common": {
     "appName": "Bio-Dosha-12",
-    "brandTagline": "Tb Otoch Ayurveda",
+    "brandTagline": "Tb Otoch · Traditional Mongolian Medicine",
     "loading": "Loading...",
     "retry": "Try again",
     "cancel": "Cancel",
@@ -43,6 +43,7 @@
       "submit": "Sign in",
       "submitting": "Signing in...",
       "invalidCredentials": "Incorrect email or password.",
+      "rateLimited": "Too many attempts. Please try again in 15 minutes.",
       "noAccount": "Don't have an account?",
       "registerLink": "Create one"
     },
@@ -53,7 +54,9 @@
       "namePlaceholder": "Your name",
       "email": "Email",
       "password": "Password",
-      "passwordPlaceholder": "At least 6 characters",
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordHint": "At least {min} characters. Mixing letters and numbers is safer.",
+      "privacyConsent": "I have read the <link>Privacy Notice</link> and agree that my health information is stored and processed by this system.",
       "personaTitle": "Account type",
       "individualLabel": "Personal",
       "individualDesc": "Track your own and your family's balance",
@@ -66,8 +69,32 @@
       "welcomePractitioner": "Welcome! Your practitioner request was sent to the admin.",
       "successManualLogin": "Account created! Please sign in.",
       "errorWithStatus": "Something went wrong ({status}). Please try again.",
+      "invalidInput": "Please check your details: a name, a valid email and a password of at least 8 characters are required.",
+      "emailTaken": "This email is already registered.",
+      "rateLimited": "Too many attempts. Please wait a moment and try again.",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
+    }
+  },
+  "legal": {
+    "disclaimer": "Bio-Dosha-12 is a prevention and self-monitoring aid. It does not replace a doctor's examination, diagnosis or treatment. Consult a qualified practitioner before acting on any recommendation.",
+    "privacyLink": "Privacy Notice",
+    "privacy": {
+      "title": "Privacy Notice",
+      "updated": "Updated: October 2026",
+      "intro": "Bio-Dosha-12 stores your health-related information only to calculate your body balance and give recommendations.",
+      "collectTitle": "What we store",
+      "collect": "Name, email and a hashed password; each profile's birth date, sex, height, constitution type and Kt coefficient; weight, season, BEDI calculation history and recommendations. In practitioner mode, a patient's national register number, phone, address, intake records and treatment log are stored.",
+      "useTitle": "How we use it",
+      "use": "The data is used only to calculate your BEDI index, deviation and recommendations, show your history, and produce practitioner reports. It is never sold or used for advertising.",
+      "accessTitle": "Who can see it",
+      "access": "Only you can see your profiles and calculations. Patient records entered by a practitioner are visible only to that practitioner. Admins see user names and emails to decide practitioner access requests.",
+      "deleteTitle": "Deleting your data",
+      "delete": "You can delete family profiles on the Family page. A practitioner can permanently delete all of a patient's data from the patient page. To delete your whole account, contact the system owner.",
+      "securityTitle": "Security",
+      "security": "Connections are encrypted with HTTPS. Passwords are stored as one-way bcrypt hashes. Sign-in attempts are rate limited and sessions expire after 12 hours.",
+      "medicalTitle": "Medical disclaimer",
+      "back": "Back to home"
     }
   },
   "locale": {

@@ -21,12 +21,19 @@ const KNOWN_CODES = new Set<SignInOutcome>(["mfa_required", "mfa_invalid", "rate
  * account can sign in. Tries twice, because one request can reach a server
  * that is still starting, and returns false if the session could not be ended
  * so the caller can say so instead of leaving the person signed in silently.
+ * A 200 from the sign-out request is not proof: the session is read back and
+ * only an empty one counts as signed out.
  */
 export async function signOutHere(): Promise<boolean> {
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      await signOut({ redirectTo: "/login?notice=signed_out_here" });
-      return true;
+      await signOut({ redirect: false });
+      const res = await fetch("/api/auth/session", { cache: "no-store" });
+      const session: { user?: unknown } | null = res.ok ? await res.json() : null;
+      if (res.ok && !session?.user) {
+        window.location.assign("/login?notice=signed_out_here");
+        return true;
+      }
     } catch {
       // The sign-out request failed (server error or offline): try once more.
     }

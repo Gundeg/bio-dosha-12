@@ -79,6 +79,10 @@ export default auth((req) => {
   return NextResponse.next();
 });
 
+// /api/auth is left out on purpose. The auth() wrapper re-issues the session
+// cookie on every request it sees; on /api/auth/signout (or a sign-in over an
+// existing session) that fresh cookie lands next to the handler's own cookie
+// change, and on Netlify it wins, so the person stays signed in.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -64,7 +64,7 @@ export function OrgSwitcher({
 
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label htmlFor={selectId} className="block text-[11px] font-semibold text-on-surface-variant">
+      <label htmlFor={selectId} className="block text-xs font-medium text-on-surface-variant">
         {t("label")}
       </label>
       <select
@@ -72,7 +72,7 @@ export function OrgSwitcher({
         value={switchingTo ?? currentId}
         disabled={!!switchingTo}
         onChange={(e) => switchTo(e.target.value)}
-        className="h-11 w-full rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-2.5 text-sm text-on-surface focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary disabled:opacity-60 md:h-9"
+        className="h-10 w-full rounded-lg border border-input bg-surface-container-lowest px-3 text-sm text-on-surface outline-none transition-colors focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15 disabled:opacity-60"
       >
         {memberships.map((m) => (
           <option key={m.organizationId} value={m.organizationId}>

@@ -1,3 +1,4 @@
+import type { IconName } from "@/components/ui/icon";
 import type { SessionOrgClaim } from "@/lib/auth.config";
 
 /**
@@ -21,7 +22,7 @@ export const NAV_ITEMS = {
   controlCenter: { href: "/admin", icon: "admin_panel_settings" },
   settings: { href: "/settings", icon: "settings" },
   help: { href: "/help", icon: "help" },
-} as const satisfies Record<string, { href: string; icon: string }>;
+} as const satisfies Record<string, { href: string; icon: IconName }>;
 
 export type NavKey = keyof typeof NAV_ITEMS;
 

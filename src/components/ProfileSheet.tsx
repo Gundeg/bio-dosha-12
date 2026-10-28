@@ -8,9 +8,11 @@ import { LocaleToggle } from "@/components/LocaleToggle";
 import { OrgNavHint, useOrgSectionTitle } from "@/components/shell/OrgNavHint";
 import { OrgSwitcher } from "@/components/shell/OrgSwitcher";
 import { ACCOUNT_ITEMS, NAV_ITEMS, isActivePath, mobilePrimaryItems, navSections } from "@/components/shell/nav";
+import { Avatar } from "@/components/shell/AccountMenu";
 import { useRoleLabel, useShell } from "@/components/shell/ShellProvider";
 import { useSignOut } from "@/components/shell/useSignOut";
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "@/components/ui/icon";
 
 function SheetItem({
   href,
@@ -22,7 +24,7 @@ function SheetItem({
 }: {
   href: string;
   label: string;
-  icon: string;
+  icon: IconName;
   active: boolean;
   hint?: React.ReactNode;
   onNavigate: () => void;
@@ -34,16 +36,11 @@ function SheetItem({
         onClick={onNavigate}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex min-h-11 items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
-          active ? "bg-primary/10 text-primary" : "text-on-surface hover:bg-surface-container"
+          "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
+          active ? "bg-primary/8 font-medium text-primary" : "text-on-surface hover:bg-surface-container-low"
         )}
       >
-        <span
-          className={cn("material-symbols-outlined text-[20px]", active ? "icon-filled text-primary" : "text-on-surface-variant")}
-          aria-hidden="true"
-        >
-          {icon}
-        </span>
+        <Icon name={icon} className={cn("size-[18px]", active ? "text-primary" : "text-on-surface-variant")} />
         <span className="min-w-0 flex-1">
           <span className="block truncate">{label}</span>
           {hint}
@@ -71,7 +68,6 @@ export function ProfileSheet({
   const roleLabel = useRoleLabel();
   const orgSectionTitle = useOrgSectionTitle();
   const displayName = user?.name || user?.email || t("personal");
-  const initial = displayName[0]?.toUpperCase() ?? "?";
   const close = () => onOpenChange(false);
 
   const inBottomBar = new Set(mobilePrimaryItems(access));
@@ -95,26 +91,21 @@ export function ProfileSheet({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="top-auto bottom-0 left-0 right-0 translate-x-0 translate-y-0 w-full max-w-full sm:max-w-full max-h-[85dvh] overflow-y-auto rounded-b-none rounded-t-3xl p-0 gap-0 data-open:slide-in-from-bottom-8 data-closed:slide-out-to-bottom-8"
+        className="top-auto bottom-0 left-0 right-0 translate-x-0 translate-y-0 w-full max-w-full sm:max-w-full max-h-[85dvh] overflow-y-auto rounded-b-none rounded-t-xl p-0 gap-0 data-open:slide-in-from-bottom-8 data-closed:slide-out-to-bottom-8"
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1" aria-hidden="true">
-          <div className="h-1 w-10 rounded-full bg-outline-variant/40" />
+          <div className="h-1 w-10 rounded-full bg-outline-variant" />
         </div>
 
         <DialogTitle className="sr-only">{t("menu")}</DialogTitle>
 
         {/* Person */}
-        <div className="flex items-center justify-between gap-3 border-b border-outline-variant/15 px-5 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-outline-variant px-5 py-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div
-              className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary-container text-base font-bold text-on-primary select-none"
-              aria-hidden="true"
-            >
-              {initial}
-            </div>
+            <Avatar name={displayName} className="size-10" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{displayName}</p>
+              <p className="truncate text-sm font-medium">{displayName}</p>
               <p className="truncate text-xs text-on-surface-variant">{roleLabel}</p>
             </div>
           </div>
@@ -125,10 +116,10 @@ export function ProfileSheet({
 
         <nav aria-label={t("menu")} className="px-2 py-2">
           {sections.map((section) => (
-            <div key={section.id} className="border-b border-outline-variant/15 py-1.5">
+            <div key={section.id} className="border-b border-outline-variant py-2">
               <p
                 id={`sheet-${section.id}`}
-                className="truncate px-4 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/80 select-none"
+                className="truncate px-3 pb-1 pt-1 text-xs font-medium text-on-surface-variant select-none"
               >
                 {section.id === "organization" ? orgSectionTitle : t(`${section.id}Section`)}
               </p>
@@ -136,19 +127,19 @@ export function ProfileSheet({
             </div>
           ))}
 
-          <ul className="border-b border-outline-variant/15 py-1.5" aria-label={t("accountSection")}>
+          <ul className="border-b border-outline-variant py-2" aria-label={t("accountSection")}>
             {ACCOUNT_ITEMS.map(renderItem)}
           </ul>
 
-          <div className="py-1.5">
+          <div className="py-2">
             <button
               type="button"
               onClick={() => void signOut()}
               disabled={signingOut}
               aria-busy={signingOut || undefined}
-              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+              className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-error transition-colors hover:bg-error/5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
             >
-              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">logout</span>
+              <Icon name="logout" className="size-[18px]" />
               {t("logout")}
             </button>
           </div>

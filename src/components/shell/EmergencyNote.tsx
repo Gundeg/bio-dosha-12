@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * One calm line with the emergency number. Shown wherever health results or
@@ -10,9 +11,7 @@ export function EmergencyNote({ className }: { className?: string }) {
   const t = useTranslations("legal");
   return (
     <p className={cn("flex items-start gap-2 text-xs leading-relaxed text-on-surface-variant", className)}>
-      <span className="material-symbols-outlined mt-px text-[16px] text-error" aria-hidden="true">
-        emergency
-      </span>
+      <Icon name="emergency" className="size-4 mt-px text-error" />
       <span>
         {t.rich("emergency", {
           call: (chunks) => (

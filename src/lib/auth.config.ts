@@ -25,6 +25,7 @@ export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
   },
-  // Health data: keep sessions short. The token is refreshed hourly while in use.
-  session: { strategy: "jwt", maxAge: 12 * 60 * 60, updateAge: 60 * 60 },
+  // Health data: a session ends after 12 hours without any request (Auth.js
+  // renews the expiry while it is used). The default was 30 days.
+  session: { strategy: "jwt", maxAge: 12 * 60 * 60 },
 };

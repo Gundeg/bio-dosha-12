@@ -112,8 +112,8 @@
       "khii_excess": "Khii (Wind) is in excess. Warm meals and a regular, restful routine are needed. See the detailed advice below.",
       "shar_badgan_excess": "Shar (Fire) or Badgan (Earth) is dominant. See the food and lifestyle advice below."
     },
-    "chartTitle": "Constitution balance chart",
-    "chartLegend": "Dashed grey — base constitution  ·  Coloured — current state",
+    "chartTitle": "Constitution field",
+    "chartLegend": "Pin — constitution  ·  Ball — current state  ·  Trail — earlier measurements",
     "metrics": {
       "age": { "label": "Age", "unit": "years" },
       "weight": { "label": "Weight", "unit": "kg" },

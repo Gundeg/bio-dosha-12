@@ -14,7 +14,7 @@ import { IconTile, PageHeader, Section } from "@/components/kit/layout";
 import { FilterTabs } from "@/components/kit/DataTable";
 import { Dot, StatusBadge, type BadgeTone } from "@/components/kit/status";
 import { SelectInput } from "@/components/settings/shared/Field";
-import DoshaRadar from "@/components/DoshaRadar";
+import { BediField } from "@/components/bedi/BediField";
 import DoshaCard from "@/components/DoshaCard";
 import RemedyPanel from "@/components/RemedyPanel";
 import { calculateBEDI, calcAge, BEDIResult } from "@/lib/bediEngine";
@@ -1113,13 +1113,11 @@ function CalculatorInner() {
                   title={t("bediResult.chartTitle")}
                   description={t("bediResult.chartLegend")}
                   actions={<StatusBadge tone="neutral" dot={false}>{doshaLabel(selectedProfile.doshaType)}</StatusBadge>}
-                  bodyClassName="flex justify-center"
                 >
-                  <DoshaRadar
+                  <BediField
                     doshaKey={selectedProfile.doshaType as DoshaKey}
                     deviation={calcResult.deviation}
                     status={calcResult.status}
-                    size={280}
                   />
                 </Section>
               )}

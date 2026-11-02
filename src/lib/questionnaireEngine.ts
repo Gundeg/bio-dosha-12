@@ -151,7 +151,8 @@ const PURE_KEY: Record<DominantType, DoshaKey> = {
   B: "Badgan",
 };
 
-function mapToDoshaKey(scores: { H: number; S: number; B: number }): DoshaKey {
+/** Questionnaire scores → constitution zone. Exported for the махбод field display; the rule itself is owner-controlled (lessons.md). */
+export function mapToDoshaKey(scores: { H: number; S: number; B: number }): DoshaKey {
   const sorted = (["H", "S", "B"] as DominantType[]).sort(
     (a, b) => scores[b] - scores[a]
   );

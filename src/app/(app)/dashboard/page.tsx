@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@/lib/formatDate";
 import { apiFetch, ApiError } from "@/lib/api";
 import { EmptyState, ErrorState, PageLoading } from "@/components/states";
-import DoshaRadar from "@/components/DoshaRadar";
+import { BediField } from "@/components/bedi/BediField";
 import DoshaCard from "@/components/DoshaCard";
 import { ButtonLink } from "@/components/ui/button-link";
 import { FilterTabs } from "@/components/kit/DataTable";
@@ -170,15 +170,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             <Section title={t("balanceTitle")} className="lg:col-span-5" bodyClassName="p-4">
               {latest && selected?.doshaType ? (
-                <div className="flex justify-center">
-                  <DoshaRadar
-                    doshaKey={selected.doshaType as DoshaKey}
-                    deviation={latest.deviation}
-                    status={latest.status}
-                    size={320}
-                    compact
-                  />
-                </div>
+                <BediField
+                  doshaKey={selected.doshaType as DoshaKey}
+                  deviation={latest.deviation}
+                  status={latest.status}
+                  history={recentRecords.slice(0, -1)}
+                />
               ) : (
                 <EmptyState
                   className="border-0 py-10"

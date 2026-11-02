@@ -112,3 +112,17 @@
   layout and ask "would a stranger perform the test correctly from this?"; generate the
   three states of one question in one stacked image so they share one style; keep scoring
   categories out of copy and images. The pipeline and its lessons: `scripts/help-illustrations/README.md`.
+
+## 2026-11-02 — A visual check runs at the pixel density people actually have
+
+- **Rule:** Before calling a canvas, WebGL or image-heavy screen finished, screenshot it in
+  a Playwright context with `deviceScaleFactor: 2` and a phone descriptor as well as at
+  DPR 1, and confirm the rendered element's CSS size equals its box (`getBoundingClientRect`
+  of the canvas vs. its container) and overlays sit inside the box.
+- **Why:** on 2026-11-02 the 3D махбод field passed every DPR 1 check, yet on phones and on
+  Windows at 125–150 % the canvas was twice the box and cropped to its top-left quarter,
+  because `renderer.setSize(w, h, false)` never wrote the element's CSS size. A fresh
+  reviewer caught it before the merge; the Playwright default (DPR 1) had hidden it.
+- **How to apply:** keep a DPR 2 run in every visual pass (the `help-preview` trick under
+  the public `/invite/` prefix works without a local database), and treat page scrolling
+  over the element (wheel and touch) as part of the check.

@@ -4,21 +4,7 @@ import { useTranslations } from "next-intl";
 import { DoshaKey } from "@/lib/ktMapping";
 import { BEDI_THRESHOLDS } from "@/lib/bediConfig";
 import type { BEDIStatus } from "@/lib/bediEngine";
-
-// Constitutional component proportions [Хий%, Шар%, Бадган%]
-// Based on traditional Mongolian medicine dosha theory
-const BASE_SCORES: Record<DoshaKey, [number, number, number]> = {
-  Khii:         [82, 10,  8],
-  Khii_Shar:    [55, 35, 10],
-  Khii_Badgan:  [55, 10, 35],
-  Shar_Khii:    [30, 60, 10],
-  Shar:         [10, 80, 10],
-  Tentsveertei: [34, 33, 33],
-  Shar_Badgan:  [10, 55, 35],
-  Badgan_Khii:  [30, 10, 60],
-  Badgan_Shar:  [10, 30, 60],
-  Badgan:       [ 8, 10, 82],
-};
+import { BASE_SCORES, applyDeviation } from "@/lib/bediField";
 
 /** Falls back to the configured band only when the caller has no stored status. */
 function statusFromDeviation(deviation: number): BEDIStatus {
@@ -36,32 +22,6 @@ const STATUS_VISUAL: Record<BEDIStatus, { color: string; badge: string }> = {
   balanced: { color: "#059669", badge: "bg-emerald-50 text-emerald-800" },
   shar_badgan_excess: { color: "#b45309", badge: "bg-amber-50 text-amber-900" },
 };
-
-function applyDeviation(
-  base: [number, number, number],
-  deviation: number,
-  status: BEDIStatus
-): [number, number, number] {
-  const [k, s, b] = base;
-  const intensity = Math.min(28, Math.abs(deviation) * 32);
-
-  if (status === "khii_excess") {
-    // Хий arvidsan — wind excess pushes Хий axis out
-    return [
-      Math.min(97, k + intensity),
-      Math.max(5, s - intensity * 0.55),
-      Math.max(5, b - intensity * 0.45),
-    ];
-  } else if (status === "shar_badgan_excess") {
-    // Шар/Бадган arvidsan — boost whichever is dominant in constitution
-    if (s >= b) {
-      return [Math.max(5, k - intensity * 0.5), Math.min(97, s + intensity), Math.max(5, b - intensity * 0.5)];
-    } else {
-      return [Math.max(5, k - intensity * 0.5), Math.max(5, s - intensity * 0.5), Math.min(97, b + intensity)];
-    }
-  }
-  return [k, s, b];
-}
 
 // Fixed viewBox coords — SVG scales via width prop
 const VW = 280;

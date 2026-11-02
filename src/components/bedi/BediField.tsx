@@ -45,12 +45,19 @@ const isStatus = (v: unknown): v is BEDIStatus =>
 
 const fmtSigned = (n: number) => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFixed(2)}`;
 
+const NO_HISTORY: BediFieldHistoryRecord[] = [];
+
+/** A value key for the history, so a new array with the same records does not repaint the scene. */
+export function historyKey(history: BediFieldHistoryRecord[]): string {
+  return history.map((h) => `${new Date(h.date).toISOString()}|${h.deviation}|${h.status}`).join(";");
+}
+
 /**
  * The махбод field in 3D: constitution pin, current ball moved by the BEDI
  * deviation, trail of earlier measurements. Loads three.js only on the client;
  * falls back to the 2D radar when WebGL is unavailable.
  */
-export function BediField({ doshaKey, deviation, status, history = [], className }: BediFieldProps) {
+export function BediField({ doshaKey, deviation, status, history = NO_HISTORY, className }: BediFieldProps) {
   const t = useTranslations("shared.field3d");
   const tShared = useTranslations("shared");
   const locale = useLocale();
@@ -58,11 +65,13 @@ export function BediField({ doshaKey, deviation, status, history = [], className
   const onUnsupported = useCallback(() => setUnsupported(true), []);
 
   const resolved: BEDIStatus = isStatus(status) ? status : "balanced";
+  // Short names on the field: "Wind (Khii)" → "Wind"; Mongolian labels have no parenthetical.
   const zoneName = useCallback(
-    (key: DoshaKey) => (locale === "en" ? DOSHA_MAP[key].labelEn : DOSHA_MAP[key].label),
+    (key: DoshaKey) => (locale === "en" ? DOSHA_MAP[key].labelEn : DOSHA_MAP[key].label).replace(/\s*\(.*\)$/, ""),
     [locale]
   );
 
+  const key = historyKey(history);
   const trail = useMemo<FieldHistoryPoint[]>(
     () =>
       history
@@ -72,7 +81,9 @@ export function BediField({ doshaKey, deviation, status, history = [], className
           deviation: h.deviation,
           status: h.status as BEDIStatus,
         })),
-    [history, locale]
+    // Keyed on the records' values, not the array identity: parents rebuild the array every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [key, locale]
   );
 
   const labels = useMemo<FieldLabels>(() => {

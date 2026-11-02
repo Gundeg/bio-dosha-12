@@ -178,6 +178,8 @@
   .bedi-tag-pin { transform: translate(-50%, -165%); }
   .bedi-tag-trail { font-weight: 500; color: var(--on-surface-variant); font-size: 0.68rem; padding: 1px 6px; }
   .bedi-tag[hidden] { display: none; }
+  .bedi-tag-balanced { font-weight: 600; color: #047857; }
+  .bedi-field canvas { display: block; width: 100% !important; height: 100% !important; }
   .bedi-compact .bedi-tag { font-size: 0.68rem; padding: 1px 6px; }
   .bedi-compact .bedi-tag-trail { display: none; }
 }

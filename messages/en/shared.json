@@ -36,9 +36,9 @@
     "noWebgl": "This device cannot show the 3D field, so the chart is shown instead.",
     "aria": "Constitution field, 3D. Constitution {constitution}. Deviation {deviation}, {status}. The current ball sits in the {zone} zone. {trail}",
     "trailNone": "No earlier measurements.",
-    "trailCloser": "{count} earlier measurements; moving toward balance.",
-    "trailFarther": "{count} earlier measurements; moving away from balance.",
-    "trailSame": "{count} earlier measurements; little change.",
+    "trailCloser": "{count, plural, one {# earlier measurement} other {# earlier measurements}}; moving toward balance.",
+    "trailFarther": "{count, plural, one {# earlier measurement} other {# earlier measurements}}; moving away from balance.",
+    "trailSame": "{count, plural, one {# earlier measurement} other {# earlier measurements}}; little change.",
     "loading": "Loading the 3D field…"
   }
 }

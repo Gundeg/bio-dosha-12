@@ -53,7 +53,7 @@ const zoneOpacity = (key: DoshaKey) =>
   key === "Tentsveertei" ? 0.3 : key === "Khii" || key === "Shar" || key === "Badgan" ? 0.46 : 0.24;
 
 const TEX = 1024;
-const PLANE = 7.2;
+const PLANE = 7.6;
 const SEG = 48;
 const DEPTH = 0.95;
 const PITCH_MIN = 0.08, PITCH_MAX = 1.5, DIST_MIN = 6, DIST_MAX = 16;
@@ -228,7 +228,6 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
   const clampPitch = (p: number) => Math.max(PITCH_MIN, Math.min(PITCH_MAX, p));
   const clampDist = (d: number) => Math.max(DIST_MIN, Math.min(DIST_MAX, d));
   const onDown = (e: PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button")) return;
     dragging = true; lastX = e.clientX; lastY = e.clientY; box.setPointerCapture(e.pointerId);
   };
   const onMove = (e: PointerEvent) => {
@@ -238,7 +237,6 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
     lastX = e.clientX; lastY = e.clientY;
   };
   const onUp = () => { dragging = false; };
-  const onWheel = (e: WheelEvent) => { distTarget = clampDist(distTarget + e.deltaY * 0.01); e.preventDefault(); };
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") yawTarget -= 0.25;
     else if (e.key === "ArrowRight") yawTarget += 0.25;
@@ -253,13 +251,12 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
   box.addEventListener("pointermove", onMove);
   box.addEventListener("pointerup", onUp);
   box.addEventListener("pointercancel", onUp);
-  box.addEventListener("wheel", onWheel, { passive: false });
   box.addEventListener("keydown", onKey);
 
   function resize() {
     const w = box.clientWidth, h = box.clientHeight;
     if (!w || !h) return;
-    renderer.setSize(w, h, false);
+    renderer.setSize(w, h);
     box.classList.toggle("bedi-compact", w < 360);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -267,7 +264,7 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
   const ro = new ResizeObserver(resize);
   ro.observe(box);
   resize();
-  const io = new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; });
+  const io = new IntersectionObserver((entries) => { visible = entries[entries.length - 1].isIntersecting; });
   io.observe(box);
 
   const v = new THREE.Vector3();
@@ -299,7 +296,8 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
       bead.position.copy(arcCurve.getPoint(t));
     }
     placeTag(pinTag, pinG.position.x, pinG.position.y + 0.72, pinG.position.z);
-    placeTag(curTag, curBall.position.x, curBall.position.y + 0.42, curBall.position.z);
+    if (curBall.visible) placeTag(curTag, curBall.position.x, curBall.position.y + 0.42, curBall.position.z);
+    else placeTag(curTag, pinG.position.x, pinG.position.y + 0.3, pinG.position.z);
     trail.forEach((t, i) => placeTag(t.tag, t.mesh.position.x, t.mesh.position.y + 0.24 + (i % 2) * 0.24, t.mesh.position.z));
     renderer.render(scene, camera);
   }
@@ -328,10 +326,10 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
 
     // Basin toward the displaced direction, depth by |Δ| (capped), flat when balanced.
     const d = Math.min(1, Math.abs(deviation));
-    const base = cur.scores;
+    const displaced = cur.scores;
     depthI.H = 0; depthI.S = 0; depthI.B = 0;
     if (status === "khii_excess") depthI.H = d;
-    else if (status === "shar_badgan_excess") { if (base[1] >= base[2]) depthI.S = d; else depthI.B = d; }
+    else if (status === "shar_badgan_excess") { if (displaced[1] >= displaced[2]) depthI.S = d; else depthI.B = d; }
     deform();
 
     const rep = ZONES[doshaKey].rep;
@@ -348,7 +346,7 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
     curShadow.position.set(qx, qy + 0.012, qz);
     curTag.textContent = labels.now;
     curBall.visible = curShadow.visible = bead.visible = cur.moved;
-    curTag.hidden = !cur.moved;
+    curTag.classList.toggle("bedi-tag-balanced", !cur.moved);
     if (arcMesh) { world.remove(arcMesh); arcMesh.geometry.dispose(); arcMesh = null; arcCurve = null; }
     if (cur.moved) {
       const a = new THREE.Vector3(px, py + 0.3, pz), b = new THREE.Vector3(qx, qy + 0.19, qz);
@@ -386,7 +384,6 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
       trailLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(linePts), trailLineMat);
       world.add(trailLine);
     }
-    host.setAttribute("aria-label", labels.aria);
   }
 
   raf = requestAnimationFrame(frame);
@@ -402,12 +399,18 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
       box.removeEventListener("pointermove", onMove);
       box.removeEventListener("pointerup", onUp);
       box.removeEventListener("pointercancel", onUp);
-      box.removeEventListener("wheel", onWheel);
       box.removeEventListener("keydown", onKey);
       for (const t of trail) t.tag.remove();
       pinTag.remove(); curTag.remove();
-      faceGeo.dispose(); texture.dispose(); faceMat.dispose();
+      scene.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.geometry) m.geometry.dispose();
+        const mat = m.material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(mat)) mat.forEach((x) => x.dispose()); else mat?.dispose();
+      });
+      texture.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       renderer.domElement.remove();
     },
   };
@@ -440,9 +443,10 @@ export default function BediFieldScene(props: BediFieldSceneProps) {
     <div className="space-y-2">
       <div
         ref={boxRef}
+        role="group"
         tabIndex={0}
         aria-label={labels.hint}
-        className="bedi-field relative aspect-[16/11] w-full cursor-grab touch-none overflow-hidden rounded-lg bg-surface-container-low outline-none focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
+        className="bedi-field relative aspect-[16/11] w-full cursor-grab select-none overflow-hidden [touch-action:pan-y] rounded-lg bg-surface-container-low outline-none focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
       >
         <div ref={hostRef} role="img" aria-label={labels.aria} className="absolute inset-0" />
         <div ref={tagsRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />

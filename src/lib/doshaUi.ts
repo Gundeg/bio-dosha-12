@@ -12,6 +12,13 @@ export const DOSHA_BG: Record<DominantType, string> = {
   B: "bg-tertiary/5",
 };
 
+/** Fill utility per constitution, matching DOSHA_COLOR (dots, progress bars). */
+export const DOSHA_FILL: Record<DominantType, string> = {
+  H: "bg-primary",
+  S: "bg-secondary",
+  B: "bg-tertiary",
+};
+
 export const DOSHA_LETTER: Record<DominantType, string> = {
   H: "Х",
   S: "Ш",

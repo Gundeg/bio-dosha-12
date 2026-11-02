@@ -1,6 +1,11 @@
 import { cn } from "@/lib/utils";
 import { Icon, type IconName } from "@/components/ui/icon";
 
+/** Small decorative round marker, 8px, coloured by a fill utility (e.g. DOSHA_FILL). */
+export function Dot({ fill, className }: { fill: string; className?: string }) {
+  return <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-full", fill, className)} />;
+}
+
 export type BadgeTone = "success" | "warning" | "danger" | "info" | "neutral" | "primary";
 
 const TONE: Record<BadgeTone, { box: string; dot: string }> = {

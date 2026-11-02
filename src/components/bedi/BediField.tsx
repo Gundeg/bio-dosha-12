@@ -113,7 +113,7 @@ export function BediField({ doshaKey, deviation, status, history = [], className
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={className}>
       <BediFieldScene
         doshaKey={doshaKey}
         deviation={deviation}
@@ -122,7 +122,6 @@ export function BediField({ doshaKey, deviation, status, history = [], className
         labels={labels}
         onUnsupported={onUnsupported}
       />
-      <p className="text-center text-xs text-on-surface-variant">{t("hint")}</p>
     </div>
   );
 }

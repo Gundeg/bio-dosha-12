@@ -56,7 +56,10 @@ const TEX = 1024;
 const PLANE = 7.2;
 const SEG = 48;
 const DEPTH = 0.95;
-const PITCH_MIN = 0.08, PITCH_MAX = 1.5, DIST_MIN = 7, DIST_MAX = 18;
+const PITCH_MIN = 0.08, PITCH_MAX = 1.5, DIST_MIN = 6, DIST_MAX = 16;
+const DIST_DEFAULT = 9.6, PITCH_DEFAULT = 0.58;
+/** Seen from above the triangle is taller than wide, so the camera backs off as the pitch rises. */
+const fitFactor = (pitch: number) => 1 + 0.4 * (pitch / PITCH_MAX);
 
 type Scene = {
   apply: (p: BediFieldSceneProps) => void;
@@ -129,13 +132,6 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
     pos.needsUpdate = true;
     faceGeo.computeVertexNormals();
   }
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(4.6, 64),
-    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.05, depthWrite: false })
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -DEPTH - 0.08;
-  world.add(floor);
 
   // Zones that matter to this person keep full colour and a bold name; the rest fade to context.
   type Level = 0 | 1 | 2;
@@ -177,8 +173,10 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
     outline(constKey, ink, 7);
     if (curKey !== constKey) outline(curKey, statusColor, 7);
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const ORIENT: DoshaKey[] = ["Khii", "Shar", "Badgan", "Tentsveertei"];
     for (const [key, z] of Object.entries(ZONES) as [DoshaKey, (typeof ZONES)[DoshaKey]][]) {
       const lv = level[key] ?? 0;
+      if (lv === 0 && !ORIENT.includes(key)) continue; // faint zones stay unlabelled: less clutter
       const size = (lv === 2 ? 17 : lv === 1 ? 14 : 12) * k, lh = size * 1.1;
       ctx.font = `${lv === 2 ? 700 : lv === 1 ? 600 : 500} ${size}px Inter, "Segoe UI", system-ui, sans-serif`;
       ctx.strokeStyle = card; ctx.lineWidth = size * 0.3;
@@ -225,7 +223,7 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
   const curTag = makeTag("bedi-tag-cur");
 
   // ── Orbit: drag turns and tilts, wheel zooms, arrows for keyboards ──
-  let yaw = 0.22, yawTarget = 0.22, pitch = 0.52, pitchTarget = 0.52, dist = 12.6, distTarget = 12.6;
+  let yaw = 0.22, yawTarget = 0.22, pitch = PITCH_DEFAULT, pitchTarget = PITCH_DEFAULT, dist = DIST_DEFAULT, distTarget = DIST_DEFAULT;
   let dragging = false, lastX = 0, lastY = 0, visible = true, disposed = false;
   const clampPitch = (p: number) => Math.max(PITCH_MIN, Math.min(PITCH_MAX, p));
   const clampDist = (d: number) => Math.max(DIST_MIN, Math.min(DIST_MAX, d));
@@ -262,6 +260,7 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
     const w = box.clientWidth, h = box.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
+    box.classList.toggle("bedi-compact", w < 360);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
@@ -274,7 +273,9 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
   const v = new THREE.Vector3();
   function placeTag(tag: HTMLSpanElement, x: number, y: number, z: number) {
     v.set(x, y, z).project(camera);
-    tag.style.left = `${((v.x + 1) / 2) * box.clientWidth}px`;
+    const half = tag.offsetWidth / 2 + 4;
+    const left = Math.min(box.clientWidth - half, Math.max(half, ((v.x + 1) / 2) * box.clientWidth));
+    tag.style.left = `${left}px`;
     tag.style.top = `${((1 - v.y) / 2) * box.clientHeight}px`;
   }
   const t0 = performance.now();
@@ -288,7 +289,8 @@ function createScene(box: HTMLDivElement, host: HTMLDivElement, tagLayer: HTMLDi
     yaw += (yawTarget - yaw) * ease;
     pitch += (pitchTarget - pitch) * ease;
     dist += (distTarget - dist) * ease;
-    camera.position.set(Math.sin(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist, Math.cos(yaw) * Math.cos(pitch) * dist);
+    const d = dist * fitFactor(pitch);
+    camera.position.set(Math.sin(yaw) * Math.cos(pitch) * d, Math.sin(pitch) * d, Math.cos(yaw) * Math.cos(pitch) * d);
     camera.up.set(0, 1, 0);
     camera.lookAt(0, 0.1, 0);
     if (faceState && (paintedYaw === null || Math.abs(yaw - paintedYaw) > 0.07)) paintFace();
@@ -433,30 +435,28 @@ export default function BediFieldScene(props: BediFieldSceneProps) {
     sceneRef.current?.apply({ doshaKey, deviation, status, history, labels, onUnsupported });
   }, [doshaKey, deviation, status, history, labels, onUnsupported]);
 
+  const viewButton = "rounded-lg px-2 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface";
   return (
-    <div
-      ref={boxRef}
-      tabIndex={0}
-      aria-label={labels.hint}
-      className="bedi-field relative aspect-[16/11] w-full cursor-grab touch-none overflow-hidden rounded-lg bg-surface-container-low outline-none focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
-    >
-      <div ref={hostRef} role="img" aria-label={labels.aria} className="absolute inset-0" />
-      <div ref={tagsRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
-      <div className="absolute bottom-2 right-2 flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => sceneRef.current?.setView(PITCH_MAX, 12)}
-          className="rounded-lg bg-surface-container-lowest/90 px-2.5 py-1 text-xs font-medium text-on-surface-variant shadow-ambient hover:text-on-surface"
-        >
-          {labels.viewTop}
-        </button>
-        <button
-          type="button"
-          onClick={() => sceneRef.current?.setView(0.22, 12)}
-          className="rounded-lg bg-surface-container-lowest/90 px-2.5 py-1 text-xs font-medium text-on-surface-variant shadow-ambient hover:text-on-surface"
-        >
-          {labels.viewSide}
-        </button>
+    <div className="space-y-2">
+      <div
+        ref={boxRef}
+        tabIndex={0}
+        aria-label={labels.hint}
+        className="bedi-field relative aspect-[16/11] w-full cursor-grab touch-none overflow-hidden rounded-lg bg-surface-container-low outline-none focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
+      >
+        <div ref={hostRef} role="img" aria-label={labels.aria} className="absolute inset-0" />
+        <div ref={tagsRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <p className="text-xs text-on-surface-variant">{labels.hint}</p>
+        <div className="-mr-2 flex gap-1">
+          <button type="button" onClick={() => sceneRef.current?.setView(PITCH_MAX, DIST_DEFAULT)} className={viewButton}>
+            {labels.viewTop}
+          </button>
+          <button type="button" onClick={() => sceneRef.current?.setView(0.22, DIST_DEFAULT)} className={viewButton}>
+            {labels.viewSide}
+          </button>
+        </div>
       </div>
     </div>
   );

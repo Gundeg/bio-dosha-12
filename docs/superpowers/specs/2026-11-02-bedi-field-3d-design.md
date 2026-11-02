@@ -1,6 +1,6 @@
 # BEDI field in 3D: bring the approved prototype into the app, without the demo clutter
 
-Date: 2026-11-02 · Status: owner said "start" (questions skipped); decisions below are the builder's · Branch: `feature/bedi-field-3d`
+Date: 2026-11-02 · Status: implemented 2026-11-02 on this branch (owner said "start"; decisions below are the builder's) · Branch: `feature/bedi-field-3d`
 
 ## Intent
 
@@ -79,3 +79,11 @@ Option C (three indices), which Оточ has not approved.
 
 Exact camera defaults, texture resolution, lattice hexagon radius, tag offsets, and the
 easing constant; whether the trail shows at most seven or all records.
+
+## Built (2026-11-02)
+
+- `src/lib/bediField.ts` + `src/lib/__tests__/bediField.test.ts` (10 tests); `DoshaRadar` now imports `BASE_SCORES` and `applyDeviation` from it.
+- `src/components/bedi/BediFieldScene.tsx` (three.js scene, custom orbit, compact mode under 360 px, tags clamped inside the canvas, no floor disc; faint zones carry no name, only Хий, Шар, Бадган and Тэнцвэртэй stay as orientation) and `src/components/bedi/BediField.tsx` (next/dynamic wrapper, labels and aria text, radar fallback).
+- Calculator result and dashboard balance section use `BediField`; the dashboard passes the earlier records as the trail.
+- `shared.field3d` copy in both locales; `calculator.bediResult.chartTitle/chartLegend` updated.
+- Checked with Playwright on a temporary public page (deleted): 1440 and 390 px, drag, top/side views, reduced motion; three.js lands in its own lazy chunk (549 KB), not in the page's first load.

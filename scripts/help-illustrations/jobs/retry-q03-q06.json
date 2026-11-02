@@ -1,0 +1,14 @@
+[
+ {
+  "name": "q3-base-v2.png",
+  "ratio": "3:2",
+  "prompt": "A SKIN PINCH self-check. Straight top-down view of a bare left forearm lying horizontally across the frame, short sleeve edge near the elbow at the left, the left hand at the right, relaxed, palm down, all five fingers clearly visible. The right hand comes from below and its thumb and index finger gently pinch a small fold of skin on the middle of the forearm, lifting it slightly; the pinched fold is near the centre of the frame. The hands occupy the lower two thirds of the frame; the upper third is empty background. Anatomically correct hands. Flat vector illustration, soft rounded shapes, matte colours, no outlines, minimal detail, warm neutral skin tone, plain light background colour #eff3f3, calm modern health-app illustration style, consistent style. No circles, arrows, labels, numbers or text of any kind, pure visual. 3:2 landscape composition."
+ },
+ {
+  "name": "q6-3panel-v2.png",
+  "ratio": "2:3",
+  "size": "2K",
+  "input": "base-V1-topdown.png",
+  "prompt": "Use the attached image ONLY as a style reference (colours, flat shapes, lighting); do not copy its content. Create a NEW instructional comparison image made of THREE EQUAL PANELS stacked vertically, separated by thin pure-white gaps, each panel exactly one third of the image height, each panel a wide landscape scene with its main subject inside the central 75% of the panel width. All three panels show the same scene, the same character, the same camera distance and framing; only the described differences change. CHARACTER, identical in every panel: a Mongolian adult with short black hair, warm skin tone, gender-neutral look, wearing a simple light-grey t-shirt and slate-blue trousers. SCENE: the character sits at a dining table with an EMPTY plate and cutlery; a round wall clock with only hands and tick marks shows it is well past mealtime. TOP panel: the character is distracted, turned away reading a book, indifferent to the empty plate, not hungry, forgot the meal. MIDDLE panel: the character is irritable and hungry: frowning, one hand pressed on the stomach, the other drumming on the table, impatient, slightly red-faced. BOTTOM panel: the character is calm and content, leaning back relaxed with hands folded, not hungry at all, unbothered by the missed meal. Flat vector illustration, soft rounded shapes, matte colours, no outlines, minimal detail, warm neutral skin tone, palette limited to teal #00626b, amber #fe932c, slate #4b596e, warm beige, soft white and the light background #eff3f3, calm modern health-app illustration style, consistent style. No circles, arrows, labels, numbers or text of any kind."
+ }
+]

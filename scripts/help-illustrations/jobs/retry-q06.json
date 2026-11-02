@@ -1,0 +1,16 @@
+[
+ {
+  "name": "q6-3panel-v3.png",
+  "ratio": "2:3",
+  "size": "2K",
+  "input": "base-V1-topdown.png",
+  "prompt": "Use the attached image ONLY as a style reference (colours, flat shapes, lighting); do not copy its content. Create a NEW instructional comparison image made of THREE EQUAL PANELS stacked vertically, separated by thin pure-white gaps, each panel exactly one third of the image height, each panel a wide landscape scene with its main subject inside the central 75% of the panel width. All three panels show the same scene, the same character, the same camera distance and framing; only the described differences change. CHARACTER, identical in every panel: a Mongolian adult with short black hair, warm skin tone, gender-neutral look, wearing a simple light-grey t-shirt and slate-blue trousers. SCENE: the character sits at a dining table with an EMPTY plate and cutlery; a round wall clock with only hands and tick marks shows it is well past mealtime. TOP panel: the character is distracted, turned away reading a book, indifferent to the empty plate, not hungry, forgot the meal. MIDDLE panel: the character is irritable and hungry: frowning, one hand pressed on the stomach, the other drumming on the table, impatient, slightly red-faced. BOTTOM panel: the character is calm and content, leaning back with hands folded in the lap, a small content smile, eyes open and clear, not hungry at all, unbothered by the missed meal. Flat vector illustration, soft rounded shapes, matte colours, no outlines, minimal detail, warm neutral skin tone, palette limited to teal #00626b, amber #fe932c, slate #4b596e, warm beige, soft white and the light background #eff3f3, calm modern health-app illustration style, consistent style. No circles, arrows, labels, numbers or text of any kind. RENDERING: every panel is equally crisp and sharp with clean flat edges; absolutely no blur, no soft focus, no haze, no mist, no smudging anywhere, including on calm or relaxed figures."
+ },
+ {
+  "name": "q6-3panel-fix.png",
+  "ratio": "2:3",
+  "size": "2K",
+  "input": "q6-3panel-v2.png",
+  "prompt": "Edit this three-panel image. The BOTTOM panel is blurred and smeared. Redraw the bottom panel completely crisp and sharp, in exactly the same flat vector style, colours, character, furniture and framing as the top and middle panels: the character sits calm and content, leaning back with hands folded in the lap, small smile, eyes open, the wall clock sharp. Keep the top and middle panels pixel-identical. No text."
+ }
+]

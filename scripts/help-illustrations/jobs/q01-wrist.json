@@ -1,0 +1,24 @@
+[
+ {
+  "name": "q1-base-V1-topdown.png",
+  "ratio": "3:2",
+  "kept": true,
+  "note": "round7/base-V1-topdown.png, approved by the owner on 2026-11-02 (V1); composed with compose_inset2 --point 640,440 --inset 640,200,178",
+  "prompt": "A WRIST CIRCUMFERENCE self-check, not pulse taking: one person holds their own LEFT WRIST with their right hand. It must be unmistakable that this is a human wrist and hand: the whole left hand is fully in view, relaxed, palm down, with all five fingers clearly visible and slightly apart, the hand noticeably wider than the wrist; the left forearm is BARE (short sleeve, the sleeve edge visible near the elbow at the left) and tapers naturally into the wrist. The right hand wraps around the left wrist from below like a bracelet, right thumb on top of the wrist, right fingers coming around the far side. Anatomically correct hands. The hands sit in the LOWER two thirds of the frame; the upper third is empty background. Viewpoint: straight top-down. The left arm runs horizontally, elbow at the left edge, hand pointing right. Flat vector illustration, soft rounded shapes, matte colours, no outlines, minimal detail, warm neutral skin tone, plain light background colour #eff3f3, calm modern health-app illustration style. No circles, arrows, labels, numbers or text of any kind, pure visual, consistent style, 3:2 landscape composition."
+ },
+ {
+  "name": "q1-base-V2-threequarter.png",
+  "ratio": "3:2",
+  "kept": false,
+  "note": "round7/base-V2-threequarter.png, rejected (owner chose V1)",
+  "prompt": "A WRIST CIRCUMFERENCE self-check, not pulse taking: one person holds their own LEFT WRIST with their right hand. It must be unmistakable that this is a human wrist and hand: the whole left hand is fully in view, relaxed, palm down, with all five fingers clearly visible and slightly apart, the hand noticeably wider than the wrist; the left forearm is BARE (short sleeve, the sleeve edge visible near the elbow at the left) and tapers naturally into the wrist. The right hand wraps around the left wrist from below like a bracelet, right thumb on top of the wrist, right fingers coming around the far side. Anatomically correct hands. The hands sit in the LOWER two thirds of the frame; the upper third is empty background. Viewpoint: three-quarter view from the person's own eyes looking down, the left arm angled from lower left toward upper right, the back of the left hand and its fingers clearly visible, the wrist and the gripping right hand near the centre. Flat vector illustration, soft rounded shapes, matte colours, no outlines, minimal detail, warm neutral skin tone, plain light background colour #eff3f3, calm modern health-app illustration style. No circles, arrows, labels, numbers or text of any kind, pure visual, consistent style, 3:2 landscape composition."
+ },
+ {
+  "name": "q1-macro-3panel.png",
+  "ratio": "2:3",
+  "size": "2K",
+  "kept": true,
+  "note": "round6/q1-macro-3panel.png, the inset source for all three Q1 states",
+  "prompt": "An instructional comparison image made of THREE EQUAL PANELS stacked vertically, separated by thin white gaps, each panel one third of the image height. Every panel is the same EXTREME CLOSE-UP, seen from directly above: the top surface of a wrist fills the panel as skin background, and two fingertips of the same hand enter the panel, a THUMB tip from the lower left and an INDEX fingertip from the upper right, both with clearly visible fingernails, each fingertip about one third of the panel width. The panels differ ONLY in how the two fingertips meet. TOP panel: the index fingertip lies across the thumb tip, the two nails clearly overlapping. MIDDLE panel: the two fingertips just touch end to end, nail meeting nail, no overlap and no gap. BOTTOM panel: the two fingertips do not reach each other, a wide gap of bare wrist skin about one fingertip wide between them. Flat vector illustration, soft rounded shapes, matte colours, no outlines, minimal detail, warm neutral skin tone, plain light background colour #eff3f3, calm modern health-app illustration style. No circles, arrows, labels, numbers or text of any kind, pure visual, consistent style."
+ }
+]

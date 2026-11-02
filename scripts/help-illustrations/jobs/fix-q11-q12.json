@@ -1,0 +1,16 @@
+[
+ {
+  "name": "q12-3panel-fix.png",
+  "ratio": "2:3",
+  "size": "2K",
+  "input": "q12-3panel-v2.png",
+  "prompt": "Edit this three-panel image. The BOTTOM panel's character is blurred. Redraw the bottom panel completely crisp and sharp, in exactly the same flat vector style, colours, furniture and framing as the top and middle panels: the character slumped back in the chair, drowsy with half-closed eyes, one hand resting on a round heavy belly, sluggish after the meal, face fully sharp. Keep the top and middle panels pixel-identical. No text."
+ },
+ {
+  "name": "q11-3panel-fix2.png",
+  "ratio": "2:3",
+  "size": "2K",
+  "input": "q11-3panel-v2.png",
+  "prompt": "Edit this three-panel image. The BOTTOM panel is blurred and hazy. Redraw the bottom panel completely crisp and sharp, in exactly the same flat vector style, colours and framing as the top and middle panels: the same character standing upright at the very top of the staircase, fresh and energetic, arms relaxed, light smile, the staircase and handrail fully sharp, no haze. Keep the top and middle panels pixel-identical. No text."
+ }
+]

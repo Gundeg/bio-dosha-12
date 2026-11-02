@@ -3,7 +3,7 @@
  * docs/platform-architecture.md, "UI kit").
  */
 export { PageHeader, Section, StatCard, DescriptionList, Callout, IconTile } from "./layout";
-export { StatusBadge, orgStatusTone, inviteStateTone, accountStatusTone, type BadgeTone } from "./status";
+export { Dot, StatusBadge, orgStatusTone, inviteStateTone, accountStatusTone, type BadgeTone } from "./status";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { CopyField } from "./CopyField";
 export { DataTable, Pagination, FilterTabs, SearchInput, type Column } from "./DataTable";

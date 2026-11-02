@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { IconTile, PageHeader, Section } from "@/components/kit/layout";
 import { FilterTabs } from "@/components/kit/DataTable";
-import { StatusBadge, type BadgeTone } from "@/components/kit/status";
+import { Dot, StatusBadge, type BadgeTone } from "@/components/kit/status";
 import { SelectInput } from "@/components/settings/shared/Field";
 import DoshaRadar from "@/components/DoshaRadar";
 import DoshaCard from "@/components/DoshaCard";
@@ -22,7 +22,7 @@ import { getRemedies, RemedyResult } from "@/lib/remedyEngine";
 import { getCurrentSeason, SeasonKey } from "@/lib/seasonFactors";
 import { DoshaKey } from "@/lib/ktMapping";
 import { QUESTIONNAIRE, scoreQuestionnaire, DominantType } from "@/lib/questionnaireEngine";
-import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
+import { DOSHA_BG, DOSHA_COLOR, DOSHA_FILL } from "@/lib/doshaUi";
 import { QUESTION_HELP } from "@/lib/questionHelp";
 import { QuestionHelpButton } from "@/components/help/QuestionHelpDialog";
 import { HelpIllustration } from "@/components/help/illustrations";
@@ -81,13 +81,6 @@ const RELATIONSHIP_OPTIONS = ["self", "spouse", "child", "parent", "other"] as c
 const SEX_ICON: Record<Profile["sex"], IconName> = { MALE: "male", FEMALE: "female" };
 const SEX_OPTIONS = ["MALE", "FEMALE"] as const;
 
-/** Fill colour per constitution (Khii, Shar, Badgan), matching DOSHA_COLOR. */
-const DOSHA_FILL: Record<DominantType, string> = {
-  H: "bg-primary",
-  S: "bg-secondary",
-  B: "bg-tertiary",
-};
-
 // The status always comes from the engine; these only colour it.
 const STATUS_STYLE: Record<BEDIResult["status"], { tone: BadgeTone; text: string; dot: string }> = {
   khii_excess:        { tone: "primary", text: "text-primary",     dot: "bg-primary" },
@@ -144,10 +137,6 @@ function GuideHeader({ icon, title }: { icon: IconName; title: React.ReactNode }
 
 function GuideIntro({ children }: { children: React.ReactNode }) {
   return <p className="mb-4 text-sm leading-relaxed text-on-surface-variant">{children}</p>;
-}
-
-function Dot({ fill }: { fill: string }) {
-  return <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-full", fill)} />;
 }
 
 function GuideItem({

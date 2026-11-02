@@ -34,6 +34,7 @@ Bio-Dosha-12 is a clinical tool used by doctors and by individuals on phones and
 - Icon colour follows the text.
 - In a tinted square use `<IconTile>`, which centres the icon.
 - No emoji or Unicode pictograms (❄ ⚖ 🌿 ♂ …) as icons. New names are added to the map in `icon.tsx`.
+- Illustrations are the approved image set described in `docs/help-illustrations.md`; never redraw, recolour or filter them per page.
 
 ## Components (use these, do not restyle per page)
 

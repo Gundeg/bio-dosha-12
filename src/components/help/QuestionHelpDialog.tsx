@@ -13,27 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { HelpIllustration } from "@/components/help/illustrations";
 import { QUESTION_HELP } from "@/lib/questionHelp";
-import { DOSHA_BG, DOSHA_COLOR } from "@/lib/doshaUi";
+import { DOSHA_FILL } from "@/lib/doshaUi";
+import { Dot } from "@/components/kit/status";
 import { DominantType, Question } from "@/lib/questionnaireEngine";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
-
-/** Махбодын үсэг бүхий дугуй тэмдэг (Х/Ш/Б өнгөний код). */
-function DoshaMark({ value, letter, className }: { value: DominantType; letter: string; className?: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-inset ring-current/20",
-        DOSHA_BG[value],
-        DOSHA_COLOR[value],
-        className
-      )}
-    >
-      {letter}
-    </span>
-  );
-}
 
 /**
  * Асуултын карт дээрх "Хэрхэн тодорхойлох вэ?" товч + сорилын тусламжийн цонх.
@@ -43,7 +27,6 @@ function DoshaMark({ value, letter, className }: { value: DominantType; letter: 
 export function QuestionHelpButton({ question }: { question: Question }) {
   const t = useTranslations("help.dialog");
   const tHelp = useTranslations("questionHelp");
-  const tShared = useTranslations("shared");
   const [variant, setVariant] = useState<DominantType | undefined>(undefined);
 
   if (!QUESTION_HELP[question.id]) return null;
@@ -72,7 +55,6 @@ export function QuestionHelpButton({ question }: { question: Question }) {
         {/* Өргөн дэлгэц: 3 хариултыг зэрэгцүүлсэн харьцуулалт */}
         <div className="hidden gap-3 sm:grid sm:grid-cols-3">
           {question.options.map((opt) => {
-            const doshaName = tShared(`dosha3.${opt.value}`);
             return (
               <div
                 key={opt.value}
@@ -86,10 +68,9 @@ export function QuestionHelpButton({ question }: { question: Question }) {
                   />
                 </div>
                 <div className="flex items-start gap-2">
-                  <DoshaMark value={opt.value} letter={doshaName.charAt(0)} className="size-6 text-xs" />
+                  <Dot fill={DOSHA_FILL[opt.value]} className="mt-1.5" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold leading-tight text-on-surface">
-                      <span className="sr-only">{doshaName}: </span>
                       {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">
@@ -130,7 +111,6 @@ export function QuestionHelpButton({ question }: { question: Question }) {
           <div className="space-y-2">
             {question.options.map((opt) => {
               const selected = variant === opt.value;
-              const doshaName = tShared(`dosha3.${opt.value}`);
               return (
                 <button
                   key={opt.value}
@@ -146,10 +126,9 @@ export function QuestionHelpButton({ question }: { question: Question }) {
                       : "bg-surface-container-lowest ring-outline-variant hover:bg-surface-container-low"
                   )}
                 >
-                  <DoshaMark value={opt.value} letter={doshaName.charAt(0)} className="size-8 text-xs" />
+                  <Dot fill={DOSHA_FILL[opt.value]} className="mt-1.5" />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold text-on-surface">
-                      <span className="sr-only">{doshaName}: </span>
                       {tHelp(`${qKey}.outcomes.${opt.value}.label`)}
                     </span>
                     <span className="mt-0.5 block text-xs leading-relaxed text-on-surface-variant">

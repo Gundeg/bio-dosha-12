@@ -159,6 +159,27 @@
 @keyframes help-ph2 { 0%, 27% { opacity: 0; } 33%, 63% { opacity: 1; } 69%, 100% { opacity: 0; } }
 @keyframes help-ph3 { 0%, 60% { opacity: 0; } 66%, 96% { opacity: 1; } 100% { opacity: 0; } }
 
+/* 3D махбод field (src/components/bedi): HTML tags positioned over the canvas by projection. */
+@layer components {
+  .bedi-tag {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--on-surface);
+    background: color-mix(in srgb, var(--surface-container-lowest) 88%, transparent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgb(16 34 40 / 0.08);
+  }
+  .bedi-tag-quiet { font-weight: 500; color: var(--on-surface-variant); }
+  .bedi-tag-cur { font-weight: 700; transform: translate(-50%, -150%); }
+  .bedi-tag-pin { transform: translate(-50%, -165%); }
+  .bedi-tag-trail { font-weight: 500; color: var(--on-surface-variant); font-size: 0.68rem; padding: 1px 6px; }
+  .bedi-tag[hidden] { display: none; }
+}
+
 /* Surface elevation for cards and panels: a hairline and a soft shadow. */
 @utility shadow-ambient {
   box-shadow: 0 0 0 1px rgb(16 34 40 / 0.07), 0 1px 2px rgb(16 34 40 / 0.04);

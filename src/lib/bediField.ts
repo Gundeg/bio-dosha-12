@@ -90,6 +90,11 @@ export function toWorld(x: number, y: number): Point2 {
   return [(x - CENTROID[0]) * K2W, (y - CENTROID[1]) * K2W];
 }
 
+/** World (x, z) → 2D field point; the inverse of toWorld. */
+export function fromWorld(wx: number, wz: number): Point2 {
+  return [wx / K2W + CENTROID[0], wz / K2W + CENTROID[1]];
+}
+
 /** Barycentric weights of a 2D point, clamped to the triangle and normalised. */
 export function baryWeights([x, y]: Point2): [number, number, number] {
   const [ax, ay] = CORNERS.H, [bx, by] = CORNERS.S, [cx, cy] = CORNERS.B;

@@ -142,6 +142,22 @@
   }
 }
 
+/* Help illustrations: Х→Ш→Б crossfade, 9 s loop, 3 s per state (docs/help-illustrations.md). */
+@layer components {
+  .help-frames .help-frame { opacity: 0; }
+  .help-frames:not([data-variant="cycle"]) .help-frame { opacity: 1; }
+  .help-frames[data-variant="cycle"] .help-frame:nth-child(1) { animation: help-ph1 9s linear infinite; }
+  .help-frames[data-variant="cycle"] .help-frame:nth-child(2) { animation: help-ph2 9s linear infinite; }
+  .help-frames[data-variant="cycle"] .help-frame:nth-child(3) { animation: help-ph3 9s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .help-frames[data-variant="cycle"] .help-frame { animation: none; }
+    .help-frames[data-variant="cycle"] .help-frame:nth-child(1) { opacity: 1; }
+  }
+}
+@keyframes help-ph1 { 0%, 30% { opacity: 1; } 36%, 94% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes help-ph2 { 0%, 27% { opacity: 0; } 33%, 63% { opacity: 1; } 69%, 100% { opacity: 0; } }
+@keyframes help-ph3 { 0%, 60% { opacity: 0; } 66%, 96% { opacity: 1; } 100% { opacity: 0; } }
+
 /* Surface elevation for cards and panels: a hairline and a soft shadow. */
 @utility shadow-ambient {
   box-shadow: 0 0 0 1px rgb(16 34 40 / 0.07), 0 1px 2px rgb(16 34 40 / 0.04);

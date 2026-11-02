@@ -52,13 +52,15 @@ def main() -> None:
     env = load_env()
 
     def run(job: dict) -> tuple[str, bool, str]:
-        cmd = [sys.executable, "-I", str(generate), job["prompt"], "--ratio", job.get("ratio", "3:2"), "-o", str(out / job["name"])]
+        target = out / job["name"]
+        target.unlink(missing_ok=True)  # a stale output must never pass as a fresh one
+        cmd = [sys.executable, "-I", str(generate), job["prompt"], "--ratio", job.get("ratio", "3:2"), "-o", str(target)]
         if job.get("size"):
             cmd += ["--size", job["size"]]
         if job.get("input"):
             cmd += ["-i", str(pathlib.Path(a.inputs) / job["input"])]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True)
-        ok = (out / job["name"]).exists()
+        ok = r.returncode == 0 and target.exists()
         tail = "" if ok else " | ".join((r.stdout + r.stderr).strip().splitlines()[-1:])
         return job["name"], ok, tail
 

@@ -38,7 +38,10 @@ export function HelpIllustration({
   const states = variant ? [variant] : CYCLE;
 
   return (
+    // Keyed by question so a question switch remounts the frames: the cycle
+    // restarts at Х and the previous question's picture never shows under the new label.
     <div
+      key={questionId}
       role="img"
       aria-label={label}
       data-variant={variant ?? "cycle"}

@@ -202,6 +202,15 @@ nobody can change or delete a `SUPERADMIN` there.
 - **Health safety.** The app is a prevention and self-monitoring aid. Show the
   medical disclaimer where results are shown, and the emergency note: call **103**
   in an emergency.
+- **Result visuals.** The calculator result and the dashboard show the BEDI result
+  on the 3D махбод field (`src/components/bedi`, geometry in `src/lib/bediField.ts`):
+  the constitution pin, the current ball moved by the deviation through the same
+  display rule the 2D radar uses, and the trail of stored records. Only approved
+  quantities drive it (`doshaType`, `deviation`, `status`, `BEDIRecord`); the
+  Option C indices from the 2026-10-30 prototype stay out until Оточ approves them.
+  `DoshaRadar` remains as the fallback without WebGL. The questionnaire help pictures
+  are the approved 36-frame image set (`docs/help-illustrations.md`); махбод letters
+  are never shown to the person answering.
 
 ## 8. Engineering notes
 
@@ -221,3 +230,9 @@ nobody can change or delete a `SUPERADMIN` there.
 - **Migrations run before the deploy** (`npx prisma migrate deploy`): the build
   does not run them. New columns are nullable or defaulted so the previous
   version keeps working during the switch.
+- **three.js** is imported only by `BediFieldScene.tsx`, which `BediField.tsx`
+  loads with `next/dynamic({ ssr: false })`, so it lands in its own lazy chunk and
+  never in a page's first-load JS. Size the canvas with `renderer.setSize(w, h)`
+  (CSS size included) and check canvas screens at `deviceScaleFactor: 2`
+  (`lessons.md` 2026-11-02); the scene disposes geometry, materials and the GL
+  context on unmount.

@@ -95,3 +95,20 @@
 - **How to apply:** for any change that touches cookies, sessions or the proxy, give the
   owner the steps to try on production after the deploy, check the function logs myself,
   and say how to roll back, before saying it is fixed.
+
+## 2026-11-02 — Instructional pictures are checked as the person will use them
+
+- **Rule:** A how-to picture shows the gesture exactly as the person performs it (for the
+  wrist test: the whole hand visible, the wrist held like a bracelet, not a pulse check).
+  The three outcomes must differ at the size the app shows them (about 220 px wide);
+  callouts and magnifiers never cover the subject; and the махбод letters (Х/Ш/Б) are never
+  shown to the person answering, because the score is counted in the background.
+- **Why:** on 2026-11-02 the owner rejected the code-drawn SVG set as ugly and unclear, then
+  rejected the first AI version of Q1 twice (it read as pulse-taking, the magnifier covered
+  the hand, the forearm looked like a stick) and asked to drop the Х/Ш/Б letters from the
+  dialog. Each correction was visible only once the picture was looked at as a stranger
+  performing the test would.
+- **How to apply:** before showing a candidate set, render it at panel size inside the real
+  layout and ask "would a stranger perform the test correctly from this?"; generate the
+  three states of one question in one stacked image so they share one style; keep scoring
+  categories out of copy and images. The pipeline and its lessons: `scripts/help-illustrations/README.md`.
